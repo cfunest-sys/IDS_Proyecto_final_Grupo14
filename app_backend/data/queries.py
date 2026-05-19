@@ -142,4 +142,3 @@ def eliminar_evaluacion(id):
      except Exception as e:
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
->>>>>>> 51eeee0 (se agrego blueprint evaluaciones, queries y evaluaciones.py)
