@@ -30,7 +30,7 @@ def forgot_credentials():
         datos = request.get_json()
 
         if not datos or "email" not in datos:
-            return jsonify({"error": "Debe enviar el email"}), 400
+            return jsonify({"error": "Debe enviar el email."}), 400
 
         email = datos["email"]
 
@@ -45,7 +45,7 @@ def forgot_credentials():
         usuario = cur.fetchone()
 
         if not usuario:
-            return jsonify({"error": "No existe un usuario con ese email"}), 404
+            return jsonify({"error": "No existe un usuario con ese email."}), 404
 
         token = generar_token()
 
@@ -65,7 +65,7 @@ def forgot_credentials():
 
     except Exception as e:
         print(e)
-        return jsonify({"error": "Error interno del servidor"}), 500
+        return jsonify({"error": "Error interno del servidor."}), 500
 
     finally:
         if cur:
@@ -83,10 +83,10 @@ def reset_password_with_token():
         datos = request.get_json()
 
         if not datos:
-            return jsonify({"error": "Body vacío"}), 400
+            return jsonify({"error": "Body vacío."}), 400
 
         if "token" not in datos or "nueva_password" not in datos:
-            return jsonify({"error": "Faltan campos obligatorios"}), 400
+            return jsonify({"error": "Faltan campos obligatorios."}), 400
 
         token = datos["token"]
         nueva_password = datos["nueva_password"]
@@ -102,7 +102,7 @@ def reset_password_with_token():
         registro = cur.fetchone()
 
         if not registro:
-            return jsonify({"error": "Token inválido o ya utilizado"}), 404
+            return jsonify({"error": "Token inválido o ya utilizado."}), 404
 
         cur.execute("""
             UPDATE usuarios
@@ -119,7 +119,7 @@ def reset_password_with_token():
         conn.commit()
 
         return jsonify({
-            "mensaje": "Contraseña actualizada correctamente"
+            "mensaje": "Contraseña actualizada correctamente."
         }), 200
 
     except Exception as e:
