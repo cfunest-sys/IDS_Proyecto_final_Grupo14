@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat:ital, wght@0, 100..900;1,180..900&display=swap');
+
+body {
+    background-image: url('../images/background.jpg');
+    margin: 0;
+}
+
+body, button {
+    font-family: Cambria;
+    background-color: #323232;
+}
+.titulo {
+    margin-bottom: 1.5em;
+    color: violet;
+}
+#productos, footer {
+    text-align: center;
+}
+li {
+    list-style-type: none;
+    margin-bottom: 2vh;
+}
+#boton-ver-mas {
+    font-size: 16px;
+    border-radius: 10px;
+    width: 75px;
+    height: 30px;
+    margin-top: 4vh;
+}
+footer {
+    margin-top: 30px;
+    border-top: gray 2px solid;
+    color: gray;
+}
+button:hover {
+    cursor: pointer;
+}
+#productos, button {
+    color: rgb(245, 64, 121);
+}
+
+.imagen-centrada {
+    width: 150px;
+    height: 150px;
+    display: block;
+    margin: 0 auto;
+}
