@@ -98,7 +98,7 @@ def reporte_estadisticas():
             ("Total de alumnos", "SELECT COUNT(*) FROM alumnos"),
             ("Total de profesores", "SELECT COUNT(*) FROM profesores"),
             ("Total de cursos", "SELECT COUNT(*) FROM cursos"),
-            ("Total de parciales", "SELECT COUNT(*) FROM evaluaciones"),
+            ("Total de evaluaciones", "SELECT COUNT(*) FROM evaluaciones"),
             ("Total de equipos", "SELECT COUNT(*) FROM equipos")
         ]
 
