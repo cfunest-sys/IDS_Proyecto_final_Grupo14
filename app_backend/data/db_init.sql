@@ -50,8 +50,8 @@ CREATE TABLE cursos (
     semestre INTEGER NOT NULL
 );
 
-CREATE TABLE parciales (
-    id_parcial INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE evaluaciones (
+    id_evaluacion INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(255) NOT NULL,
     tipo VARCHAR(100) NOT NULL,
     fecha DATE NOT NULL,
@@ -69,6 +69,7 @@ CREATE TABLE equipos (
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 INSERT INTO usuarios (email, contrasenia, rol)
 VALUES
