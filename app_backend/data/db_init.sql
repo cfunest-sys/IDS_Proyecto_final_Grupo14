@@ -61,8 +61,8 @@ CREATE TABLE parciales (
 );
 
 CREATE TABLE equipos (
-    id INT NOT NULL PRIMARY KEY AUTOINCREMENT,
-    nombre VARCHAR(255) NOT NULL,
+    id_equipo INT NOT NULL PRIMARY KEY AUTOINCREMENT,
+    nombre_equipo VARCHAR(255) NOT NULL,
     id_curso INT NOT NULL,
 
     INDEX (id_curso),

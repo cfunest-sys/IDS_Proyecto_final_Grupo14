@@ -10,6 +10,7 @@ app.register_blueprint(profesores_bp, url_prefix='/api/profesores')
 app.register_blueprint(evaluaciones_bp, url_prefix='/api/evaluaciones')
 app.register_blueprint(auth_bp)
 app.register_blueprint(reportes_bp)
+app.register_blueprint(equipos_bp, url_prefix='/api/equipos')
 
 @app.route('/')
 def hello_world():
