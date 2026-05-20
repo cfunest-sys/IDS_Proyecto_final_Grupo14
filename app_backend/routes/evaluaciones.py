@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 
 from data.queries import get_connection
 
-from db.queries import (
+from data.queries import (
     get_evaluacion,
     crear_evaluacion,
     cambiar_evaluacion,
