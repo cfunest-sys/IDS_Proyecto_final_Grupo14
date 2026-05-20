@@ -90,7 +90,7 @@ VALUES
  ('Introducción al Desarrollo', 2024, 1),
  ('Fundamentos de Programación', 2024, 2);
 
-INSERT INTO parciales (nombre, tipo, fecha, id_curso)
+INSERT INTO evaluaciones (nombre, tipo, fecha, id_curso)
 VALUES 
     ('Primer Parcial Teórico-Práctico', 'parcial', '2026-05-20', 1),
     ('Trabajo Práctico Integrador Final', 'TP', '2026-06-17', 1),
