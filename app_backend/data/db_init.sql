@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS equipos;
 CREATE TABLE usuarios (
     id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT NOT NULL,
-    contraseña TEXT NOT NULL,
+    contrasenia VARCHAR(255) NOT NULL,
     rol TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -71,7 +71,7 @@ CREATE TABLE equipos (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO usuarios (email, contraseña, rol) 
+INSERT INTO usuarios (email, contrasenia, rol) 
 VALUES
  ('admin@example.com', 'admin123', 'admin'),
  ('profesor@example.com', 'profesor123', 'profesor'),

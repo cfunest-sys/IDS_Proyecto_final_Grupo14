@@ -15,7 +15,7 @@ def get_alumno(nombre, contrasenia):
             INNER JOIN alumnos a
                 ON u.id_usuario = a.id_usuario
             WHERE u.email = %s
-            AND u.contraseña = %s
+            AND u.contrasenia = %s
             """
         cur.execute(query, (nombre, contrasenia))
         return cur.fetchone()
@@ -53,7 +53,7 @@ def cargar_alumno(nombre, contrasenia, email, created_at, estado, rol):
     try:
         cur = get_connection().cursor()
         query = """
-            INSERT INTO usuarios (email, contraseña, created_at, rol)
+            INSERT INTO usuarios (email, contrasenia, created_at, rol)
             VALUES (%s, %s, %s, %s)
             """
         cur.execute(query, (email, contrasenia, created_at, rol))
@@ -83,7 +83,7 @@ def actualizar_alumno(legajo, nombre, contrasenia, email, created_at, estado, ro
         query = """
             UPDATE usuarios u
             INNER JOIN alumnos a ON u.id_usuario = a.id_usuario
-            SET u.email = %s, u.contraseña = %s, u.created_at = %s, u.rol = %s,
+            SET u.email = %s, u.contrasenia = %s, u.created_at = %s, u.rol = %s,
                 a.nombre = %s, a.estado = %s
             WHERE a.legajo = %s
             """
@@ -131,7 +131,7 @@ def get_profesor(nombre, contrasenia):
             INNER JOIN profesores p
                 ON u.id_usuario = p.id_usuario
             WHERE u.email = %s
-            AND u.contraseña = %s
+            AND u.contrasenia = %s
             """
         cur.execute(query, (nombre, contrasenia))
         return cur.fetchone()
