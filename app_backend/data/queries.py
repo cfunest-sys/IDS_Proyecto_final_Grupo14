@@ -6,9 +6,11 @@ def get_alumno(nombre, contrasenia):
     if not nombre or not contrasenia:
         raise ValueError("Todos los campos son obligatorios")
     
+    conn = None
     cur = None
     try:
-        cur = get_connection().cursor()
+        conn = get_connection()
+        cur = conn.cursor()
         query = """
             SELECT *
             FROM usuarios u
@@ -24,34 +26,47 @@ def get_alumno(nombre, contrasenia):
     finally:
         if cur:
             cur.close()
+        if conn:
+            conn.close()
 
 def get_alumnos():
     """Obtiene todos los alumnos."""
+    conn = None
     cur = None
+
     try:
-        cur = get_connection().cursor()
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+
         query = """
             SELECT *
             FROM usuarios u
             INNER JOIN alumnos a
                 ON u.id_usuario = a.id_usuario
-            """
+        """
+
         cur.execute(query)
         return cur.fetchall()
+
     except Exception as e:
         raise Exception(f"Error obteniendo alumnos: {e}")
+
     finally:
         if cur:
             cur.close()
+        if conn:
+            conn.close()
 
 def cargar_alumno(nombre, contrasenia, email, created_at, estado, rol):
     """Carga un nuevo alumno en la base de datos."""
     if not nombre or not contrasenia or not email or not created_at or estado is None or not rol:
         raise ValueError("Todos los campos son obligatorios")
     
+    conn = None
     cur = None
     try:
-        cur = get_connection().cursor()
+        conn = get_connection()
+        cur = conn.cursor()
         query = """
             INSERT INTO usuarios (email, contrasenia, created_at, rol)
             VALUES (%s, %s, %s, %s)
@@ -71,15 +86,19 @@ def cargar_alumno(nombre, contrasenia, email, created_at, estado, rol):
     finally:
         if cur:
             cur.close()
+        if conn:
+            conn.close()
 
 def actualizar_alumno(legajo, nombre, contrasenia, email, created_at, estado, rol):
     """Actualiza un alumno existente en la base de datos."""
     if not legajo or not nombre or not contrasenia or not email or not created_at or estado is None or not rol:
         raise ValueError("Todos los campos son obligatorios")
     
+    conn = None
     cur = None
     try:
-        cur = get_connection().cursor()
+        conn = get_connection()
+        cur = conn.cursor()
         query = """
             UPDATE usuarios u
             INNER JOIN alumnos a ON u.id_usuario = a.id_usuario
@@ -94,15 +113,19 @@ def actualizar_alumno(legajo, nombre, contrasenia, email, created_at, estado, ro
     finally:
         if cur:
             cur.close()
+        if conn:
+            conn.close()
 
 def eliminar_alumno(legajo):
     """Elimina un alumno de la base de datos."""
     if not legajo:
         raise ValueError("El legajo es obligatorio")
     
+    conn = None
     cur = None
     try:
-        cur = get_connection().cursor()
+        conn = get_connection()
+        cur = conn.cursor()
         query = """
             DELETE u, a
             FROM usuarios u
@@ -116,15 +139,19 @@ def eliminar_alumno(legajo):
     finally:
         if cur:
             cur.close()
+        if conn:
+            conn.close()
 
 def get_profesor(nombre, contrasenia):
     """Obtiene un profesor por su nombre y contraseña."""
     if not nombre or not contrasenia:
         raise ValueError("Todos los campos son obligatorios")
     
+    conn = None
     cur = None
     try:
-        cur = get_connection().cursor()
+        conn = get_connection()
+        cur = conn.cursor()
         query = """
             SELECT *
             FROM usuarios u
@@ -140,14 +167,24 @@ def get_profesor(nombre, contrasenia):
     finally:
         if cur:
             cur.close()
+        if conn:
+            conn.close()
 
 def get_all_users():
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM users")
-    users = cursor.fetchall()
-    cursor.close()
-    connection.close()
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users")
+        users = cur.fetchall()
+    except Exception as e:
+        raise Exception(f"Error obteniendo usuarios: {e}")
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
     return users
 
 def get_evaluacion(id):
