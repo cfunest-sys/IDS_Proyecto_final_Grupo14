@@ -60,7 +60,7 @@ CREATE TABLE parciales (
 );
 
 CREATE TABLE equipos (
-    id_equipo INT NOT NULL PRIMARY KEY AUTOINCREMENT,
+    id_equipo INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     nombre_equipo VARCHAR(255) NOT NULL,
     id_curso INT NOT NULL,
 
@@ -95,7 +95,7 @@ VALUES
     ('Trabajo Práctico Integrador Final', 'TP', '2026-06-17', 1),
     ('Control de Lectura - Parcialito 1', 'parcialito', '2026-05-13', 2);
 
-INSERT INTO equipos (nombre, id_curso)
+INSERT INTO equipos (nombre_equipo, id_curso)
 VALUES 
     ('Equipo Artemis 3', 1),
     ('Equipo Backend Masters', 1),
