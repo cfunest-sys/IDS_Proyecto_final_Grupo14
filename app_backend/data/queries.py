@@ -272,3 +272,25 @@ def eliminar_evaluacion(id):
     except Exception as e:
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
+
+def get_user_by_id(user_id):
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        
+        query = "SELECT id_usuario, email, rol FROM usuarios WHERE id_usuario = %s"
+        cur.execute(query, (user_id,))
+        
+        user = cur.fetchone() 
+        return user
+
+    except Exception as e:
+        print(f"Error en MySQL get_user_by_id: {e}")
+        return None 
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()

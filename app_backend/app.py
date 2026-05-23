@@ -4,6 +4,7 @@ from routes.profesores import profesores_bp
 from routes.auth import auth_bp
 from routes.reportes import reportes_bp
 from routes.evaluaciones import evaluaciones_bp
+from routes.perfil import perfil_bp
 
 app = Flask(__name__)
 app.register_blueprint(alumnos_bp, url_prefix='/api/alumnos')
@@ -12,6 +13,7 @@ app.register_blueprint(evaluaciones_bp, url_prefix='/api/evaluaciones')
 app.register_blueprint(auth_bp)
 app.register_blueprint(reportes_bp)
 app.register_blueprint(equipos_bp, url_prefix='/api/equipos')
+app.register_blueprint(perfil_bp, url_prefix='/api/perfil')
 
 @app.route('/')
 def hello_world():
