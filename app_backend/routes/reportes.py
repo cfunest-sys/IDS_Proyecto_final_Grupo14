@@ -8,18 +8,12 @@ import tempfile
 
 reportes_bp = Blueprint("reportes", __name__)
 
+
 def crear_pdf_con_tabla(titulo, encabezados, filas):
     archivo = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
     archivo.close()
 
-    doc = SimpleDocTemplate(
-        archivo.name,
-        pagesize=A4,
-        leftMargin=40,
-        rightMargin=40,
-        topMargin=40,
-        bottomMargin=40
-    )
+    doc = SimpleDocTemplate(archivo.name, pagesize=A4, leftMargin=40, rightMargin=40, topMargin=40, bottomMargin=40)
 
     elementos = []
     estilos = getSampleStyleSheet()
@@ -32,10 +26,14 @@ def crear_pdf_con_tabla(titulo, encabezados, filas):
         datos.append([str(valor) if valor is not None else "" for valor in fila])
 
     tabla = Table(datos)
-    tabla.setStyle(TableStyle([
-        ("GRID", (0, 0), (-1, -1), 1, colors.black),
-        ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
-    ]))
+    tabla.setStyle(
+        TableStyle(
+            [
+                ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+            ]
+        )
+    )
 
     elementos.append(tabla)
     doc.build(elementos)
@@ -50,7 +48,7 @@ def reporte_alumnos():
 
     try:
         conn = get_connection()
-        cur = conn.cur()
+        cur = conn.cursor()
 
         cur.execute("""
             SELECT a.legajo, a.nombre, a.estado, u.email
@@ -61,18 +59,9 @@ def reporte_alumnos():
 
         filas = cur.fetchall()
 
-        ruta = crear_pdf_con_tabla(
-            "Reporte de Alumnos",
-            ["Legajo", "Nombre", "Estado", "Email"],
-            filas
-        )
+        ruta = crear_pdf_con_tabla("Reporte de Alumnos", ["Legajo", "Nombre", "Estado", "Email"], filas)
 
-        return send_file(
-            ruta,
-            as_attachment=True,
-            download_name="reporte_alumnos.pdf",
-            mimetype="application/pdf"
-        )
+        return send_file(ruta, as_attachment=True, download_name="reporte_alumnos.pdf", mimetype="application/pdf")
 
     except Exception as e:
         print(e)
@@ -92,14 +81,14 @@ def reporte_estadisticas():
 
     try:
         conn = get_connection()
-        cur = conn.cur()
+        cur = conn.cursor()
 
         consultas = [
             ("Total de alumnos", "SELECT COUNT(*) FROM alumnos"),
             ("Total de profesores", "SELECT COUNT(*) FROM profesores"),
             ("Total de cursos", "SELECT COUNT(*) FROM cursos"),
             ("Total de parciales", "SELECT COUNT(*) FROM parciales"),
-            ("Total de equipos", "SELECT COUNT(*) FROM equipos")
+            ("Total de equipos", "SELECT COUNT(*) FROM equipos"),
         ]
 
         filas = []
@@ -109,18 +98,9 @@ def reporte_estadisticas():
             total = cur.fetchone()[0]
             filas.append((descripcion, total))
 
-        ruta = crear_pdf_con_tabla(
-            "Reporte de Estadísticas",
-            ["Indicador", "Valor"],
-            filas
-        )
+        ruta = crear_pdf_con_tabla("Reporte de Estadísticas", ["Indicador", "Valor"], filas)
 
-        return send_file(
-            ruta,
-            as_attachment=True,
-            download_name="reporte_estadisticas.pdf",
-            mimetype="application/pdf"
-        )
+        return send_file(ruta, as_attachment=True, download_name="reporte_estadisticas.pdf", mimetype="application/pdf")
 
     except Exception as e:
         print(e)
@@ -140,7 +120,7 @@ def reporte_equipos():
 
     try:
         conn = get_connection()
-        cur = conn.cur()
+        cur = conn.cursor()
 
         cur.execute("""
             SELECT e.id, e.nombre, c.nombre
@@ -151,18 +131,9 @@ def reporte_equipos():
 
         filas = cur.fetchall()
 
-        ruta = crear_pdf_con_tabla(
-            "Reporte de Equipos",
-            ["ID", "Equipo", "Curso"],
-            filas
-        )
+        ruta = crear_pdf_con_tabla("Reporte de Equipos", ["ID", "Equipo", "Curso"], filas)
 
-        return send_file(
-            ruta,
-            as_attachment=True,
-            download_name="reporte_equipos.pdf",
-            mimetype="application/pdf"
-        )
+        return send_file(ruta, as_attachment=True, download_name="reporte_equipos.pdf", mimetype="application/pdf")
 
     except Exception as e:
         print(e)
