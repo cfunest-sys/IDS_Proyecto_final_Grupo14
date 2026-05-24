@@ -1,11 +1,39 @@
 from database.db import get_connection
 from flask import jsonify
 
+
+def get_profesor_by_email(email):
+    # JOIN entre usuarios y profesores
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(
+            """SELECT p.id_profesor as id, p.nombre, u.email, u.contrasenia as password 
+           FROM profesores p
+           INNER JOIN usuarios u ON p.id_usuario = u.id_usuario
+           WHERE u.email = %s""",
+            (email,),
+        )
+        profesor = cursor.fetchone()
+        return profesor
+
+    except Exception as e:
+        print(f"Error al obtener profesor: {e}")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
 def get_alumno(nombre, contrasenia):
     """Obtiene un alumno por su nombre y contraseña."""
     if not nombre or not contrasenia:
         raise ValueError("Todos los campos son obligatorios")
-    
+
     conn = None
     cur = None
     try:
@@ -28,6 +56,7 @@ def get_alumno(nombre, contrasenia):
             cur.close()
         if conn:
             conn.close()
+
 
 def get_alumnos():
     """Obtiene todos los alumnos."""
@@ -57,11 +86,12 @@ def get_alumnos():
         if conn:
             conn.close()
 
+
 def cargar_alumno(nombre, contrasenia, email, created_at, estado, rol):
     """Carga un nuevo alumno en la base de datos."""
     if not nombre or not contrasenia or not email or not created_at or estado is None or not rol:
         raise ValueError("Todos los campos son obligatorios")
-    
+
     conn = None
     cur = None
     try:
@@ -73,13 +103,13 @@ def cargar_alumno(nombre, contrasenia, email, created_at, estado, rol):
             """
         cur.execute(query, (email, contrasenia, created_at, rol))
         id_usuario = cur.lastrowid
-        
+
         query_alumno = """
             INSERT INTO alumnos (id_usuario, nombre, estado)
             VALUES (%s, %s, %s)
             """
         cur.execute(query_alumno, (id_usuario, nombre, estado))
-        
+
         return id_usuario
     except Exception as e:
         raise Exception(f"Error cargando alumno: {e}")
@@ -89,11 +119,12 @@ def cargar_alumno(nombre, contrasenia, email, created_at, estado, rol):
         if conn:
             conn.close()
 
+
 def actualizar_alumno(legajo, nombre, contrasenia, email, created_at, estado, rol):
     """Actualiza un alumno existente en la base de datos."""
     if not legajo or not nombre or not contrasenia or not email or not created_at or estado is None or not rol:
         raise ValueError("Todos los campos son obligatorios")
-    
+
     conn = None
     cur = None
     try:
@@ -116,11 +147,12 @@ def actualizar_alumno(legajo, nombre, contrasenia, email, created_at, estado, ro
         if conn:
             conn.close()
 
+
 def eliminar_alumno(legajo):
     """Elimina un alumno de la base de datos."""
     if not legajo:
         raise ValueError("El legajo es obligatorio")
-    
+
     conn = None
     cur = None
     try:
@@ -142,11 +174,12 @@ def eliminar_alumno(legajo):
         if conn:
             conn.close()
 
+
 def get_profesor(nombre, contrasenia):
     """Obtiene un profesor por su nombre y contraseña."""
     if not nombre or not contrasenia:
         raise ValueError("Todos los campos son obligatorios")
-    
+
     conn = None
     cur = None
     try:
@@ -170,6 +203,7 @@ def get_profesor(nombre, contrasenia):
         if conn:
             conn.close()
 
+
 def get_all_users():
     conn = None
     cur = None
@@ -187,6 +221,7 @@ def get_all_users():
             conn.close()
     return users
 
+
 def get_evaluacion(id):
     try:
         connection = get_connection()
@@ -199,6 +234,7 @@ def get_evaluacion(id):
     except Exception as e:
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
+
 
 def crear_evaluacion(nombre, tipo, fecha, curso_id):
     try:
@@ -214,6 +250,7 @@ def crear_evaluacion(nombre, tipo, fecha, curso_id):
     except Exception as e:
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
+
 
 def cambiar_evaluacion(id, nombre, tipo, fecha, curso_id):
     try:
@@ -245,6 +282,7 @@ def cambiar_evaluacion(id, nombre, tipo, fecha, curso_id):
             connection.close()
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
+
 
 def eliminar_evaluacion(id):
     try:
