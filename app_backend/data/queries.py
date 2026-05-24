@@ -332,3 +332,141 @@ def get_user_by_id(user_id):
             cur.close()
         if conn:
             conn.close()
+
+
+def get_equipos_filtrados(id_equipo=None, nombre_equipo=None, id_curso=None):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        query = "SELECT * FROM equipos"
+        parametros = []
+        condiciones = []
+
+        if id_equipo:
+            condiciones.append("id_equipo = %s")
+            parametros.append(id_equipo)
+
+        if nombre_equipo:
+            condiciones.append("nombre_equipo = %s")
+            parametros.append(nombre_equipo)  
+
+        if id_curso:
+            condiciones.append("id_curso = %s")
+            parametros.append(id_curso)
+            
+        if condiciones:
+            query += " WHERE " + " AND ".join(condiciones)
+
+        cursor.execute(query, parametros)
+        equipos = cursor.fetchall()
+
+        return equipos
+    
+    except Exception as e:
+        print(f"Error en la obtención del equipo: {e}")
+        raise e
+    
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
+
+
+def get_equipo_id(id_equipo):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        cursor.execute("SELECT * FROM equipos WHERE id_equipo = %s", (id_equipo,))
+        equipo = cursor.fetchone()
+
+        return equipo
+
+    except Exception as e:
+        print(f"Error en la obtención del equipo: {e}")
+        raise e
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
+
+
+def insertar_equipo(nombre_equipo, id_curso):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+        
+        cursor.execute("INSERT INTO equipos (nombre_equipo, id_curso) VALUES (%s, %s)", (nombre_equipo, id_curso))
+        conexion.commit()
+    
+    except Exception as e:
+        print(f"Error en la creación del equipo {e}")
+        raise e
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
+
+
+def actualizar_equipo(id_equipo, nombre_equipo, id_curso):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        query_update = "UPDATE equipos SET nombre_equipo = %s, id_curso = %s WHERE id_equipo = %s"
+        cursor.execute(query_update, (nombre_equipo, id_curso, id_equipo))
+        conexion.commit()
+
+    except Exception as e:
+        if conexion:
+            conexion.rollback()
+        print(f"Error en la actualización del equipo {e}")
+        raise e
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
+
+
+def delete_equipo(id_equipo):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        cursor.execute("DELETE FROM equipos WHERE id_equipo = %s", (id_equipo,))
+        conexion.commit()
+
+    except Exception as e:
+        if conexion:
+            conexion.rollback()
+        print(f"Error al intentar eliminar el equipo {e}")
+        raise e
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
