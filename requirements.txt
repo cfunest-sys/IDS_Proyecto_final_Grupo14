@@ -1,7 +1,9 @@
 flask
+flask-jwt-extended
 requests
 flask-cors
 mysql-connector-python
 reportlab
 PyJWT
 werkzeug
+python-dotenv
