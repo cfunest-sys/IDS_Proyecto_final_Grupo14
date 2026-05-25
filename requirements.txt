@@ -3,3 +3,5 @@ requests
 flask-cors
 mysql-connector-python
 reportlab
+PyJWT
+werkzeug
