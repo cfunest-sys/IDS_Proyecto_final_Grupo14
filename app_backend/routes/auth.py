@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from database.db import get_connection
+from utils.auth import hash_password
 import random
 import string
 
@@ -8,18 +9,18 @@ auth_bp = Blueprint("auth", __name__)
 def generar_token(longitud=32):
     caracteres = string.ascii_letters + string.digits
     token = ""
-    for _ in range(longitud):
+
+    for i in range(longitud):
         token += random.choice(caracteres)
     return token
 
 def simular_envio_email(destinatario, token):
     print("=" * 60)
-    print("SIMULACIÓN DE ENVIO DE EMAIL")
+    print("SIMULACIÓN DE ENVÍO DE EMAIL")
     print("Para:", destinatario)
     print("Asunto: Recuperación de contraseña")
     print("Token:", token)
     print("=" * 60)
-
 
 @auth_bp.route("/api/auth/forgot-credentials", methods=["POST"])
 def forgot_credentials():
@@ -28,44 +29,50 @@ def forgot_credentials():
 
     try:
         datos = request.get_json()
-
         if not datos or "email" not in datos:
-            return jsonify({"error": "Debe enviar el email."}), 400
+            return jsonify({
+                "error": "Debe enviar el email."
+            }), 400
 
         email = datos["email"]
 
         conn = get_connection()
-        cur = conn.cur(dictionary=True)
+        cur = conn.cursor(dictionary=True)
 
         cur.execute("""
             SELECT id_usuario
             FROM usuarios
             WHERE email = %s
         """, (email,))
+
         usuario = cur.fetchone()
 
         if not usuario:
-            return jsonify({"error": "No existe un usuario con ese email."}), 404
+            return jsonify({
+                "error": "No existe un usuario con ese email."
+            }), 404
 
         token = generar_token()
 
         cur.execute("""
-            INSERT INTO password_reset_tokens (id_usuario, token, usado)
+            INSERT INTO password_reset_tokens
+            (id_usuario, token, usado)
             VALUES (%s, %s, FALSE)
         """, (usuario["id_usuario"], token))
 
         conn.commit()
 
-        # SIMULA EL ENVÍO DEL MAIL, A REVISAR CON EL PROFE
         simular_envio_email(email, token)
 
         return jsonify({
-            "mensaje": "Se generó el token y se simuló el envío del correo."
+            "mensaje": "Token generado correctamente."
         }), 200
 
     except Exception as e:
         print(e)
-        return jsonify({"error": "Error interno del servidor."}), 500
+        return jsonify({
+            "error": "Error interno del servidor."
+        }), 500
 
     finally:
         if cur:
@@ -81,12 +88,15 @@ def reset_password_with_token():
 
     try:
         datos = request.get_json()
-
         if not datos:
-            return jsonify({"error": "Body vacío."}), 400
+            return jsonify({
+                "error": "Body vacío."
+            }), 400
 
         if "token" not in datos or "nueva_password" not in datos:
-            return jsonify({"error": "Faltan campos obligatorios."}), 400
+            return jsonify({
+                "error": "Faltan campos obligatorios."
+            }), 400
 
         token = datos["token"]
         nueva_password = datos["nueva_password"]
@@ -97,18 +107,24 @@ def reset_password_with_token():
         cur.execute("""
             SELECT id_usuario
             FROM password_reset_tokens
-            WHERE token = %s AND usado = FALSE
+            WHERE token = %s
+            AND usado = FALSE
         """, (token,))
+
         registro = cur.fetchone()
 
         if not registro:
-            return jsonify({"error": "Token inválido o ya utilizado."}), 404
+            return jsonify({
+                "error": "Token inválido o ya utilizado."
+            }), 404
+
+        password_hasheada = hash_password(nueva_password)
 
         cur.execute("""
             UPDATE usuarios
-            SET contraseña = %s
+            SET contrasenia = %s
             WHERE id_usuario = %s
-        """, (nueva_password, registro["id_usuario"]))
+        """, (password_hasheada, registro["id_usuario"]))
 
         cur.execute("""
             UPDATE password_reset_tokens
@@ -124,7 +140,9 @@ def reset_password_with_token():
 
     except Exception as e:
         print(e)
-        return jsonify({"error": "Error interno del servidor"}), 500
+        return jsonify({
+            "error": "Error interno del servidor."
+        }), 500
 
     finally:
         if cur:
