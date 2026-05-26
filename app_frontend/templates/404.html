@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Página no encontrada{% endblock %}
+
+{% block content %}
+<section class="error-page">
+    <span class="error-page__icon">&#128269;</span>
+    <h1 class="error-page__code">404</h1>
+    <h2 class="error-page__title">Página no encontrada</h2>
+    <p class="error-page__message">
+        {% if error and error.description %}
+            {{ error.description }}
+        {% else %}
+            Lo sentimos, la página que estás buscando no existe o fue movida.
+        {% endif %}
+    </p>
+    <div class="error-page__actions">
+        <a href="{{ url_for('alumnos.index') }}" class="error-page__link">Volver al inicio</a>
+        <a href="javascript:history.back()" class="error-page__link error-page__link--secondary">Volver atrás</a>
+    </div>
+</section>
+{% endblock %}
