@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS data_base;
 USE data_base;
 
 DROP TABLE IF EXISTS equipos;
-DROP TABLE IF EXISTS parciales;
+DROP TABLE IF EXISTS evaluaciones;
 DROP TABLE IF EXISTS password_reset_tokens;
 DROP TABLE IF EXISTS alumnos;
 DROP TABLE IF EXISTS profesores;
