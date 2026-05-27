@@ -1,339 +1,47 @@
-@import url('https://fonts.googleapis.com/css2?family=Bitter:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Montserrat:ital, wght@0, 100..900;1,180..900&display=swap');
 
-:root{
-    --uba-primary: #1d2554;
-    --uba-secondary: #91bde1;
-    --uba-accent: #f7a600;
-    --uba-bg: #f4f6fa;
-    --uba-white: #ffffff;
-    --uba-border: #d8dfeb;
-    --uba-text: #1f2937;
+body {
+    background-image: url('../images/background.jpg');
+    margin: 0;
 }
 
-/* =========================
-   BASE
-========================= */
-
-body{
-    background-color: var(--uba-bg);
-    color: var(--uba-text);
-    font-family: 'Roboto', sans-serif;
+body, button {
+    font-family: Cambria;
+    background-color: #323232;
+}
+.titulo {
+    margin-bottom: 1.5em;
+    color: violet;
+}
+#productos, footer {
+    text-align: center;
+}
+li {
+    list-style-type: none;
+    margin-bottom: 2vh;
+}
+#boton-ver-mas {
+    font-size: 16px;
+    border-radius: 10px;
+    width: 75px;
+    height: 30px;
+    margin-top: 4vh;
+}
+footer {
+    margin-top: 30px;
+    border-top: gray 2px solid;
+    color: gray;
+}
+button:hover {
+    cursor: pointer;
+}
+#productos, button {
+    color: rgb(245, 64, 121);
 }
 
-h1,h2,h3,h4,h5,h6,
-.btn,
-.navbar-brand,
-.table thead th{
-    font-family: 'Bitter', serif;
-}
-
-/* =========================
-   NAVBAR
-========================= */
-
-.uba-navbar{
-    background-color: var(--uba-primary);
-    min-height: 82px;
-}
-
-.uba-logo-wrapper{
-    padding: 0.75rem 1rem;
-    margin: 0.5rem;
-    border-radius: 12px;
-}
-
-.uba-logo{
-    width: 54px;
-    height: auto;
-    margin-right: 14px;
-}
-
-.uba-brand-text{
-    display: flex;
-    flex-direction: column;
-    line-height: 1.1;
-}
-
-.uba-brand-main{
-    color: white;
-    font-size: 1.25rem;
-    font-weight: 700;
-}
-
-.uba-brand-sub{
-    color: rgba(255,255,255,0.88);
-    font-size: 0.78rem;
-    letter-spacing: 0.3px;
-}
-
-.nav-link{
-    color: rgba(255,255,255,0.85) !important;
-    font-family: 'Bitter', serif;
-    font-weight: 500;
-    margin-left: 0.75rem;
-    transition: all .2s ease;
-}
-
-.nav-link:hover,
-.nav-link.active{
-    color: var(--uba-secondary) !important;
-}
-
-/* =========================
-   BOTONES
-========================= */
-
-.btn{
-    border-radius: 12px;
-    padding: 0.7rem 1.4rem;
-    font-weight: 600;
-}
-
-.btn-uba-primary{
-    background-color: var(--uba-primary);
-    border: none;
-    color: white;
-    transition: all .2s ease;
-}
-
-.btn-uba-primary:hover{
-    background-color: #27306b;
-    transform: translateY(-1px);
-}
-
-.btn-uba-secondary{
-    background-color: var(--uba-secondary);
-    border: none;
-    color: var(--uba-primary);
-}
-
-.btn-uba-secondary:hover{
-    background-color: #7eaed6;
-}
-
-.btn-uba-outline{
-    border: 1px solid rgba(255,255,255,0.35);
-    color: white;
-}
-
-.btn-uba-outline:hover{
-    background-color: white;
-    color: var(--uba-primary);
-}
-
-/* =========================
-   HEADER
-========================= */
-
-.page-title{
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: var(--uba-primary);
-    margin-bottom: 0.4rem;
-}
-
-.page-subtitle{
-    font-size: 1rem;
-    color: #64748b;
-    margin-bottom: 0;
-}
-
-/* =========================
-   PANELS
-========================= */
-
-.filter-panel,
-.table-panel{
-    background-color: white;
-    border-radius: 20px;
-    padding: 1.8rem;
-    border: 1px solid var(--uba-border);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.04);
-}
-
-.filter-panel-header,
-.table-panel-header{
-    margin-bottom: 1.5rem;
-}
-
-.filter-title,
-.table-title{
-    font-size: 1.3rem;
-    color: var(--uba-primary);
-    font-weight: 700;
-    margin-bottom: 0.3rem;
-}
-
-.table-subtitle{
-    color: #64748b;
-    font-size: 0.92rem;
-}
-
-/* =========================
-   FORMULARIOS
-========================= */
-
-.form-label{
-    font-family: 'Bitter', serif;
-    font-weight: 600;
-    color: var(--uba-primary);
-}
-
-.form-control,
-.form-select{
-    border-radius: 12px;
-    border: 1px solid #cfd8e3;
-    padding: 0.85rem 1rem;
-    font-family: 'Roboto', sans-serif;
-}
-
-.form-control:focus,
-.form-select:focus{
-    border-color: var(--uba-secondary);
-    box-shadow: 0 0 0 0.2rem rgba(145,189,225,0.25);
-}
-
-/* =========================
-   TABLA
-========================= */
-
-.uba-table{
-    margin-bottom: 0;
-}
-
-.uba-table thead th{
-    background-color: var(--uba-primary);
-    color: white;
-    border: none;
-    font-weight: 600;
-    padding: 1rem;
-    white-space: nowrap;
-}
-
-.uba-table tbody td{
-    padding: 1rem;
-    vertical-align: middle;
-    border-color: #eef2f7;
-    font-family: 'Roboto', sans-serif;
-}
-
-.uba-table tbody tr{
-    transition: background-color .15s ease;
-}
-
-.uba-table tbody tr:hover{
-    background-color: rgba(145,189,225,0.12);
-}
-
-/* =========================
-   BADGES
-========================= */
-
-.uba-badge-primary{
-    background-color: var(--uba-primary);
-    color: white;
-}
-
-.uba-badge-secondary{
-    background-color: var(--uba-secondary);
-    color: var(--uba-primary);
-}
-
-.uba-badge-accent{
-    background-color: var(--uba-accent);
-    color: white;
-}
-
-.badge{
-    padding: 0.6rem 0.8rem;
-    border-radius: 999px;
-    font-size: 0.78rem;
-    font-weight: 600;
-}
-
-/* =========================
-   STATUS
-========================= */
-
-.status-pill{
-    padding: 0.45rem 0.85rem;
-    border-radius: 999px;
-    font-size: 0.78rem;
-    font-weight: 600;
-}
-
-.status-active{
-    background-color: rgba(25,135,84,.15);
-    color: #198754;
-}
-
-.status-pending{
-    background-color: rgba(247,166,0,.18);
-    color: #a06a00;
-}
-
-.status-closed{
-    background-color: rgba(108,117,125,.18);
-    color: #495057;
-}
-
-/* =========================
-   MODAL
-========================= */
-
-.uba-modal{
-    border: none;
-    border-radius: 22px;
-    overflow: hidden;
-}
-
-.uba-modal-header{
-    background-color: var(--uba-primary);
-    color: white;
-    border: none;
-    padding: 1.5rem 1.5rem 1.2rem;
-}
-
-.modal-title{
-    font-size: 1.45rem;
-    font-weight: 700;
-}
-
-.modal-subtitle{
-    color: rgba(255,255,255,0.78);
-    font-size: 0.9rem;
-}
-
-.modal-body{
-    padding: 1.7rem;
-}
-
-.modal-footer{
-    padding: 0 1.7rem 1.5rem;
-}
-
-/* =========================
-   EMPTY STATE
-========================= */
-
-.empty-state{
-    color: #64748b;
-    font-style: italic;
-}
-
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media (max-width: 992px){
-
-    .page-title{
-        font-size: 1.8rem;
-    }
-
-    .filter-panel,
-    .table-panel{
-        padding: 1.2rem;
-    }
-
+.imagen-centrada {
+    width: 150px;
+    height: 150px;
+    display: block;
+    margin: 0 auto;
 }
