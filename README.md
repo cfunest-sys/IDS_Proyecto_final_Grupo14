@@ -46,6 +46,9 @@ La arquitectura del sistema mantiene una separación estricta entre la API lógi
 │   ├── routes/
 │   │   └── routes.py            # Enrutamiento de la interfaz de gestión y consumo de la API RESTful
 │   ├── static/
+│   │   ├── images/
+│   │   │   ├── background.jpeg  # Fondo con imagen del edificio de Paseo Colón a incluir en los templates.
+│   │   │   └── logo.png         # Logo de la FIUBA a incluir en los templates.
 │   │   ├── script.js            # Interactividad y validaciones del lado del cliente (JavaScript Vanilla)
 │   │   └── styles.css           # Hoja de estilos del panel de administración (CSS/Bootstrap)
 │   ├── templates/
