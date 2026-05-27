@@ -9,7 +9,9 @@ from routes.evaluaciones import evaluaciones_bp
 from routes.equipos import equipos_bp
 from routes.perfil import perfil_bp
 
-app = Flask(__name__)
+app = Flask(__name__, 
+            template_folder='../app_frontend/templates', 
+            static_folder='../app_frontend/static')
 
 app.config["JWT_SECRET_KEY"] = config.JWT_SECRET_KEY
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = config.JWT_ACCESS_TOKEN_EXPIRES
@@ -23,11 +25,24 @@ app.register_blueprint(reportes_bp)
 app.register_blueprint(equipos_bp, url_prefix='/api/equipos')
 app.register_blueprint(perfil_bp, url_prefix='/api/perfil')
 
+@app.route('/dashboard')
+def dashboard_profesor():
+    return "Este es el dashboard del profesor (provisional)"
 
-@app.route("/")
-def hello_world():
-    return "Hello, World!"
+@app.route('/')
+def home():
+    return "Hola! El servidor está funcionando."
 
+@app.route('/evaluaciones')
+def evaluaciones():
+    return render_template('evaluaciones.html')
+
+@app.route('/notas')
+def notas():
+    return render_template('notas.html') 
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 if __name__ == "__main__":
     app.run(debug=True)
