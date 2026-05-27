@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_jwt_extended import JWTManager
 import config
 from routes.alumnos import alumnos_bp
