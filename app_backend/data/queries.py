@@ -531,3 +531,92 @@ def crear_alumno(alumno):
 
         if conn:
             conn.close()
+
+            
+def get_miembros_equipo(id_miembro=None, id_equipo=None, legajo_alumno=None):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        query = "SELECT * FROM miembros_equipo"
+        parametros = []
+        condiciones = []
+
+        if id_miembro:
+            condiciones.append("id_miembro = %s")
+            parametros.append(id_miembro)
+
+        if id_equipo:
+            condiciones.append("id_equipo = %s")
+            parametros.append(id_equipo)  
+
+        if legajo_alumno:
+            condiciones.append("legajo_alumno = %s")
+            parametros.append(legajo_alumno)
+
+        if condiciones:
+            query += " WHERE " + " AND ".join(condiciones)
+
+        cursor.execute(query, parametros)
+        equipo = cursor.fetchall()
+
+        return equipo
+    
+    except Exception as e:
+        print(f"Error en la obtención del equipo: {e}")
+        raise e
+    
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
+        
+
+def insertar_miembro(id_equipo, legajo_alumno):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+        
+        cursor.execute("INSERT INTO miembros_equipo (id_equipo, legajo_alumno) VALUES (%s, %s)", (id_equipo, legajo_alumno))
+        conexion.commit()
+    
+    except Exception as e:
+        print(f"Error al agregar un alumno al equipo {e}")
+        raise e
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
+
+
+def delete_miembro(id_miembro):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        cursor.execute("DELETE FROM miembros_equipo WHERE id_miembro = %s", (id_miembro,))
+        conexion.commit()
+
+    except Exception as e:
+        if conexion:
+            conexion.rollback()
+        print(f"Error al intentar eliminar el miembro{e}")
+        raise e
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()

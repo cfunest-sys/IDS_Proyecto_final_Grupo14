@@ -1,6 +1,7 @@
 CREATE DATABASE IF NOT EXISTS data_base;
 USE data_base;
 
+DROP TABLE IF EXISTS miembros_equipo;
 DROP TABLE IF EXISTS equipos;
 DROP TABLE IF EXISTS evaluaciones;
 DROP TABLE IF EXISTS password_reset_tokens;
@@ -28,7 +29,7 @@ CREATE TABLE password_reset_tokens (
 );
 
 CREATE TABLE alumnos (
-    legajo INTEGER PRIMARY KEY AUTO_INCREMENT,
+    legajo INTEGER PRIMARY KEY,
     nombre TEXT NOT NULL,
     estado TEXT NOT NULL,
     id_usuario INTEGER,
@@ -70,6 +71,16 @@ CREATE TABLE equipos (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE miembros_equipo (
+    id_miembro INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    id_equipo INT NOT NULL,
+    legajo_alumno INT NOT NULL,
+
+    FOREIGN KEY (id_equipo) REFERENCES equipos(id_equipo) ON DELETE CASCADE,
+    FOREIGN KEY (legajo_alumno) REFERENCES alumnos(legajo),
+    UNIQUE(id_equipo, legajo_alumno)
+) ENGINE=InnoDB;
+
 
 INSERT INTO usuarios (email, contrasenia, rol)
 VALUES
@@ -85,7 +96,7 @@ VALUES
 
 INSERT INTO alumnos (nombre, estado, id_usuario)
 VALUES
- ('Juan Pérez', 'activo', 3);
+ (115598, 'Juan Pérez', 'activo', 3);
 
 INSERT INTO cursos (nombre, anio, semestre)
 VALUES
@@ -98,8 +109,12 @@ VALUES
     ('Trabajo Práctico Integrador Final', 'TP', '2026-06-17', 1),
     ('Control de Lectura - Parcialito 1', 'parcialito', '2026-05-13', 2);
 
-INSERT INTO equipos (nombre_equipo, id_curso)
+INSERT INTO equipos (legajo, nombre_equipo, id_curso)
 VALUES 
     ('Equipo Artemis 3', 1),
     ('Equipo Backend Masters', 1),
     ('Equipo Gastronómico Control', 2);
+
+INSERT INTO miembros_equipo (id_equipo, legajo_alumno)
+VALUES
+    (1, 115598);
