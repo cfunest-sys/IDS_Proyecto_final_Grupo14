@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}
+Reportes
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="text-center mb-5">
+
+        <h1
+            id="tituloPrincipal"
+            class="display-4 fw-bold">
+            Reportes del Sistema
+        </h1>
+
+        <p class="lead">
+            Descarga de reportes académicos y estadísticas.
+        </p>
+
+    </div>
+
+
+    <!-- CARDS REPORTES -->
+
+    <div class="row g-4">
+
+        <!-- REPORTE ALUMNOS -->
+
+        <div class="col-md-4">
+
+            <div class="card shadow h-100">
+
+                <div class="card-body d-flex flex-column">
+
+                    <h3 class="card-title">
+                        Reporte de Alumnos
+                    </h3>
+
+                    <p class="card-text">
+                        Descarga el PDF con el listado
+                        completo de alumnos registrados.
+                    </p>
+
+                    <a
+                        href="http://127.0.0.1:5000/api/reportes/alumnos"
+                        target="_blank"
+                        class="btn btn-primary mt-auto btn-reporte btn-descargar">
+
+                        Descargar PDF
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- REPORTE ESTADÍSTICAS -->
+
+        <div class="col-md-4">
+
+            <div class="card shadow h-100">
+
+                <div class="card-body d-flex flex-column">
+
+                    <h3 class="card-title">
+                        Reporte de Estadísticas
+                    </h3>
+
+                    <p class="card-text">
+                        Descarga el PDF con las
+                        estadísticas académicas.
+                    </p>
+
+                    <a
+                        href="http://127.0.0.1:5000/api/reportes/estadisticas"
+                        target="_blank"
+                        class="btn btn-success mt-auto btn-reporte btn-descargar">
+
+                        Descargar PDF
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- REPORTE EQUIPOS -->
+
+        <div class="col-md-4">
+
+            <div class="card shadow h-100">
+
+                <div class="card-body d-flex flex-column">
+
+                    <h3 class="card-title">
+                        Reporte de Equipos
+                    </h3>
+
+                    <p class="card-text">
+                        Descarga el PDF con
+                        los equipos registrados.
+                    </p>
+
+                    <a
+                        href="http://127.0.0.1:5000/api/reportes/equipos"
+                        target="_blank"
+                        class="btn btn-dark mt-auto btn-reporte btn-descargar">
+
+                        Descargar PDF
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
