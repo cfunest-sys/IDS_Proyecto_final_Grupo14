@@ -29,6 +29,11 @@ body {
     margin-left: 15px;
 }
 
+.uba-logo {
+    height: 60px;
+    width: auto;
+}
+
 /* HERO */
 
 .hero-section {
