@@ -91,6 +91,18 @@ body {
     color: white;
 }
 
+.btn-azul-ids {
+    background-color:  #1d2554;
+    border: none; 
+}
+.btn-azul-ids:hover {
+    background-color:  #91bde1;
+}
+/* Línea divisoria vertical sutil del login */
+.divisor-vertical {
+    border-left: 1px solid #e0e0e0;
+}
+
 /* CARDS */
 
 .card-custom {
