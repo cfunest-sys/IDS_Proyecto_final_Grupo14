@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}
+Calendario - Campus FIUBA
+{% endblock %}
+
+{% block content %}
+
+<section class="container py-5">
+	<div class="card shadow-sm card-custom p-4">
+		<h2 class="text-center">Calendario</h2>
+		<nav aria-label="Page navigation example">
+		  <ul class="pagination">
+		    <li class="page-item">
+		      <a class="page-link" href="#" aria-label="Previous">
+		        <span aria-hidden="true">&laquo;</span>
+		      </a>
+		    </li>
+		    <li class="page-item">
+		      <a class="page-link" href="#" aria-label="Next">
+		        <span aria-hidden="true">&raquo;</span>
+		      </a>
+		    </li>
+		  </ul>
+		</nav>
+	    <div class="container py-3">
+	    	<h3> Mes: {{mes}}</h3> 
+		    <div class="row justify-content-center">
+		    <!--dias es una lista de numeros-->
+	    	{% for i in range(1, dias + 1) %}	
+			    	<div class="col bg-primary-subtle border border-secondary">
+			    		<div class="w-25"> {{i}}:</div>
+			    		{% for evento in eventos %}	
+				    		{% if evento.dia|int == i %}
+				    		<div class="text-center">{{evento.nombre}}</div>
+				    		{% endif %}
+	    				{% endfor %}
+			    	</div>
+			    	{% if i % 4 == 0 %}
+					<div class="w-100"></div>
+					{% endif %}
+	        {% endfor %}
+	 		</div>
+	    </div>
+	</div>
+</section>
+{% endblock %}

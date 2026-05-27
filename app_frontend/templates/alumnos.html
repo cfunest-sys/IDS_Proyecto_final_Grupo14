@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}
+Gestion de alumnos - Campus FIUBA
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+	<div class="col">
+		<section class="container py-5">
+			<div class="card shadow-sm card-custom p-4">
+				<h2 class="text-center">Listado de Alumnos</h2>
+				<div class="form-check content-center">
+				  	<input class="form-check-input" type="checkbox" value="" id="incluir-inactivos">
+				  	<label class="form-check-label" for="incluir-inactivos">Incluir inactivos</label>
+				</div>
+			    <div class="row justify-content-center">
+			        <div class="col-auto px-5 bg-primary-subtle border-secondary">Legajo</div>
+			        <div class="col-auto px-5 bg-primary-subtle border-secondary">Nombre</div>
+			        <div class="col-auto px-5 bg-primary-subtle border-secondary">Estado</div>
+			    </div>
+			    <div class="container py-3">
+			    	{% for alumno in alumnos %}	
+					    <div class="row justify-content-center">
+					    	<div class="col"></div>
+					    	<div class="col px-5 bg-primary-subtle border border-secondary">{{alumno.legajo}}</div>
+					        <div class="col px-5 bg-primary-subtle border border-secondary">{{alumno.nombre}}</div>
+					        <div class="col px-5 bg-primary-subtle border border-secondary">{{alumno.estado}}</div>
+					    	<div class="col"></div>
+					    </div>
+			        {% endfor %}
+			    </div>
+			</div>
+		</section>
+	</div>
+	<div class="col">
+		<section class="container py-5">
+		<div class="card shadow-sm card-custom p-4">
+			<h2 class="text-center">Subir alumnos</h2>
+			<div class="input-group mb-3">
+			  	<span class="input-group-text" id="alumnos-file">Archivo de alumnos:</span>
+			  	<input type="file" class="form-control" placeholder="Archivo.csv" aria-label="Archivo." aria-describedby="	alumnos-file">
+			</div>
+		</div>
+		</section>
+	</div>
+</div>
+{% endblock %}
