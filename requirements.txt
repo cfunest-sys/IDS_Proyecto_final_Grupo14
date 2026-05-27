@@ -5,5 +5,5 @@ mysql-connector-python
 reportlab
 PyJWT
 werkzeug
-flask-jwt-extended\
+flask-jwt-extended
 python-dotenv
