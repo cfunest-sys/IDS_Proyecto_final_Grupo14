@@ -4,6 +4,7 @@ USE data_base;
 DROP TABLE IF EXISTS miembros_equipo;
 DROP TABLE IF EXISTS equipos;
 DROP TABLE IF EXISTS evaluaciones;
+DROP TABLE IF EXISTS notas;
 DROP TABLE IF EXISTS password_reset_tokens;
 DROP TABLE IF EXISTS alumnos;
 DROP TABLE IF EXISTS profesores;
@@ -59,6 +60,22 @@ CREATE TABLE evaluaciones (
     id_curso INT NOT NULL,
     FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
 );
+
+CREATE TABLE notas (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    alumno_id INT NOT NULL,
+    evaluacion_id INT NOT NULL,
+    calificacion DECIMAL(4,2) NOT NULL,
+    fecha DATE NOT NULL DEFAULT CURRENT_DATE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_notas_alumno_id (alumno_id),
+    INDEX idx_notas_evaluacion_id (evaluacion_id),
+    UNIQUE (alumno_id, evaluacion_id),
+    CHECK (calificacion >= 0 AND calificacion <= 10),
+    FOREIGN KEY (alumno_id) REFERENCES alumnos(legajo),
+    FOREIGN KEY (evaluacion_id) REFERENCES evaluaciones(id_evaluacion)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE equipos (
     id_equipo INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
