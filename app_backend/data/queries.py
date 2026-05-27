@@ -470,3 +470,64 @@ def delete_equipo(id_equipo):
             cursor.close()
         if conexion:
             conexion.close()
+
+
+def crear_alumno(alumno):
+
+    conn = None
+    cur = None
+
+    try:
+
+        conn = get_connection()
+        cur = conn.cursor()
+
+        query_usuario = """
+            INSERT INTO usuarios (
+                email,
+                contrasenia,
+                rol
+            )
+            VALUES (%s, %s, %s)
+        """
+
+        cur.execute(
+            query_usuario,
+            (
+                alumno["email"],
+                alumno["password"],
+                "alumno"
+            )
+        )
+
+        id_usuario = cur.lastrowid
+
+        query_alumno = """
+            INSERT INTO alumnos (
+                nombre,
+                estado,
+                id_usuario
+            )
+            VALUES (%s, %s, %s)
+        """
+
+        cur.execute(
+            query_alumno,
+            (
+                alumno["nombre"],
+                "activo",
+                id_usuario
+            )
+        )
+
+        conn.commit()
+
+        return cur.lastrowid
+
+    finally:
+
+        if cur:
+            cur.close()
+
+        if conn:
+            conn.close()

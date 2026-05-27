@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from data.queries import get_alumno, get_alumnos, cargar_alumno, actualizar_alumno, eliminar_alumno
+from data.queries import crear_alumno, get_alumno, get_alumnos, cargar_alumno, actualizar_alumno, eliminar_alumno
 
 alumnos_bp = Blueprint('alumnos', __name__)
 
@@ -10,8 +10,45 @@ def login():
 
 @alumnos_bp.route('/register', methods=['POST'])
 def register():
-    # Hace falta agregar la lógica para el registro de usuarios
-    return 'Registro exitoso'
+
+    try:
+
+        data = request.json
+
+        print(data)
+
+        nombre = data.get("nombre")
+        email = data.get("email")
+        password = data.get("password")
+
+        print(nombre, email)
+
+        if not nombre or not email or not password:
+
+            return jsonify({
+                "error": "Faltan datos obligatorios"
+            }), 400
+
+        alumno = {
+            "nombre": nombre,
+            "email": email,
+            "password": password
+        }
+
+        legajo = crear_alumno(alumno)
+
+        return jsonify({
+            "mensaje": "Alumno registrado correctamente",
+            "legajo": legajo
+        }), 201
+
+    except Exception as e:
+        
+        print(e)
+
+        return jsonify({
+            "error": str(e)
+        }), 500
 
 
 
