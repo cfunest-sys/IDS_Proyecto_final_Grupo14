@@ -1,47 +1,118 @@
-@import url('https://fonts.googleapis.com/css?family=Montserrat:ital, wght@0, 100..900;1,180..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 body {
-    background-image: url('../images/background.jpg');
-    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    background-color: #f4f4f4;
 }
 
-body, button {
-    font-family: Cambria;
-    background-color: #323232;
+/* NAVBAR */
+
+.navbar-custom {
+    background-color: #7fa7d8;
+    padding: 15px 30px;
 }
-.titulo {
-    margin-bottom: 1.5em;
-    color: violet;
+
+.navbar-brand {
+    font-weight: bold;
+    color: white !important;
 }
-#productos, footer {
+
+.nav-link {
+    color: white !important;
+    font-weight: 600;
+    margin-left: 15px;
+}
+
+/* HERO */
+
+.hero-section {
+    min-height: 90vh;
+
+    background-image:
+        linear-gradient(
+            rgba(255,255,255,0.65),
+            rgba(255,255,255,0.65)
+        ),
+        url('images/background.jpeg');
+
+    background-size: cover;
+    background-position: center;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     text-align: center;
-}
-li {
-    list-style-type: none;
-    margin-bottom: 2vh;
-}
-#boton-ver-mas {
-    font-size: 16px;
-    border-radius: 10px;
-    width: 75px;
-    height: 30px;
-    margin-top: 4vh;
-}
-footer {
-    margin-top: 30px;
-    border-top: gray 2px solid;
-    color: gray;
-}
-button:hover {
-    cursor: pointer;
-}
-#productos, button {
-    color: rgb(245, 64, 121);
+    padding: 40px;
 }
 
-.imagen-centrada {
-    width: 150px;
-    height: 150px;
-    display: block;
-    margin: 0 auto;
+.overlay {
+    width: 100%;
+}
+
+.titulo-principal {
+    font-size: 4rem;
+    font-weight: 700;
+    color: #1f1f1f;
+
+    margin-bottom: 20px;
+}
+
+.subtitulo {
+    font-size: 1.3rem;
+    color: #333;
+
+    margin-bottom: 50px;
+}
+
+/* BOTONES */
+
+.btn-campus {
+    background-color: #1f0f9b;
+    color: white;
+    border-radius: 20px;
+
+    padding: 15px 40px;
+
+    font-weight: bold;
+    border: none;
+
+    transition: 0.3s;
+}
+
+.btn-campus:hover {
+    background-color: #14096d;
+    color: white;
+}
+
+/* CARDS */
+
+.card-custom {
+    border-radius: 20px;
+    border: none;
+}
+
+/* FOOTER */
+
+.footer-custom {
+    background-color: #7fa7d8;
+
+    color: white;
+
+    text-align: center;
+
+    padding: 15px;
+}
+
+/* TITULOS */
+
+.page-title {
+    font-weight: bold;
+    margin-bottom: 30px;
 }
