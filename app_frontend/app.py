@@ -12,9 +12,9 @@ app.secret_key = "six_seven"
 def mostrar_alumnos():
     alumnos = ({"nombre":"pepe", "legajo":112533, "estado": "activo"},
         {"nombre":"maria", "legajo":114529, "estado": "activo"},
-        {"nombre":"pedro", "legajo":111572, "estado": "activo"},
+        {"nombre":"pedro", "legajo":111572, "estado": "inactivo"},
         {"nombre":"laura", "legajo":115343, "estado": "activo"},
-        {"nombre":"juan", "legajo":113323, "estado": "activo"});
+        {"nombre":"juan", "legajo":113323, "estado": "inactivo"});
     return render_template("alumnos.html", alumnos=alumnos)
 
 @app.route("/calendario")##solamente de prueba
@@ -31,6 +31,10 @@ def mostrar_calendario():
     año=2026 
     bisiesto=False
     return render_template("calendario.html", mes=mes, dias=dias, año=año, bisiesto=bisiesto,eventos=eventos)
+
+@app.route("/notas")
+def notas():
+    return render_template("notas.html")
 
 if __name__ == "__main__":
     app.run(debug=True, port=PORT)
