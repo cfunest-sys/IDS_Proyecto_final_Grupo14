@@ -6,8 +6,6 @@ mysql-connector-python
 reportlab
 PyJWT
 werkzeug
-<<<<<<< HEAD
 flask-jwt-extended
-=======
 python-dotenv
->>>>>>> feature-endpoints-equipos
+
