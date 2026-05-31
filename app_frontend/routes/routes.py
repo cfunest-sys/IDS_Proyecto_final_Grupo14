@@ -61,3 +61,9 @@ def register():
         )
 
     return render_template("registro.html")
+
+@inicio.route("/login", methods=["GET", "POST"])
+def login():
+ #logica del login
+    
+    return render_template("login.html")

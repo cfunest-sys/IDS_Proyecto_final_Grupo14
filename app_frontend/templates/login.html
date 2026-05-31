@@ -1,4 +1,4 @@
-/*RUTAS DE LAS LINEAS 16,47,58 A MODIFICAR */
+<!--RUTAS DE LAS LINEAS 16,47,58 A MODIFICAR-->
 
 {% extends "base.html" %}
 
@@ -14,14 +14,15 @@
                 <div class="text-center mb-4">
                     <h4>Login</h4>
                 </div>
-                <form action="{{ url_for('login') }}" method="POST" class="w-100">
+                <!--Formulario para login-->
+                <form action="{{ url_for('inicio.login') }}" method="POST" class="w-100">
                     <div class="mb-3">
                         <input 
-                        type="text" 
+                        type="email" 
                         class="form-control form-control-lg bg-light text-secondary border-0 rounded-3 py-2" 
-                        id="username" 
-                        name="username" 
-                        placeholder="Nombre de usuario" 
+                        id="email"
+                        name="email"
+                        placeholder="Email" 
                         required
                         >
                     </div>
@@ -38,14 +39,14 @@
                     </div>
 
                     <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg rounded-3 py-2 btn-azul-ids" style="font-size: 1.1rem;">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-3 py-2" style="font-size: 1.1rem; background-color: #1d2554;">
                             Acceder
                         </button>
                     </div>
                 </form>
 
                 <div class="text-center mt-3">
-                    <a href="{{ url_for('login') }}" class="text-decoration-none small" style="color: #1d2554 ;">
+                    <a href="{{ url_for('inicio.login') }}" class="text-decoration-none small" style="color: #1d2554 ;">
                     ¿Olvidó su contraseña? </a>
                 </div>
             </div>
@@ -53,10 +54,10 @@
             <div class="d-none d-md-block col-md-1 divisor-vertical my-2 p-0" style="max-width: 1px; margin-left: -1px;"></div>
 
             <div class="col-md-4 ps-md-4 d-flex flex-column justify-content-between align-items-center text-center mt-4 mt-md-0">
-                
+                <!--Apartado para registrarse como docente-->
                 <div class="my-auto">
                     <h5 class="text-dark fw-normal mb-4" style="font-size: 1.3rem;">Registrarse como usuario</h5>
-                    <a href="{{ url_for('login') }}" class="btn btn-light text-dark px-4 py-2 border rounded-3 small shadow-sm" style="background-color:  #fccd8e ; border-color:   #fccd8e !important;">
+                    <a href="{{ url_for('inicio.login') }}" class="btn btn-light text-dark px-4 py-2 border rounded-3 small shadow-sm" style="background-color:  #fccd8e ;">
                         Crear Cuenta
                     </a>
                 </div>
