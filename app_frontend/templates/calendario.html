@@ -9,39 +9,154 @@ Calendario - Campus FIUBA
 <section class="container py-5">
 	<div class="card shadow-sm card-custom p-4">
 		<h2 class="text-center">Calendario</h2>
-		<nav aria-label="Page navigation example">
-		  <ul class="pagination">
-		    <li class="page-item">
-		      <a class="page-link" href="#" aria-label="Previous">
-		        <span aria-hidden="true">&laquo;</span>
-		      </a>
-		    </li>
-		    <li class="page-item">
-		      <a class="page-link" href="#" aria-label="Next">
-		        <span aria-hidden="true">&raquo;</span>
-		      </a>
-		    </li>
-		  </ul>
-		</nav>
-	    <div class="container py-3">
-	    	<h3> Mes: {{mes}}</h3> 
-		    <div class="row justify-content-center">
-		    <!--dias es una lista de numeros-->
-	    	{% for i in range(1, dias + 1) %}	
-			    	<div class="col bg-primary-subtle border border-secondary">
-			    		<div class="w-25"> {{i}}:</div>
-			    		{% for evento in eventos %}	
-				    		{% if evento.dia|int == i %}
-				    		<div class="text-center">{{evento.nombre}}</div>
-				    		{% endif %}
-	    				{% endfor %}
-			    	</div>
-			    	{% if i % 4 == 0 %}
-					<div class="w-100"></div>
-					{% endif %}
-	        {% endfor %}
-	 		</div>
-	    </div>
+		<div class="d-flex flex-row">
+			<nav class="mt-4 px-3" aria-label="Page navigation example">
+			  <ul class="pagination">
+			    <li class="page-item">
+			      <a class="page-link" id="link-previo" aria-label="Anterior">
+			        <span aria-hidden="true">&laquo;</span>
+			      </a>
+			    </li>
+			    <li class="page-item">
+			      <a class="page-link" id="link-proximo" aria-label="Proximo">
+			        <span aria-hidden="true">&raquo;</span>
+			      </a>
+			    </li>
+			  </ul>
+			</nav>
+			<div class="px-3">
+                <label for="filtro-curso" class="form-label"></label>
+                <select id="filtro-curso" name="curso" class="form-select" required>
+                    <option value="" defaultSelected="true">Seleccionar curso</option>
+                </select>
+            </div>
+		</div>
+		{% for año in (año_actual-1, año_actual, año_actual+1) %}
+			{% if año == año_actual %}
+				<h2 class="titulo-año" id="año_actual">{{año}}</h2>
+			{% else %}
+				<h2 class="titulo-año" style="display:none;">{{año}}</h2>
+			{% endif %}
+			{% for mes in range(1, 13) %}
+				{% if mes == mes_actual and año == año_actual %}
+				<div class="container py-3 mes-contenedor" data-mes="{{mes}}" 
+					data-año="{{año}}" id="mes_actual">
+				{% else %}
+				<div class="container py-3 mes-contenedor" data-mes="{{mes}}" 
+					data-año="{{año}}" style="display:none;">
+				{% endif %}
+			    	<h3> Mes: {{mes_nombre[mes - 1]}}</h3> 
+				    <div class="row justify-content-center">
+				    <!--dias es una lista de numeros-->
+			    	{% for i in range(1, dias[mes - 1] + 1) %}	
+				    	<div class="col bg-primary-subtle border border-secondary">
+				    		<div class="w-25"> {{i}}:</div>
+				    		{% for evento in eventos %}	
+					    		{% if evento["fecha"][-2:]|int == i and 
+					    			evento["fecha"][-5:-3]|int == mes and
+					    			evento["fecha"][:4]|int == año %}
+					    			<div class="evento" data-curso="{{evento['curso']}}">
+					    				{{evento["nombre"]}}
+					    			</div>
+					    		{% endif %}
+		    				{% endfor %}
+				    	</div>
+				    	{% if i % 4 == 0 %}
+						<div class="w-100"></div>
+						{% endif %}
+			        {% endfor %}
+			 		</div>
+			    </div>
+		    {% endfor %}
+	    {% endfor %}
 	</div>
 </section>
+<script>
+	const selectCurso = document.getElementById("filtro-curso");
+	const eventos = document.querySelectorAll(".evento"); 
+	function agregarOpcionCursos () {
+		contador_curso = 0;
+		eventos.forEach(evento => {
+			let cant_hijos = selectCurso.children.length;
+			let distinto = true;
+			let curso_evento = +evento.attributes["data-curso"].value;
+			console.log("curso_evento: ", curso_evento);
+			for (var i = 0; i < cant_hijos; i++) {
+				if (curso_evento == +selectCurso.children[i].value) {
+					console.log("no es distinto en i:", i);
+					distinto = false;
+				}
+			}
+			if (distinto && curso_evento != NaN) {
+				contador_curso++;
+				selectCurso[contador_curso] = new Option("Curso " + curso_evento, curso_evento);
+			}
+		})
+	};//agrega los cursos que hay en los eventos de calendario.html
+	agregarOpcionCursos();
+	function filtrarCursoCalendario() {
+	    const valor = selectCurso.value;
+	    eventos.forEach(evento => {
+	    	if (+evento.attributes["data-curso"].value != valor && valor != "") {
+	    		evento.style.display="None";
+	    	} else {
+	    		evento.style.display="";
+	    	}
+	    });
+	}
+	selectCurso.addEventListener("change", filtrarCursoCalendario);
+	const botonPrevio = document.getElementById("link-previo");
+	const botonProximo = document.getElementById("link-proximo");
+	function cambiarMes(indicador) {
+		const meses = document.querySelectorAll(".mes-contenedor");
+		mes_mostrado = 0;
+		meses.forEach(mes => {
+			if (mes.style.display != "none") {
+				mes_mostrado = +mes.attributes["data-mes"].value;
+			}
+		});
+		const años = document.querySelectorAll(".titulo-año");
+		año_mostrado = 0;
+		años.forEach(año => {
+			if (año.style.display != "none") {
+				año_mostrado = +año.innerText;
+			}
+		});
+		año_actual = +document.getElementById("año_actual").innerText;
+		nuevo_mes = mes_mostrado + indicador;
+		año_nuevo = año_mostrado;
+		if (nuevo_mes == 0) {
+			if (año_mostrado <= año_actual-1) {
+				return;
+			}
+			nuevo_mes = 12;
+			año_nuevo--;
+		} else if (nuevo_mes == 13) {
+			if (año_mostrado >= año_actual+1) {
+				return;
+			}
+			nuevo_mes = 1;
+			año_nuevo++;
+		}
+	    meses.forEach(mes => {
+	    	if (+mes.attributes["data-mes"].value != nuevo_mes ||
+	    			+mes.attributes["data-año"].value != año_nuevo) {
+	    		mes.style.display="none";
+	    	} else {
+	    		mes.style.display="";
+	    	}
+	    });
+	    años.forEach(año => {
+			if (+año.innerText != año_nuevo) {
+	    		año.style.display="none";
+	    	} else {
+	    		año.style.display="";
+	    	}
+		});
+	}
+    botonPrevio.addEventListener("click", () => {cambiarMes(-1)});
+    botonProximo.addEventListener("click", () => {cambiarMes(1)});
+
+
+</script>
 {% endblock %}
