@@ -56,7 +56,7 @@ Gestión de equipos
         </div>
         
         <div class="row mb-4">
-            <div class="col-md-8">
+            <div class="col-md-10">
                 <div class="input-group">
                     <span class="input-group-text" id="inputGroup-sizing-default">Nombre equipo</span>
                     <input type="text" class="form-control">
@@ -84,8 +84,16 @@ Gestión de equipos
                     <tbody>
                         <tr>
                             <th scope="row">1</th>
-                            <td>'Equipo Artemis 3'</td>
+                            <td>Equipo Artemis 3</td>
                             <td>3</td>
+                            <td>
+                                <button class="btn btn-alumnos" data-bs-toggle="modal" data-bs-target="#modal_alumnos">Alumnos</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Los basheros</td>
+                            <td>2</td>
                             <td>
                                 <button class="btn btn-alumnos" data-bs-toggle="modal" data-bs-target="#modal_alumnos">Alumnos</button>
                             </td>
@@ -205,7 +213,7 @@ Gestión de equipos
             <form>
                 <div class="modal-body">
                     <h6 class="texto-indicacion-modal mb-2">Complete el siguiente campo:</h6>
-                    <p class="advertencia-eliminar mb-3">Precaución: una vez que se elimine un equipo no podrá recuperarlo</p>
+                    <p class="advertencia-eliminar mb-3">PRECAUCIÓN: una vez que se elimine un equipo no podrá recuperarlo</p>
                     <div class="input-group mb-4">
                         <span class="input-group-text">id_equipo</span>
                         <input type="number" name="id_equipo" class="form-control" placeholder="Ej: 104432" required>
