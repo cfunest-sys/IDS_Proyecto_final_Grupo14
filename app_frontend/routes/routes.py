@@ -61,3 +61,9 @@ def register():
         )
 
     return render_template("registro.html")
+
+
+@inicio.route("/equipos")
+def equipos():
+
+    return render_template("equipos.html")
