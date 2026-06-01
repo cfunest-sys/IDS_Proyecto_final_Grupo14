@@ -1,21 +1,21 @@
 const title = document.getElementById("titulo")
 
-title.addEventListener("mouseover", () => {
-    alert("Hola")
-})
+// title.addEventListener("mouseover", () => {
+//     alert("Hola")
+// })
 
-const changeColor = document.getElementById("change-color")
+// const changeColor = document.getElementById("change-color")
 
-changeColor.onclick = function (event) {
-    const R = randomNumber().toString()
-    const G = randomNumber().toString()
-    const B = randomNumber().toString()
-    title.style.color = `rgb(${R},${G},${B})`
-}
+// changeColor.onclick = function (event) {
+//     const R = randomNumber().toString()
+//     const G = randomNumber().toString()
+//     const B = randomNumber().toString()
+//     title.style.color = `rgb(${R},${G},${B})`
+// }
 
-function randomNumber() {
-    return (Math.random() * 256).toFixed(0)
-}
+// function randomNumber() {
+//     return (Math.random() * 256).toFixed(0)
+// }
 
 
 
