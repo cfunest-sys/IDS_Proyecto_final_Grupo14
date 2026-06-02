@@ -1,59 +1,48 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request, jsonify
+# Decorador de sesión @token_required (autenticación JWT)
+from utils.auth import token_required 
+from data.queries import get_notas_filtradas, get_promedio_notas
 
-from data.queries import get_notas, get_alumno_por_usuario_id
-from utils.auth import token_required
+notas_bp = Blueprint('notas', __name__)
 
-notas_bp = Blueprint("notas", __name__)
-
-
-@notas_bp.route("/", methods=["GET"])
+@notas_bp.route('/notas', methods=['GET'])
 @token_required
-def listar_notas(current_user):
-    """Consulta notas con filtros, paginación y promedio."""
-    print(
-        f"[notas] consulta usuario_id={current_user['id']} rol={current_user['rol']} "
-        f"alumno_id={request.args.get('alumno_id')} evaluacion_id={request.args.get('evaluacion_id')}"
-    )
-
-    rol = current_user.get("rol", "")
-    if rol not in ("profesor", "alumno", "admin"):
-        return jsonify({"error": "No autorizado"}), 403
-
-    alumno_id = request.args.get("alumno_id", type=int)
-    evaluacion_id = request.args.get("evaluacion_id", type=int)
-    page = request.args.get("page", default=1, type=int) or 1
-    per_page = request.args.get("per_page", default=10, type=int) or 10
-
-    if rol == "alumno":
-        alumno = get_alumno_por_usuario_id(current_user["id"])
-        if not alumno:
-            return jsonify({"error": "No se encontró el alumno asociado al usuario"}), 404
-
-        legajo = alumno.get("legajo")
-        if alumno_id is not None and alumno_id != legajo:
-            return jsonify({"error": "No autorizado para consultar otras notas"}), 403
-
-        alumno_id = legajo
-
+def listar_notas(current_user): 
     try:
-        resultado = get_notas(alumno_id=alumno_id, evaluacion_id=evaluacion_id, page=page, per_page=per_page)
-    except Exception as exc:
-        print(f"[notas] error al consultar notas: {exc}")
-        return jsonify({"error": "Error interno del servidor"}), 500
+        usuario_id = current_user.get('id')
+        rol = current_user.get('rol')
 
-    items = resultado.get("items", [])
-    total_notas = len(items)
-    promedio = 0.0
-    if total_notas:
-        promedio = round(sum(float(item.get("calificacion", 0) or 0) for item in items) / total_notas, 2)
+        alumno_id = request.args.get('alumno_id', type=int)
+        evaluacion_id = request.args.get('evaluacion_id', type=int)
+        id_curso = request.args.get('id_curso', type=int)
 
-    return jsonify(
-        {
-            "items": items,
+        # Paginación
+        page = request.args.get('page', default=1, type=int)
+        per_page = request.args.get('per_page', default=10, type=int)
+        
+        if page < 1: 
+            page = 1
+        if per_page < 1: 
+            per_page = 10
+        
+        offset = (page - 1) * per_page
+
+        # Llamo a las funciones de consulta
+        notas = get_notas_filtradas(rol, usuario_id, alumno_id, evaluacion_id, id_curso, per_page, offset)
+        promedio = get_promedio_notas(rol, usuario_id, alumno_id, evaluacion_id, id_curso)
+
+        # Formateo de fechas a string para JSON
+        for nota in notas:
+            if nota['fecha']:
+                nota['fecha'] = nota['fecha'].strftime('%Y-%m-%d')
+
+        return jsonify({
+            "page": page,
+            "per_page": per_page,
             "promedio": promedio,
-            "page": resultado.get("page", page),
-            "per_page": resultado.get("per_page", per_page),
-            "total": resultado.get("total", total_notas),
-            "pages": resultado.get("pages", 0),
-        }
-    ), 200
+            "notas": notas
+        }), 200
+
+    except Exception as e:
+        print(f"Error en endpoint listar_notas: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500

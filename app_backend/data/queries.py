@@ -10,7 +10,7 @@ def get_profesor_by_email(email):
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute(
-            """SELECT p.id_profesor as id, p.nombre, u.email, u.contrasenia as password, u.rol
+            """SELECT p.id_profesor as id, p.nombre, u.email, u.contrasenia as password
            FROM profesores p
            INNER JOIN usuarios u ON p.id_usuario = u.id_usuario
            WHERE u.email = %s""",
@@ -317,146 +317,16 @@ def get_user_by_id(user_id):
     try:
         conn = get_connection()
         cur = conn.cursor(dictionary=True)
-
+        
         query = "SELECT id_usuario, email, rol FROM usuarios WHERE id_usuario = %s"
         cur.execute(query, (user_id,))
-
-        user = cur.fetchone()
+        
+        user = cur.fetchone() 
         return user
 
     except Exception as e:
         print(f"Error en MySQL get_user_by_id: {e}")
-        return None
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
-
-
-def get_alumno_por_usuario_id(usuario_id):
-    conn = None
-    cur = None
-    try:
-        conn = get_connection()
-        cur = conn.cursor(dictionary=True)
-        cur.execute("SELECT legajo, nombre, id_usuario FROM alumnos WHERE id_usuario = %s", (usuario_id,))
-        return cur.fetchone()
-    except Exception as e:
-        print(f"Error obteniendo alumno por usuario: {e}")
-        return None
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
-
-
-def get_nota(alumno_id, evaluacion_id):
-    conn = None
-    cur = None
-    try:
-        conn = get_connection()
-        cur = conn.cursor(dictionary=True)
-        cur.execute(
-            """
-            SELECT n.*, a.nombre AS alumno, e.nombre AS evaluacion
-            FROM notas n
-            JOIN alumnos a ON a.legajo = n.alumno_id
-            JOIN evaluaciones e ON e.id_evaluacion = n.evaluacion_id
-            WHERE n.alumno_id = %s AND n.evaluacion_id = %s
-            """,
-            (alumno_id, evaluacion_id),
-        )
-        return cur.fetchone()
-    except Exception as e:
-        print(f"Error obteniendo nota: {e}")
-        return None
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
-
-
-def upsert_nota(alumno_id, evaluacion_id, calificacion):
-    conn = None
-    cur = None
-    try:
-        conn = get_connection()
-        cur = conn.cursor(dictionary=True)
-        cur.execute("SELECT id FROM notas WHERE alumno_id = %s AND evaluacion_id = %s", (alumno_id, evaluacion_id))
-        existing = cur.fetchone()
-
-        if existing:
-            cur.execute(
-                "UPDATE notas SET calificacion = %s, fecha = CURDATE() WHERE id = %s",
-                (calificacion, existing["id"]),
-            )
-            accion = "actualizada"
-            nota_id = existing["id"]
-        else:
-            cur.execute(
-                "INSERT INTO notas (alumno_id, evaluacion_id, calificacion, fecha) VALUES (%s, %s, %s, CURDATE())",
-                (alumno_id, evaluacion_id, calificacion),
-            )
-            nota_id = cur.lastrowid
-            accion = "creada"
-
-        conn.commit()
-        return {"id": nota_id, "accion": accion, "alumno_id": alumno_id, "evaluacion_id": evaluacion_id, "calificacion": calificacion}
-    except Exception as e:
-        if conn:
-            conn.rollback()
-        print(f"Error guardando nota: {e}")
-        raise
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
-
-
-def get_notas(alumno_id=None, evaluacion_id=None, page=1, per_page=10):
-    conn = None
-    cur = None
-    try:
-        conn = get_connection()
-        cur = conn.cursor(dictionary=True)
-
-        condiciones = []
-        parametros = []
-        if alumno_id is not None:
-            condiciones.append("n.alumno_id = %s")
-            parametros.append(alumno_id)
-        if evaluacion_id is not None:
-            condiciones.append("n.evaluacion_id = %s")
-            parametros.append(evaluacion_id)
-
-        where_clause = " WHERE " + " AND ".join(condiciones) if condiciones else ""
-        count_query = "SELECT COUNT(*) AS total FROM notas n" + where_clause
-        cur.execute(count_query, parametros)
-        total = cur.fetchone()["total"]
-
-        page = max(1, int(page))
-        per_page = max(1, int(per_page))
-        offset = (page - 1) * per_page
-
-        query = """
-            SELECT n.id, n.alumno_id, n.evaluacion_id, n.calificacion, n.fecha,
-                   a.nombre AS alumno, e.nombre AS evaluacion
-            FROM notas n
-            JOIN alumnos a ON a.legajo = n.alumno_id
-            JOIN evaluaciones e ON e.id_evaluacion = n.evaluacion_id
-        """ + where_clause + " ORDER BY n.fecha DESC, n.id DESC LIMIT %s OFFSET %s"
-        cur.execute(query, parametros + [per_page, offset])
-        items = cur.fetchall()
-
-        pages = (total + per_page - 1) // per_page if total else 0
-        return {"items": items, "page": page, "per_page": per_page, "total": total, "pages": pages}
-    except Exception as e:
-        print(f"Error listando notas: {e}")
-        raise
+        return None 
     finally:
         if cur:
             cur.close()
@@ -750,3 +620,108 @@ def delete_miembro(id_miembro):
             cursor.close()
         if conexion:
             conexion.close()
+
+def get_notas_filtradas(rol, usuario_id, alumno_id=None, evaluacion_id=None, id_curso=None, limit=10, offset=0):
+    # Obtiene el listado de notas aplicando seguridad por rol, filtros y paginación
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+    # Obtenemos alumno, evaluacion, nota y fecha
+        query = """
+            SELECT a.nombre AS alumno, e.nombre AS evaluacion, n.calificacion, n.fecha
+            FROM notas n
+            INNER JOIN alumnos a ON n.alumno_id = a.legajo
+            INNER JOIN evaluaciones e ON n.evaluacion_id = e.id_evaluacion
+            INNER JOIN cursos c ON e.id_curso = c.id_curso
+        """
+        condiciones = []
+        parametros = []
+
+        # Filtro si es alumno
+        if rol == "alumno":
+            condiciones.append("a.id_usuario = %s")
+            parametros.append(usuario_id)
+
+        # Filtros de búsqueda
+        if alumno_id:
+            condiciones.append("n.alumno_id = %s")
+            parametros.append(alumno_id)
+
+        if evaluacion_id:
+            condiciones.append("n.evaluacion_id = %s")
+            parametros.append(evaluacion_id)
+
+        if id_curso:
+            condiciones.append("e.id_curso = %s")
+            parametros.append(id_curso)
+
+        if condiciones:
+            query += " WHERE " + " AND ".join(condiciones)
+
+        # Paginación
+        query += " LIMIT %s OFFSET %s"
+        parametros.extend([limit, offset])
+
+        cur.execute(query, parametros)
+        return cur.fetchall()
+
+    except Exception as e:
+        print(f"Error en queries.get_notas_filtradas: {e}")
+        raise e
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+
+def get_promedio_notas(rol, usuario_id, alumno_id=None, evaluacion_id=None, id_curso=None):
+    # Calcula el promedio de notas filtradas
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT AVG(n.calificacion) AS promedio
+            FROM notas n
+            INNER JOIN alumnos a ON n.alumno_id = a.legajo
+            INNER JOIN evaluaciones e ON n.evaluacion_id = e.id_evaluacion
+            INNER JOIN cursos c ON e.id_curso = c.id_curso
+        """
+        condiciones = []
+        parametros = []
+
+        if rol == "alumno":
+            condiciones.append("a.id_usuario = %s")
+            parametros.append(usuario_id)
+
+        if alumno_id:
+            condiciones.append("n.alumno_id = %s")
+            parametros.append(alumno_id)
+
+        if evaluacion_id:
+            condiciones.append("n.evaluacion_id = %s")
+            parametros.append(evaluacion_id)
+
+        if id_curso:
+            condiciones.append("e.id_curso = %s")
+            parametros.append(id_curso)
+
+        if condiciones:
+            query += " WHERE " + " AND ".join(condiciones)
+
+        cur.execute(query, parametros)
+        resultado = cur.fetchone()
+        
+        if resultado and resultado['promedio'] is not None:
+            return round(float(resultado['promedio']), 2)
+        return 0.0
+
+    except Exception as e:
+        print(f"Error en queries.get_promedio_notas: {e}")
+        raise e
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()

@@ -1,14 +1,13 @@
 CREATE DATABASE IF NOT EXISTS data_base;
 USE data_base;
 
-DROP TABLE IF EXISTS miembros_equipo;
 DROP TABLE IF EXISTS equipos;
-DROP TABLE IF EXISTS evaluaciones;
-DROP TABLE IF EXISTS notas;
+DROP TABLE IF EXISTS parciales;
 DROP TABLE IF EXISTS password_reset_tokens;
 DROP TABLE IF EXISTS alumnos;
 DROP TABLE IF EXISTS profesores;
 DROP TABLE IF EXISTS cursos;
+DROP TABLE IF EXISTS evaluaciones;
 DROP TABLE IF EXISTS usuarios;
 
 CREATE TABLE usuarios (
@@ -30,7 +29,7 @@ CREATE TABLE password_reset_tokens (
 );
 
 CREATE TABLE alumnos (
-    legajo INTEGER PRIMARY KEY,
+    legajo INTEGER PRIMARY KEY AUTO_INCREMENT,
     nombre TEXT NOT NULL,
     estado TEXT NOT NULL,
     id_usuario INTEGER,
@@ -66,14 +65,17 @@ CREATE TABLE notas (
     alumno_id INT NOT NULL,
     evaluacion_id INT NOT NULL,
     calificacion DECIMAL(4,2) NOT NULL,
-    fecha DATE NOT NULL DEFAULT CURRENT_DATE,
+    fecha DATE NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     INDEX idx_notas_alumno_id (alumno_id),
     INDEX idx_notas_evaluacion_id (evaluacion_id),
-    UNIQUE (alumno_id, evaluacion_id),
-    CHECK (calificacion >= 0 AND calificacion <= 10),
+
+    CONSTRAINT unique_alumno_evaluacion UNIQUE (alumno_id, evaluacion_id),
+    CONSTRAINT chk_calificacion_range CHECK (calificacion >= 0 AND calificacion <= 10),
+
     FOREIGN KEY (alumno_id) REFERENCES alumnos(legajo),
+
     FOREIGN KEY (evaluacion_id) REFERENCES evaluaciones(id_evaluacion)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -87,16 +89,6 @@ CREATE TABLE equipos (
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE miembros_equipo (
-    id_miembro INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    id_equipo INT NOT NULL,
-    legajo_alumno INT NOT NULL,
-
-    FOREIGN KEY (id_equipo) REFERENCES equipos(id_equipo) ON DELETE CASCADE,
-    FOREIGN KEY (legajo_alumno) REFERENCES alumnos(legajo),
-    UNIQUE(id_equipo, legajo_alumno)
-) ENGINE=InnoDB;
 
 
 INSERT INTO usuarios (email, contrasenia, rol)
@@ -113,7 +105,7 @@ VALUES
 
 INSERT INTO alumnos (nombre, estado, id_usuario)
 VALUES
- (115598, 'Juan Pérez', 'activo', 3);
+ ('Juan Pérez', 'activo', 3);
 
 INSERT INTO cursos (nombre, anio, semestre)
 VALUES
@@ -126,12 +118,8 @@ VALUES
     ('Trabajo Práctico Integrador Final', 'TP', '2026-06-17', 1),
     ('Control de Lectura - Parcialito 1', 'parcialito', '2026-05-13', 2);
 
-INSERT INTO equipos (legajo, nombre_equipo, id_curso)
+INSERT INTO equipos (nombre_equipo, id_curso)
 VALUES 
     ('Equipo Artemis 3', 1),
     ('Equipo Backend Masters', 1),
     ('Equipo Gastronómico Control', 2);
-
-INSERT INTO miembros_equipo (id_equipo, legajo_alumno)
-VALUES
-    (1, 115598);
