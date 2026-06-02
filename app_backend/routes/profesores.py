@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from utils.auth import validate_profesor_credentials
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from utils.auth import generate_token, validate_profesor_credentials
 
 profesores_bp = Blueprint("profesores", __name__)
 
@@ -24,7 +24,7 @@ def login():
     if not profesor:
         return jsonify({"error": "Email o contraseña inválidos"}), 401
 
-    access_token = create_access_token(identity=str(profesor["id"]))
+    access_token = generate_token(usuario_id=profesor["id"], rol=profesor["rol"])
 
     return (
         jsonify(
@@ -32,7 +32,7 @@ def login():
                 "success": True,
                 "message": "Login exitoso",
                 "token": access_token,
-                "profesor": {"id": profesor["id"], "nombre": profesor["nombre"], "email": profesor["email"]},
+                "profesor": {"id": profesor["id"], "nombre": profesor["nombre"], "email": profesor["email"], "rol": profesor["rol"]},
             }
         ),
         200,

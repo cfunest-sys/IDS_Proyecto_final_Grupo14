@@ -8,6 +8,7 @@ from routes.reportes import reportes_bp
 from routes.evaluaciones import evaluaciones_bp
 from routes.equipos import equipos_bp
 from routes.perfil import perfil_bp
+from routes.notas import notas_bp
 
 app = Flask(__name__)
 
@@ -22,6 +23,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(reportes_bp)
 app.register_blueprint(equipos_bp, url_prefix='/api/equipos')
 app.register_blueprint(perfil_bp, url_prefix='/api/perfil')
+app.register_blueprint(notas_bp, url_prefix='/api/notas')
 
 
 @app.route("/")
