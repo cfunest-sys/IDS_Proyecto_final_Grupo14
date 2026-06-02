@@ -70,5 +70,4 @@ def equipos():
 @inicio.route("/login", methods=["GET", "POST"])
 def login():
  #logica del login
-    
     return render_template("login.html")

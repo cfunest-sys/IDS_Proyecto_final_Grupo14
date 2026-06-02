@@ -1,6 +1,18 @@
 from database.db import get_connection
 from flask import jsonify
 
+# def crear_base_datos():
+#     connection = get_connection()
+#     cursor = connection.cursor()
+#     f = open("data/db_init.sql", 'r')
+#     lineas = f.readlines()
+#     f.close()
+#     for linea in lineas:
+#         if (linea != "" and linea != None):
+#             cursor.execute(linea)
+#             connection.commit()
+#     cursor.close()
+#     connection.close()
 
 def get_profesor_by_email(email):
     # JOIN entre usuarios y profesores
@@ -228,6 +240,55 @@ def get_evaluacion(id):
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM evaluaciones WHERE id = %s", (id))
         evaluacion = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        if cursor.rowcount == 0:
+            return evaluacion, 204
+        return evaluacion, 200
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+def get_evaluacion_por_curso(curso_id):
+    try:
+        connection = get_connection()
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM evaluaciones WHERE id_curso = %s", (curso_id,))
+        # cursor.execute("SELECT * FROM evaluaciones")
+        evaluacion = cursor.fetchall()
+        cursor.close()
+        connection.close()
+        return evaluacion
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+def get_evaluacion_profesor(id_profesor):
+    try:
+        connection = get_connection()
+        cursor = connection.cursor()
+        query = """select evaluaciones.* from evaluaciones  
+                   inner join profesor_curso pc on pc.id_curso = evaluaciones.id_curso 
+                   where pc.id_profesor=%s;"""
+        cursor.execute(query, (id_profesor,))
+        evaluacion = cursor.fetchall()
+        cursor.close()
+        connection.close()
+        return evaluacion
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+# select evaluaciones.* from evaluaciones  
+# inner join profesor_curso pc on pc.id_curso = evaluaciones.id_curso 
+# where pc.id_profesor=2;
+
+def get_evaluacion_todas():
+    try:
+        connection = get_connection()
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM evaluaciones")
+        evaluacion = cursor.fetchall()
         cursor.close()
         connection.close()
         return evaluacion

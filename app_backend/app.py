@@ -9,6 +9,7 @@ from routes.evaluaciones import evaluaciones_bp
 from routes.equipos import equipos_bp
 from routes.perfil import perfil_bp
 
+PORT = 5001
 app = Flask(__name__)
 
 app.config["JWT_SECRET_KEY"] = config.JWT_SECRET_KEY
@@ -26,8 +27,9 @@ app.register_blueprint(perfil_bp, url_prefix='/api/perfil')
 
 @app.route("/")
 def hello_world():
-    return "Hello, World!"
+    respuesta = {"mensaje":"Hello, World!"}
+    return respuesta, 202
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=PORT)
