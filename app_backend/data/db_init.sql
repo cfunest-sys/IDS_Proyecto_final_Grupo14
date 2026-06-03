@@ -1,9 +1,9 @@
 CREATE DATABASE IF NOT EXISTS data_base;
 USE data_base;
-SET FOREIGN_KEY_CHECKS = 0; -- Deshabilitar temporalmente las comprobaciones de claves foráneas para evitar errores de tablas
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS miembros_equipo;
-DROP TABLE IF EXISTS profesor_curso;
 DROP TABLE IF EXISTS logs_login;
+DROP TABLE IF EXISTS materiales;
 DROP TABLE IF EXISTS equipos;
 DROP TABLE IF EXISTS evaluaciones;
 DROP TABLE IF EXISTS notas;
@@ -13,9 +13,10 @@ DROP TABLE IF EXISTS alumnos;
 DROP TABLE IF EXISTS profesores;
 DROP TABLE IF EXISTS cursos;
 DROP TABLE IF EXISTS usuarios;
-DROP TABLE IF EXISTS materiales;
 DROP TABLE IF EXISTS qr_asistencia;
 DROP TABLE IF EXISTS asistencia;
+
+
 CREATE TABLE usuarios (
     id_usuario INTEGER PRIMARY KEY AUTO_INCREMENT,
     email TEXT NOT NULL,
@@ -35,6 +36,12 @@ CREATE TABLE password_reset_tokens (
 CREATE TABLE alumnos (
     legajo INTEGER PRIMARY KEY,
     nombre TEXT NOT NULL,
+    apellido TEXT NOT NULL,
+    dni TEXT NOT NULL UNIQUE,
+    email TEXT,
+    curso TEXT,
+    anio INTEGER,
+    cuatrimestre INTEGER, 
     estado TEXT NOT NULL,
     id_usuario INTEGER,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
@@ -166,9 +173,28 @@ VALUES
  ('Dr. Smith', 'Matemáticas', 2),
  ('juan', 'intro DS', 4 );
 
-INSERT INTO alumnos (legajo, nombre, estado, id_usuario)
-VALUES
- (115598, 'Juan Pérez', 'activo', 3);
+INSERT INTO alumnos (
+    legajo,
+    nombre,
+    apellido,
+    dni,
+    curso,
+    anio,
+    cuatrimestre,
+    estado,
+    id_usuario
+)
+VALUES (
+    115598,
+    'Juan',
+    'Pérez',
+    '40123456',
+    '75.40',
+    2,
+    1,
+    'activo',
+    3
+);
 INSERT INTO cursos (nombre, anio, semestre)
 VALUES
  ('Introducción al Desarrollo', 2024, 1),

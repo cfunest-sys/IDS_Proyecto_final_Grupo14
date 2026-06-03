@@ -2,6 +2,8 @@ from werkzeug.security import generate_password_hash
 
 from database.db import get_connection
 from flask import jsonify
+import csv
+import io
 
 # def crear_base_datos():
 #     connection = get_connection()
@@ -731,6 +733,8 @@ def delete_miembro(id_miembro):
         if conexion:
             conexion.close()
 
+
+# <------------------- MATERIALES  ----------------------------->
 CAMPOS_PERMITIDOS_UPDATE = {
     'titulo', 'descripcion', 'tema', 'fecha_material',
     'estado', 'orden_material', 'es_libre', 'tipo_material'
@@ -914,3 +918,180 @@ def registrar_login(id_usuario, email, resultado, ip):
     conn.commit()
     cur.close()
     conn.close()
+
+# <===================== CARGAR ALUMNOS COMO USUARIOS =========================>
+
+def cargar_alumnos_csv(archivo_csv):
+    """
+    CSV ejemplo:
+    legajo,nombre,apellido,dni,email,curso,anio,cuatrimestre
+
+    """
+    from utils.auth import hash_password
+    exitosos = 0
+    errores = []
+
+    def agregar_error(fila, motivo):
+        errores.append({
+            "fila": fila,
+            "motivo": motivo
+        })
+
+    conn = get_connection()
+    cur = None
+    try:
+        cur = conn.cursor()
+        lector = csv.DictReader(io.StringIO(archivo_csv))
+        columnas_requeridas = {
+            "legajo",
+            "nombre",
+            "apellido",
+            "dni",
+            "email",
+            "curso",
+            "anio",
+            "cuatrimestre"
+        }
+
+        if not lector.fieldnames:
+            raise ValueError("El archivo CSV está vacío")
+        faltantes = columnas_requeridas - set(lector.fieldnames)
+
+        if faltantes:
+            raise ValueError(
+                f"Faltan columnas: {', '.join(sorted(faltantes))}"
+            )
+
+        for numero_fila, fila in enumerate(lector, start=2):
+            try:
+                if not any(fila.values()):
+                    continue
+                legajo = int(fila["legajo"])
+                nombre = fila["nombre"].strip()
+                apellido = fila["apellido"].strip()
+                dni = fila["dni"].strip()
+                email = fila["email"].strip()
+                curso = fila["curso"].strip()
+                anio = int(fila["anio"])
+                cuatrimestre = int(fila["cuatrimestre"])
+
+                # Verificar legajo existente
+
+                cur.execute(
+                    "SELECT 1 FROM alumnos WHERE legajo = %s",
+                    (legajo,)
+                )
+
+                if cur.fetchone():
+                    agregar_error(
+                        numero_fila,
+                        f"Legajo {legajo} ya existe"
+                    )
+                    continue
+
+                # Verificar DNI existente
+                cur.execute(
+                    "SELECT 1 FROM alumnos WHERE dni = %s",
+                    (dni,)
+                )
+
+                if cur.fetchone():
+                    agregar_error(
+                        numero_fila,
+                        f"DNI {dni} ya registrado"
+                    )
+                    continue
+                # Verificar email existente
+                cur.execute(
+                    "SELECT 1 FROM usuarios WHERE email = %s",
+                    (email,)
+                )
+
+                if cur.fetchone():
+                    agregar_error(
+                        numero_fila,
+                        f"Email {email} ya registrado"
+                    )
+                    continue
+                # Crear usuario
+
+                cur.execute(
+                    """
+                    INSERT INTO usuarios
+                    (email, contrasenia, rol)
+                    VALUES (%s, %s, 'alumno')
+                    """,
+                    (
+                        email,
+                        hash_password(dni)
+                    )
+                )
+
+                id_usuario = cur.lastrowid
+                # Crear alumnos
+
+                cur.execute(
+                    """
+                    INSERT INTO alumnos (
+                        legajo,
+                        nombre,
+                        apellido,
+                        dni,
+                        email,
+                        curso,
+                        anio,
+                        cuatrimestre,
+                        estado,
+                        id_usuario
+                    )
+                    VALUES (
+                        %s, %s, %s, %s,
+                        %s, %s, %s, %s,
+                        'activo',
+                        %s
+                    )
+                    """,
+                    (
+                        legajo,
+                        nombre,
+                        apellido,
+                        dni,
+                        email,
+                        curso,
+                        anio,
+                        cuatrimestre,
+                        id_usuario
+                    )
+                )
+
+                exitosos += 1
+
+            except ValueError:
+                agregar_error(
+                    numero_fila,
+                    "Error de formato en campos numéricos"
+                )
+
+            except Exception as e:
+                agregar_error(
+                    numero_fila,
+                    str(e)
+                )
+
+        conn.commit()
+
+        return {
+            "exitosos": exitosos,
+            "errores": errores
+        }
+
+    except Exception as e:
+
+        conn.rollback()
+        raise Exception(f"Error procesando CSV: {e}")
+
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()

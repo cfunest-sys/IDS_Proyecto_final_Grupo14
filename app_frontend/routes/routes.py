@@ -187,3 +187,26 @@ def logout():
     flash("Sesión cerrada correctamente.", "success")
 
     return redirect("/")
+
+@inicio.route("/alumnos/cargar-csv", methods=["POST"])
+def cargar_csv():
+    archivo = request.files.get("archivo")
+    if not archivo:
+        flash("No se envió archivo", "danger")
+        return redirect("/alumnos")
+    resp = requests.post(
+        "http://127.0.0.1:5000/api/alumnos/cargar-csv",
+        files={"archivo": (archivo.filename, archivo.stream, archivo.content_type)},
+        timeout=30,
+    )
+    if resp.ok:
+        data = resp.json()
+        exitosos = data.get("exitosos", 0)
+        errores = data.get("errores", [])
+        flash(f"Se cargaron {exitosos} alumnos correctamente", "success")
+        if errores:
+            for e in errores:
+                flash(f"Fila {e['fila']}: {e['motivo']}", "danger")
+    else:
+        flash("Error al cargar el archivo", "danger")
+    return redirect("/alumnos")
