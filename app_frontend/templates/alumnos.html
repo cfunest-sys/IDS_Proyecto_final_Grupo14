@@ -11,7 +11,7 @@ Gestion de alumnos - Campus FIUBA
 			<div class="card shadow-sm card-custom p-4">
 				<h2 class="text-center">Listado de Alumnos</h2>
 				<div class="form-check content-center">
-				  	<input class="form-check-input" type="checkbox" value="" id="incluir-inactivos">
+				  	<input class="form-check-input" type="checkbox" value="inactivo" id="incluir-inactivos">
 				  	<label class="form-check-label" for="incluir-inactivos">Incluir inactivos</label>
 				</div>
 			    <div class="row justify-content-center">
@@ -21,12 +21,12 @@ Gestion de alumnos - Campus FIUBA
 			    </div>
 			    <div class="container py-3">
 			    	{% for alumno in alumnos %}	
-					    <div class="row justify-content-center">
-					    	<div class="col"></div>
-					    	<div class="col px-5 bg-primary-subtle border border-secondary">{{alumno.legajo}}</div>
-					        <div class="col px-5 bg-primary-subtle border border-secondary">{{alumno.nombre}}</div>
-					        <div class="col px-5 bg-primary-subtle border border-secondary">{{alumno.estado}}</div>
-					    	<div class="col"></div>
+					    <div class="row justify-content-center alumno">
+					    	<!-- <div class="col"></div> -->
+					    	<div class="col px-5 bg-primary-subtle border border-secondary legajo">{{alumno.legajo}}</div>
+					        <div class="col px-5 bg-primary-subtle border border-secondary nombre">{{alumno.nombre}}</div>
+					        <div class="col px-5 bg-primary-subtle border border-secondary estado ">{{alumno.estado}}</div>
+					    	<!-- <div class="col"></div> -->
 					    </div>
 			        {% endfor %}
 			    </div>
@@ -45,4 +45,23 @@ Gestion de alumnos - Campus FIUBA
 		</section>
 	</div>
 </div>
+
+<script>
+	const botonInactivo = document.getElementById("incluir-inactivos");
+	botonInactivo.checked = true;
+	function clickCheck() {
+		const filas = document.querySelectorAll(".alumno");
+	    filas.forEach(fila => {
+	    	const checked = botonInactivo.checked;
+	    	if (fila.querySelector(".estado").innerText == "inactivo" && !checked) {
+	    		fila.style.display="None";
+	    	} else {
+	    		fila.style.display="";
+	    	}
+	    });
+	}
+	clickCheck();
+    botonInactivo.addEventListener("click", clickCheck);
+</script>
+
 {% endblock %}

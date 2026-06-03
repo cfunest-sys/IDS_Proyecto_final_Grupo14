@@ -133,3 +133,120 @@ body {
     font-weight: bold;
     margin-bottom: 30px;
 }
+
+/*CSS de equipos*/
+
+.btn.btn-filtrar {
+    background-color: #1f0f9b;
+    color: white;
+    border: none;
+    padding: 7px 35px;
+}
+
+.btn.btn-filtrar:hover {
+    background-color: #1d2554;
+    color: white;
+}
+
+.btn.btn-alumnos {
+    background-color: #2d208f;
+    color: white;
+}
+
+.btn.btn-alumnos:hover {
+    background-color: #1c2970;
+    color: white;
+}
+
+.btn.btn-crear-equipo {
+    border-color: #0f9621;
+    border-width: 2px;
+    padding: 7px 70px;
+}
+
+.btn.btn-crear-equipo:hover {
+    background-color: #0f9621;
+    color: white;
+}
+
+.btn.btn-modificar-equipo {
+    border-color: #ac7d1a;
+    border-width: 2px;
+    padding: 7px 70px;
+}
+
+.btn.btn-modificar-equipo:hover {
+    background-color: #ac7d1a;
+    color: white;
+}
+
+.btn.btn-eliminar-equipo {
+    border-color: #b31b1b;
+    border-width: 2px;
+    padding: 7px 70px;
+}
+
+.btn.btn-eliminar-equipo:hover {
+    background-color: #b31b1b;
+    color: white;
+}
+
+.btn.btn-eliminar-alumno {
+    background-color: #b31b1b;
+    color: white;
+    border: none;
+}
+
+.btn.btn-eliminar-alumno:hover {
+    background-color: #811313;
+    color: white;
+}
+
+.btn.btn-agregar-alumno {
+    background-color: #0f9621;
+    color: white;
+    border: none;
+}
+
+.btn.btn-agregar-alumno:hover {
+    background-color: #083a0f;
+    color: white;
+}
+
+.texto-indicacion-modal {
+    font-weight: 700;
+}
+
+.advertencia-eliminar {
+    color:#811313;
+}
+
+.table tbody tr:nth-child(even) th,
+.table tbody tr:nth-child(even) td {
+    background-color: #f2f2f2;
+}
+
+.table thead tr th {
+    background-color:#1d2554;
+    color: white;
+}
+
+.input-group {
+    border: 2px solid #1d2554;
+    border-radius: 8px;
+}
+
+.input-group-text {
+    background-color: #1d2554 !important;
+    color: white !important;
+    border-color: #1d2554 !important;
+}
+
+h2, h3 {
+    font-weight: 700 !important;
+    color: #1e293b !important; 
+}
+
+.modal-title {
+    font-weight: 700;
+}

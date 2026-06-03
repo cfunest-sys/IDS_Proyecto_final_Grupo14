@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}
+Gestión de equipos
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5 mb-5">
+    <h1 class="page-title">
+        Registro de equipos
+    </h1>
+
+    <div class="container mt-5 mb-5 px-0">
+        <h2>
+            Acciones
+        </h2>
+        <div class="row mb-5 mt-4 mx-0">
+        <div class="col-md-4">
+            <button class="btn btn-crear-equipo" data-bs-toggle="modal" data-bs-target="#modal_crear_equipo">Crear equipo</button>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-modificar-equipo" data-bs-toggle="modal" data-bs-target="#modal_modificar_equipo">Modificar equipo</button>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-eliminar-equipo" data-bs-toggle="modal" data-bs-target="#modal_eliminar_equipo">Eliminar equipo</button> 
+        </div>
+    </div>
+
+    <div class="container px-0">
+        <h2>
+            Filtros
+        </h2>
+        <div class="row mb-4">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <label class="input-group-text" for="inputGroupSelect01">ID curso</label>
+                    <select class="form-select" id="inputGroupSelect01">
+                        <option selected>Elegir ID</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text" id="inputGroup-sizing-default">ID equipo</span>
+                    <input type="text" class="form-control">
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-filtrar">Filtrar</button>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-10">
+                <div class="input-group">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Nombre equipo</span>
+                    <input type="text" class="form-control">
+                </div>
+            </div>
+        </div>   
+    </div>
+
+    <div class="container mt-5 mb-5 px-0">
+        <div class="row mt-5 mx-0">
+            <div class="col-12">
+                <h3 class="titulo-tabla mb-3">
+                    Equipos registrados
+                </h3>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID equipo</th>
+                            <th scope="col">Nombre del equipo</th>
+                            <th scope="col">ID curso</th>
+                            <th scope="col">Integrantes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>Equipo Artemis 3</td>
+                            <td>3</td>
+                            <td>
+                                <button class="btn btn-alumnos" data-bs-toggle="modal" data-bs-target="#modal_alumnos">Alumnos</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Los basheros</td>
+                            <td>2</td>
+                            <td>
+                                <button class="btn btn-alumnos" data-bs-toggle="modal" data-bs-target="#modal_alumnos">Alumnos</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_alumnos" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered"> 
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Integrantes del equipo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+        
+            <div class="modal-body">
+                <h6 class="texto-indicacion-modal mb-3">Alumnos asignados:</h6>
+                <ul class="list-group mb-3">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="contenido-modal">Padrón: 115598</span>
+                        <a class="btn btn-eliminar-alumno">Eliminar</a>
+                    </li>
+                </ul>
+                <hr>
+                <h6 class="texto-indicacion-modal mb-2">Asignar nuevo alumno:</h6>
+                <form method="post" class="d-flex gap-2">
+                    <input type="hidden" name="id_equipo" value="1"> 
+                    <div class="input-group">
+                        <span class="input-group-text">Padrón</span>
+                        <input type="number" name="legajo_alumno" class="form-control" placeholder="Ej: 104432" required>
+                    </div>
+            
+                    <button type="submit" class="btn btn-agregar-alumno">Agregar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_crear_equipo" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nuevo equipo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form method="post">
+                <div class="modal-body">
+                    <h6 class="texto-indicacion-modal mb-3">Complete los siguientes campos:</h6>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Nombre equipo</span>
+                        <input type="text" name="nombre_equipo" class="form-control" placeholder="Ej: Artemis 3" required>
+                    </div>
+
+                    <div class="input-group mb-4">
+                        <span class="input-group-text">id_curso</span>
+                        <input type="number" name="id_curso" class="form-control" placeholder="Ej: 104432" required>
+                    </div> 
+                    
+                    <div class="d-flex justify-content-center mt-2">
+                        <button type="submit" class="btn btn-crear-equipo">Crear</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_modificar_equipo" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modificar equipo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form>
+                <div class="modal-body">
+                    <h6 class="texto-indicacion-modal mb-3">Complete los siguientes campos:</h6>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">id_equipo</span>
+                        <input type="number" name="id_equipo" class="form-control" placeholder="Ej: 104432" required>
+                    </div> 
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Nombre equipo</span>
+                        <input type="text" name="nombre_equipo" class="form-control" placeholder="Ej: Artemis 3" required>
+                    </div>
+
+                    <div class="input-group mb-4">
+                        <span class="input-group-text">id_curso</span>
+                        <input type="number" name="id_curso" class="form-control" placeholder="Ej: 104432" required>
+                    </div> 
+                    
+                    <div class="d-flex justify-content-center mt-2">
+                        <button type="submit" class="btn btn-modificar-equipo">Modificar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_eliminar_equipo" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Eliminar equipo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form>
+                <div class="modal-body">
+                    <h6 class="texto-indicacion-modal mb-2">Complete el siguiente campo:</h6>
+                    <p class="advertencia-eliminar mb-3">PRECAUCIÓN: una vez que se elimine un equipo no podrá recuperarlo</p>
+                    <div class="input-group mb-4">
+                        <span class="input-group-text">id_equipo</span>
+                        <input type="number" name="id_equipo" class="form-control" placeholder="Ej: 104432" required>
+                    </div> 
+                    
+                    <div class="d-flex justify-content-center mt-2">
+                        <button type="submit" class="btn btn-eliminar-equipo">Eliminar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

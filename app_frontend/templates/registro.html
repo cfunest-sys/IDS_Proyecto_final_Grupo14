@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-Registro de Alumno - Campus FIUBA
+Registro de Profesor - Campus FIUBA
 {% endblock %}
 
 {% block content %}
@@ -15,7 +15,7 @@ Registro de Alumno - Campus FIUBA
             <div class="card shadow-sm card-custom p-4">
 
                 <h1 class="page-title text-center">
-                    Registro de Alumno
+                    Registro de Profesor
                 </h1>
 
                 {% if error %}
@@ -39,6 +39,21 @@ Registro de Alumno - Campus FIUBA
                             class="form-control"
                             id="nombre"
                             name="nombre"
+                            required>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label for="departamento" class="form-label">
+                            Departamento
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="departamento"
+                            name="departamento"
                             required>
 
                     </div>
