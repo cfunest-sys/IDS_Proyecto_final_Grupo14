@@ -1,3 +1,5 @@
+from werkzeug.security import generate_password_hash
+
 from database.db import get_connection
 from flask import jsonify
 
@@ -16,13 +18,14 @@ from flask import jsonify
 
 def get_profesor_by_email(email):
     # JOIN entre usuarios y profesores
+    
     conn = None
     cursor = None
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute(
-            """SELECT p.id_profesor as id, p.nombre, u.email, u.contrasenia as password 
+            """SELECT p.id_profesor as id, p.nombre, u.email, u.rol, u.contrasenia as password 
            FROM profesores p
            INNER JOIN usuarios u ON p.id_usuario = u.id_usuario
            WHERE u.email = %s""",
@@ -533,7 +536,7 @@ def delete_equipo(id_equipo):
             conexion.close()
 
 
-def crear_alumno(alumno):
+def crear_profesor(profesor):
 
     conn = None
     cur = None
@@ -552,31 +555,33 @@ def crear_alumno(alumno):
             VALUES (%s, %s, %s)
         """
 
+        password_hash = generate_password_hash(profesor["password"])
+
         cur.execute(
             query_usuario,
             (
-                alumno["email"],
-                alumno["password"],
-                "alumno"
+                profesor["email"],
+                password_hash,
+                "profesor"
             )
         )
 
         id_usuario = cur.lastrowid
 
-        query_alumno = """
-            INSERT INTO alumnos (
+        query_profesor = """
+            INSERT INTO profesores (
                 nombre,
-                estado,
+                departamento,
                 id_usuario
             )
             VALUES (%s, %s, %s)
         """
 
         cur.execute(
-            query_alumno,
+            query_profesor,
             (
-                alumno["nombre"],
-                "activo",
+                profesor["nombre"],
+                profesor["departamento"],
                 id_usuario
             )
         )
@@ -681,3 +686,20 @@ def delete_miembro(id_miembro):
             cursor.close()
         if conexion:
             conexion.close()
+
+def registrar_login(id_usuario, email, resultado, ip):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        INSERT INTO logs_login
+        (id_usuario, email, resultado, ip)
+        VALUES (%s, %s, %s, %s)
+        """,
+        (id_usuario, email, resultado, ip)
+    )
+
+    conn.commit()
+    cur.close()
+    conn.close()
