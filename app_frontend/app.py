@@ -14,6 +14,14 @@ app.register_blueprint(evaluaciones_blueprint, url_prefix='/evaluaciones')
 app.register_blueprint(notas_blueprint, url_prefix='/notas')
 app.register_blueprint(dashboard_bp)
 
+@app.route("/perfil/profesor") #Temporal para testeo
+def perfil_profesor():
+    return render_template("perfil_profesor.html")
+
+@app.route("/perfil/alumno") #Temporal para testeo
+def perfil_alumno():
+    return render_template("perfil_alumno.html")
+
 # Solamente para testear
 @app.route("/alumnos")
 def mostrar_alumnos():

@@ -6,15 +6,13 @@ from routes.profesores import profesores_bp
 from routes.auth import auth_bp
 from routes.reportes import reportes_bp
 from routes.evaluaciones import evaluaciones_bp
-# from routes.notas import notas_bp
 from routes.equipos import equipos_bp
 from routes.perfil import perfil_bp
-<<<<<<< HEAD
 from routes.notas import notas_bp
-=======
 from routes.login import login_bp
 from routes.dashboard import dashboard_bp
->>>>>>> 2e76cbeb94ab83811230cf40cd3621db4abf7ad4
+
+from routes.registro_asistencia import asistencia_bp
 
 PORT = 5001
 app = Flask(__name__)
@@ -26,18 +24,14 @@ jwt = JWTManager(app)
 app.register_blueprint(alumnos_bp, url_prefix="/api/alumnos")
 app.register_blueprint(profesores_bp, url_prefix="/api/profesores")
 app.register_blueprint(evaluaciones_bp, url_prefix="/api/evaluaciones")
-# app.register_blueprint(notas_bp, url_prefix="/api/notas")
 app.register_blueprint(auth_bp)
 app.register_blueprint(reportes_bp)
 app.register_blueprint(equipos_bp, url_prefix='/api/equipos')
 app.register_blueprint(perfil_bp, url_prefix='/api/perfil')
-<<<<<<< HEAD
 app.register_blueprint(notas_bp, url_prefix='/api/notas')
-=======
 app.register_blueprint(login_bp, url_prefix='/api/login')
 app.register_blueprint(dashboard_bp)
->>>>>>> 2e76cbeb94ab83811230cf40cd3621db4abf7ad4
-
+app.register_blueprint(asistencia_bp, url_prefix="/api/asistencia")
 
 @app.route("/")
 def hello_world():

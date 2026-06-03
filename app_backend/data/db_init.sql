@@ -14,6 +14,8 @@ DROP TABLE IF EXISTS profesores;
 DROP TABLE IF EXISTS cursos;
 DROP TABLE IF EXISTS evaluaciones;
 DROP TABLE IF EXISTS usuarios;
+DROP TABLE IF EXISTS qr_asistencia;
+DROP TABLE IF EXISTS asistencia;
 CREATE TABLE usuarios (
     id_usuario INTEGER PRIMARY KEY AUTO_INCREMENT,
     email TEXT NOT NULL,
@@ -81,8 +83,8 @@ CREATE TABLE notas (
     CONSTRAINT chk_calificacion_range CHECK (calificacion >= 0 AND calificacion <= 10),
 
     FOREIGN KEY (legajo_alumno) REFERENCES alumnos(legajo),
-
     FOREIGN KEY (id_evaluacion) REFERENCES evaluaciones(id_evaluacion)
+    
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE equipos (
@@ -104,6 +106,22 @@ CREATE TABLE miembros_equipo (
     FOREIGN KEY (legajo_alumno) REFERENCES alumnos(legajo),
     UNIQUE(id_equipo, legajo_alumno)
 ) ENGINE=InnoDB;
+CREATE TABLE qr_asistencia (
+    id_qr INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(255) NOT NULL,
+    fecha_generacion DATETIME NOT NULL,
+    expiracion DATETIME NOT NULL,
+    activo BOOLEAN DEFAULT TRUE
+);
+CREATE TABLE asistencia (
+    id_asistencia INT AUTO_INCREMENT PRIMARY KEY,
+    alumno_legajo INT NOT NULL,
+    qr_id INT NOT NULL,
+    fecha DATE NOT NULL,
+    registrado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (alumno_legajo) REFERENCES alumnos(legajo),
+    FOREIGN KEY (qr_id) REFERENCES qr_asistencia(id_qr)
+);
 
 INSERT INTO usuarios (email, contrasenia, rol)
 VALUES

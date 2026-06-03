@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}
+Perfil Docente
+{% endblock %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil del Profesor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="body-perfil">
+
+    <div class="contenedor-principal">
+        
+        <header class="header-plataforma">
+            <div>
+                <h1 class="logo-texto">Mi Perfil</h1>
+            </div>
+            <span class="badge-rol badge-profesor">Rol: Profesor</span>
+        </header>
+
+        <div class="grid-layout">
+            
+            <div class="columna-izquierda">
+                
+                <div class="tarjeta-foto">
+                    <div class="avatar-iniciales avatar-profesor">TV</div>
+                    <h2 class="nombre-alumno">Tomas Villegas</h2>
+                    <span class="badge-estado badge-activo-prof">Docente Activo</span>
+                </div>
+
+                <div class="tarjeta-datos">
+                    <h3 class="titulo-seccion-lateral">Información Institucional</h3>
+                    
+                    <div class="item-dato">
+                        <span class="etiqueta-dato">Correo Institucional</span>
+                        <p class="valor-dato">tvillegas@fi.uba.ar</p>
+                    </div>
+                    <div>
+                        <span class="etiqueta-dato">Correo Personal</span>
+                        <p class="valor-dato">tomasv1234@gmail.com</p>
+                    </div>
+
+                    <div class="sub-grid-datos">
+                        <div>
+                            <span class="etiqueta-dato">DNI</span>
+                            <p class="valor-badge-dato">28.456.789</p>
+                        </div>
+                    </div>
+
+                    <div class="item-dato">
+                        <span class="etiqueta-dato">Departamento</span>
+                        <p class="valor-dato">Computación</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="columna-derecha">
+                
+                <div class="tarjeta-academica">
+                    <h3 class="titulo-seccion-principal">Cursos: </h3>
+                    
+                    <div class="contenedor-equipo">
+                        <div>
+                            <span class="subetiqueta-equipo text-profesor">Cátedra: </span>
+                            <h4 class="nombre-equipo">Lanzillota - Introduccion al Desarrollo de Software</h4>
+                        </div>
+                        <div class="footer-equipo">
+                            <p>Curso: <span class="destaque-texto">02- Tarde</span></p>
+                            <span class="badge-periodo">Año 2026 1 Cuatrimestre</span>
+                        </div>
+                        <div> 
+                            <span class="subetiqueta-equipo text-profesor">Cátedra: </span>
+                            <h4 class="nombre-equipo">Lanzillota - Introduccion al Desarrollo de Software</h4>
+                        </div>
+                        <div class="footer-equipo">
+                            <p>Curso: <span class="destaque-texto">03- Noche</span></p>
+                            <span class="badge-periodo">Año 2026 1 Cuatrimestre</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tarjeta-academica">
+                    <h3 class="titulo-seccion-principal">Evaluaciones a Corregir: </h3>
+                    
+                    <div class="lista-evaluaciones">
+                        
+                        <div class="tarjeta-evaluacion borde-parcial">
+                            <div class="info-evaluacion">
+                                <h4 class="nombre-evaluacion">Entrega de Notas: Primer Parcial Teórico</h4>
+                                <span class="tipo-evaluacion">Pendiente</span>
+                            </div>
+                            <div class="fecha-evaluacion">
+                                <span class="texto-fecha-label"></span>
+                                <span class="badge-fecha">2026-06-05</span>
+                            </div>
+                        </div>
+
+                        <div class="tarjeta-evaluacion borde-tp">
+                            <div class="info-evaluacion">
+                                <h4 class="nombre-evaluacion">Revisión: Trabajo Práctico Integrador</h4>
+                                <span class="tipo-evaluacion">En Curso</span>
+                            </div>
+                            <div class="fecha-evaluacion">
+                                <span class="texto-fecha-label"></span>
+                                <span class="badge-fecha">2026-06-22</span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+{% endblock %}

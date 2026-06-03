@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}
+Perfil Alumno
+{% endblock %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil del Alumno</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="body-perfil">
+
+    <div class="contenedor-principal">
+        
+        <header class="header-plataforma">
+            <div>
+                <h1 class="logo-texto">Mi Perfil</h1>
+            </div>
+            <span class="badge-rol">Rol: Alumno</span>
+        </header>
+
+        <div class="grid-layout">
+            
+            <div class="columna-izquierda">
+                
+                <div class="tarjeta-foto">
+                    <div class="avatar-iniciales">JP</div>
+                    <h2 class="nombre-alumno">Juan Pérez</h2>
+                    <span class="badge-estado">Estado: Activo</span>
+                </div>
+
+                <div class="tarjeta-datos">
+                    <h3 class="titulo-seccion-lateral">Datos Personales: </h3>
+                    
+                    <div class="item-dato">
+                        <span class="etiqueta-dato">Correo Institucional</span>
+                        <p class="valor-dato">jperez@fi.uba.ar</p>
+                    </div>
+                    <div>
+                        <span class="etiqueta-dato">Correo Personal</span>
+                        <p class="valor-dato">juan.perez@gmail.com</p>
+                    </div>
+                    <div>
+                        <span class="etiqueta-dato">Carrera</span>
+                        <p class="valor-dato">Ingenieria Informática</p>
+                    </div>
+
+                    <div class="sub-grid-datos">
+                        <div>
+                            <span class="etiqueta-dato">N° Legajo</span>
+                            <p class="valor-badge-dato">115598</p>
+                        </div>
+                        <div>
+                            <span class="etiqueta-dato">DNI</span>
+                            <p class="valor-badge-dato">45.678.912</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="columna-derecha">
+                
+                <div class="tarjeta-academica">
+                    <h3 class="titulo-seccion-principal">Equipos: </h3>
+                    
+                    <div class="contenedor-equipo">
+                        <div>
+                            <span class="subetiqueta-equipo">Grupo asignado</span>
+                            <h4 class="nombre-equipo">Equipo Artemis 3</h4>
+                        </div>
+                        <div class="footer-equipo">
+                            <p>Curso: <span class="destaque-texto">Introducción al Desarrollo de Software</span></p>
+                            <span class="badge-periodo">Año 2026 • 1 Cuatrimestre</span>
+                        </div>
+                        <div>
+                            <span class="subetiqueta-equipo">Grupo Asignado</span>
+                            <h4 class="nombre-equipo">Equipo Nº6</h4>
+                        </div>
+                        <div class="footer-equipo">
+                            <p>Curso: <span class="destaque-texto">Fundamentos de la Programacion</span></p>
+                            <span class="badge-periodo">Año 2026 • 1 Cuatrimestre</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tarjeta-academica">
+                    <h3 class="titulo-seccion-principal">Evaluaciones: </h3>
+                    
+                    <div class="lista-evaluaciones">
+                        
+                        <div class="tarjeta-evaluacion borde-parcial">
+                            <div class="info-evaluacion">
+                                <h4 class="nombre-evaluacion">Primer Parcial Teórico-Práctico</h4>
+                                <span class="tipo-evaluacion">parcial</span>
+                            </div>
+                            <div class="fecha-evaluacion">
+                                <span class="texto-fecha-label">Fecha límite:</span>
+                                <span class="badge-fecha">2026-05-20</span>
+                            </div>
+                        </div>
+
+                        <div class="tarjeta-evaluacion borde-tp">
+                            <div class="info-evaluacion">
+                                <h4 class="nombre-evaluacion">Trabajo Práctico Integrador Final</h4>
+                                <span class="tipo-evaluacion">TP</span>
+                            </div>
+                            <div class="fecha-evaluacion">
+                                <span class="texto-fecha-label">Fecha límite:</span>
+                                <span class="badge-fecha">2026-06-17</span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+{% endblock %}
