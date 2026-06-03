@@ -8,6 +8,7 @@ from routes.reportes import reportes_bp
 from routes.evaluaciones import evaluaciones_bp
 from routes.equipos import equipos_bp
 from routes.perfil import perfil_bp
+from routes.materiales import materiales_bp
 from routes.notas import notas_bp
 from routes.login import login_bp
 from routes.dashboard import dashboard_bp
@@ -28,6 +29,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(reportes_bp)
 app.register_blueprint(equipos_bp, url_prefix='/api/equipos')
 app.register_blueprint(perfil_bp, url_prefix='/api/perfil')
+app.register_blueprint(materiales_bp, url_prefix='/api/materiales')
 app.register_blueprint(notas_bp, url_prefix='/api/notas')
 app.register_blueprint(login_bp, url_prefix='/api/login')
 app.register_blueprint(dashboard_bp)

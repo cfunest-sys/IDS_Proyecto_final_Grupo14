@@ -1,9 +1,9 @@
 CREATE DATABASE IF NOT EXISTS data_base;
 USE data_base;
-SET FOREIGN_KEY_CHECKS = 0; -- Deshabilitar temporalmente las comprobaciones de claves foráneas para evitar errores de tablas
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS miembros_equipo;
-DROP TABLE IF EXISTS profesor_curso;
 DROP TABLE IF EXISTS logs_login;
+DROP TABLE IF EXISTS materiales;
 DROP TABLE IF EXISTS equipos;
 DROP TABLE IF EXISTS evaluaciones;
 DROP TABLE IF EXISTS notas;
@@ -16,6 +16,8 @@ DROP TABLE IF EXISTS evaluaciones;
 DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS qr_asistencia;
 DROP TABLE IF EXISTS asistencia;
+
+
 CREATE TABLE usuarios (
     id_usuario INTEGER PRIMARY KEY AUTO_INCREMENT,
     email TEXT NOT NULL,
@@ -35,6 +37,12 @@ CREATE TABLE password_reset_tokens (
 CREATE TABLE alumnos (
     legajo INTEGER PRIMARY KEY AUTO_INCREMENT,
     nombre TEXT NOT NULL,
+    apellido TEXT NOT NULL,
+    dni TEXT NOT NULL UNIQUE,
+    email TEXT,
+    curso TEXT,
+    anio INTEGER,
+    cuatrimestre INTEGER, 
     estado TEXT NOT NULL,
     id_usuario INTEGER,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
@@ -106,6 +114,51 @@ CREATE TABLE miembros_equipo (
     FOREIGN KEY (legajo_alumno) REFERENCES alumnos(legajo),
     UNIQUE(id_equipo, legajo_alumno)
 ) ENGINE=InnoDB;
+CREATE TABLE materiales(
+  id_material INT AUTO_INCREMENT PRIMARY KEY,
+    id_curso INT NOT NULL,
+    id_profesor INT NOT NULL,
+    titulo VARCHAR(200) NOT NULL,
+    descripcion TEXT,
+    tipo_material ENUM(
+        'apunte',
+        'guia',
+        'video',
+        'imagen',
+        'documento',
+        'archivo',
+        'bibliografia',
+        'otro'
+    ) NOT NULL,
+    tema VARCHAR(100),
+    orden_material INT DEFAULT 0,
+    archivo_ruta VARCHAR(500) NOT NULL,
+    es_externo BOOLEAN DEFAULT FALSE,
+    tipo_archivo VARCHAR(50),
+    tamaño_bytes BIGINT,
+    fecha_material DATE,
+    es_libre BOOLEAN DEFAULT FALSE,
+    activo BOOLEAN DEFAULT TRUE,
+    estado ENUM(
+        'borrador',
+        'publicado',
+        'archivado'
+    ) DEFAULT 'publicado',
+    fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_curso)
+        REFERENCES cursos(id_curso)
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_profesor)
+        REFERENCES profesores(id_profesor)
+        ON DELETE RESTRICT,
+    INDEX idx_curso (id_curso),
+    INDEX idx_profesor (id_profesor),
+    INDEX idx_tema (tema),
+    INDEX idx_tipo (tipo_material),
+    INDEX idx_curso_tipo (id_curso, tipo_material)
+);
 CREATE TABLE qr_asistencia (
     id_qr INT AUTO_INCREMENT PRIMARY KEY,
     codigo VARCHAR(255) NOT NULL,
@@ -135,10 +188,28 @@ VALUES
  ('Dr. Smith', 'Matemáticas', 2),
  ('juan', 'intro DS', 4 );
 
-INSERT INTO alumnos (legajo, nombre, estado, id_usuario)
-VALUES
- (115598, 'Juan Pérez', 'activo', 3);
-
+INSERT INTO alumnos (
+    legajo,
+    nombre,
+    apellido,
+    dni,
+    curso,
+    anio,
+    cuatrimestre,
+    estado,
+    id_usuario
+)
+VALUES (
+    115598,
+    'Juan',
+    'Pérez',
+    '40123456',
+    '75.40',
+    2,
+    1,
+    'activo',
+    3
+);
 INSERT INTO cursos (nombre, anio, semestre)
 VALUES
  ('Introducción al Desarrollo', 2024, 1),
@@ -170,4 +241,4 @@ VALUES
  (2, 1),
  (2, 2),
  (1, 1);
-SET FOREIGN_KEY_CHECKS = 1;  -- Restaurar la verificación de claves foráneas
+SET FOREIGN_KEY_CHECKS = 1;
