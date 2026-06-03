@@ -1,8 +1,11 @@
 CREATE DATABASE IF NOT EXISTS data_base;
 USE data_base;
+SET FOREIGN_KEY_CHECKS = 0; -- Deshabilitar temporalmente las comprobaciones de claves foráneas para evitar errores de tablas
 DROP TABLE IF EXISTS miembros_equipo;
 DROP TABLE IF EXISTS equipos;
 DROP TABLE IF EXISTS evaluaciones;
+DROP TABLE IF EXISTS notas;
+DROP TABLE IF EXISTS profesor_curso;
 DROP TABLE IF EXISTS password_reset_tokens;
 DROP TABLE IF EXISTS alumnos;
 DROP TABLE IF EXISTS profesores;
@@ -38,18 +41,18 @@ CREATE TABLE profesores (
     id_usuario INTEGER,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );
-CREATE TABLE cursos (
-    id_curso INTEGER PRIMARY KEY AUTO_INCREMENT,
-    nombre TEXT NOT NULL,
-    anio INTEGER NOT NULL,
-    semestre INTEGER NOT NULL
-);
 CREATE TABLE profesor_curso (
     id_profesor_curso INTEGER PRIMARY KEY AUTO_INCREMENT,
     id_profesor INTEGER NOT NULL,
     id_curso INTEGER NOT NULL,
     FOREIGN KEY (id_profesor) REFERENCES profesores(id_profesor),
     FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
+);
+CREATE TABLE cursos (
+    id_curso INTEGER PRIMARY KEY AUTO_INCREMENT,
+    nombre TEXT NOT NULL,
+    anio INTEGER NOT NULL,
+    semestre INTEGER NOT NULL
 );
 CREATE TABLE evaluaciones (
     id_evaluacion INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -58,6 +61,14 @@ CREATE TABLE evaluaciones (
     fecha DATE NOT NULL,
     id_curso INT NOT NULL,
     FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
+);
+CREATE TABLE notas (
+    id_nota INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    legajo_alumno INT NOT NULL,
+    id_evaluacion INT NOT NULL,
+    nota DECIMAL(5,2) NOT NULL,
+    FOREIGN KEY (legajo_alumno) REFERENCES alumnos(legajo),
+    FOREIGN KEY (id_evaluacion) REFERENCES evaluaciones(id_evaluacion)
 );
 CREATE TABLE equipos (
     id_equipo INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -77,15 +88,6 @@ CREATE TABLE miembros_equipo (
     FOREIGN KEY (legajo_alumno) REFERENCES alumnos(legajo),
     UNIQUE(id_equipo, legajo_alumno)
 ) ENGINE=InnoDB;
-CREATE TABLE logs_login (
-    id_log INT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255),
-    fecha_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
-    resultado ENUM('exitoso', 'fallido'),
-    ip VARCHAR(45),
-    id_usuario INTEGER,
-    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
-);
 INSERT INTO usuarios (email, contrasenia, rol)
 VALUES
  ('admin@example.com', 'scrypt:32768:8:1$Hid9QZTkQuxvOQsc$75db4c395ec522e9159b5e58cf012086b1f51e05388e72c4a898b9b76ec8ace4fb08590a30e9a3ce04acb71b6e633462d1773c1e8aed8ed6112bd5a0a7f3e0a8', 'admin'),
@@ -109,6 +111,11 @@ VALUES
     ('Primer Parcial Teórico-Práctico', 'parcial', '2026-05-20', 1),
     ('Trabajo Práctico Integrador Final', 'TP', '2026-06-17', 1),
     ('Control de Lectura - Parcialito 1', 'parcialito', '2026-05-13', 2);
+INSERT INTO notas (legajo_alumno, id_evaluacion, nota)
+VALUES
+    (115598, 1, 8.5),
+    (115598, 2, 9.0),
+    (115598, 3, 7.5);
 INSERT INTO equipos (nombre_equipo, id_curso)
 VALUES 
     ('Equipo Artemis 3', 1),
@@ -117,9 +124,9 @@ VALUES
 INSERT INTO miembros_equipo (id_equipo, legajo_alumno)
 VALUES
     (1, 115598);
-
 INSERT INTO profesor_curso (id_profesor, id_curso)
 VALUES
  (2, 1),
  (2, 2),
  (1, 1);
+SET FOREIGN_KEY_CHECKS = 1;  -- Restaurar la verificación de claves foráneas
