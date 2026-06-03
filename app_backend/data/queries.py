@@ -16,32 +16,76 @@ from flask import jsonify
 #     cursor.close()
 #     connection.close()
 
-def get_profesor_by_email(email):
-    # JOIN entre usuarios y profesores
-    
+def get_usuario_by_email(email):
+
     conn = None
     cursor = None
+
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute(
-            """SELECT p.id_profesor as id, p.nombre, u.email, u.rol, u.contrasenia as password 
-           FROM profesores p
-           INNER JOIN usuarios u ON p.id_usuario = u.id_usuario
-           WHERE u.email = %s""",
-            (email,),
-        )
-        profesor = cursor.fetchone()
-        return profesor
+
+        query = """
+            SELECT
+                id_usuario,
+                email,
+                contrasenia AS password,
+                rol
+            FROM usuarios
+            WHERE email = %s
+        """
+
+        cursor.execute(query, (email,))
+        return cursor.fetchone()
 
     except Exception as e:
-        print(f"Error al obtener profesor: {e}")
+        print(f"Error al obtener usuario: {e}")
         return None
+
     finally:
         if cursor:
             cursor.close()
         if conn:
             conn.close()
+
+def get_user_profile(usuario):
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+
+        if usuario["rol"] == "profesor":
+
+            query = """
+                SELECT
+                    p.id_profesor,
+                    p.nombre,
+                    p.departamento
+                FROM profesores p
+                WHERE p.id_usuario = %s
+            """
+
+        elif usuario["rol"] == "alumno":
+
+            query = """
+                SELECT
+                    a.id_alumno,
+                    a.nombre,
+                    a.legajo
+                FROM alumnos a
+                WHERE a.id_usuario = %s
+            """
+
+        else:
+            return None
+
+        cursor.execute(query, (usuario["id_usuario"],))
+        return cursor.fetchone()
+
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def get_alumno(nombre, contrasenia):
@@ -687,37 +731,46 @@ def delete_miembro(id_miembro):
         if conexion:
             conexion.close()
 
-def get_notas_filtradas(rol, usuario_id, alumno_id=None, evaluacion_id=None, id_curso=None, limit=10, offset=0):
-    # Obtiene el listado de notas aplicando seguridad por rol, filtros y paginación
+def get_notas_filtradas(rol, usuario_id, legajo_alumno=None, id_evaluacion=None, id_curso=None, limit=10, offset=0):
+    """Obtiene el listado de notas aplicando paginación y seguridad estricta por rol."""
     conn = None
     cur = None
     try:
         conn = get_connection()
         cur = conn.cursor(dictionary=True)
-    # Obtenemos alumno, evaluacion, nota y fecha
+
         query = """
             SELECT a.nombre AS alumno, e.nombre AS evaluacion, n.calificacion, n.fecha
             FROM notas n
-            INNER JOIN alumnos a ON n.alumno_id = a.legajo
-            INNER JOIN evaluaciones e ON n.evaluacion_id = e.id_evaluacion
+            INNER JOIN alumnos a ON n.legajo_alumno = a.legajo
+            INNER JOIN evaluaciones e ON n.id_evaluacion = e.id_evaluacion
             INNER JOIN cursos c ON e.id_curso = c.id_curso
         """
         condiciones = []
         parametros = []
 
-        # Filtro si es alumno
+        # alumno: Solo ve sus propias notas
         if rol == "alumno":
             condiciones.append("a.id_usuario = %s")
             parametros.append(usuario_id)
 
-        # Filtros de búsqueda
-        if alumno_id:
-            condiciones.append("n.alumno_id = %s")
-            parametros.append(alumno_id)
+        # profesor: Solo ve notas de los cursos que dicta
+        elif rol == "profesor":
+            query += """
+                INNER JOIN profesor_curso pc ON c.id_curso = pc.id_curso
+                INNER JOIN profesores p ON pc.id_profesor = p.id_profesor
+            """
+            condiciones.append("p.id_usuario = %s")
+            parametros.append(usuario_id)
 
-        if evaluacion_id:
-            condiciones.append("n.evaluacion_id = %s")
-            parametros.append(evaluacion_id)
+        # Filtros opcionales de búsqueda
+        if legajo_alumno:
+            condiciones.append("n.legajo_alumno = %s")
+            parametros.append(legajo_alumno)
+
+        if id_evaluacion:
+            condiciones.append("n.id_evaluacion = %s")
+            parametros.append(id_evaluacion)
 
         if id_curso:
             condiciones.append("e.id_curso = %s")
@@ -726,7 +779,6 @@ def get_notas_filtradas(rol, usuario_id, alumno_id=None, evaluacion_id=None, id_
         if condiciones:
             query += " WHERE " + " AND ".join(condiciones)
 
-        # Paginación
         query += " LIMIT %s OFFSET %s"
         parametros.extend([limit, offset])
 
@@ -741,8 +793,7 @@ def get_notas_filtradas(rol, usuario_id, alumno_id=None, evaluacion_id=None, id_
         if conn: conn.close()
 
 
-def get_promedio_notas(rol, usuario_id, alumno_id=None, evaluacion_id=None, id_curso=None):
-    # Calcula el promedio de notas filtradas
+def get_promedio_notas(rol, usuario_id, legajo_alumno=None, id_evaluacion=None, id_curso=None):
     conn = None
     cur = None
     try:
@@ -752,8 +803,8 @@ def get_promedio_notas(rol, usuario_id, alumno_id=None, evaluacion_id=None, id_c
         query = """
             SELECT AVG(n.calificacion) AS promedio
             FROM notas n
-            INNER JOIN alumnos a ON n.alumno_id = a.legajo
-            INNER JOIN evaluaciones e ON n.evaluacion_id = e.id_evaluacion
+            INNER JOIN alumnos a ON n.legajo_alumno = a.legajo
+            INNER JOIN evaluaciones e ON n.id_evaluacion = e.id_evaluacion
             INNER JOIN cursos c ON e.id_curso = c.id_curso
         """
         condiciones = []
@@ -762,14 +813,22 @@ def get_promedio_notas(rol, usuario_id, alumno_id=None, evaluacion_id=None, id_c
         if rol == "alumno":
             condiciones.append("a.id_usuario = %s")
             parametros.append(usuario_id)
+            
+        elif rol == "profesor":
+            query += """
+                INNER JOIN profesor_curso pc ON c.id_curso = pc.id_curso
+                INNER JOIN profesores p ON pc.id_profesor = p.id_profesor
+            """
+            condiciones.append("p.id_usuario = %s")
+            parametros.append(usuario_id)
 
-        if alumno_id:
-            condiciones.append("n.alumno_id = %s")
-            parametros.append(alumno_id)
+        if legajo_alumno:
+            condiciones.append("n.legajo_alumno = %s")
+            parametros.append(legajo_alumno)
 
-        if evaluacion_id:
-            condiciones.append("n.evaluacion_id = %s")
-            parametros.append(evaluacion_id)
+        if id_evaluacion:
+            condiciones.append("n.id_evaluacion = %s")
+            parametros.append(id_evaluacion)
 
         if id_curso:
             condiciones.append("e.id_curso = %s")
@@ -792,40 +851,31 @@ def get_promedio_notas(rol, usuario_id, alumno_id=None, evaluacion_id=None, id_c
         if cur: cur.close()
         if conn: conn.close()
 
-def verificar_alumno_y_evaluacion(alumno_id, evaluacion_id):
-    # Verifica que existan alumno y evaluación en la base de datos para evitar errores al cargar una nota
+
+def verificar_alumno_evaluacion(legajo_alumno, id_evaluacion):
+    # Verifica la existencia del alumno y la evaluación antes de insertar o actualizar una nota
     conn = None
     cur = None
     try:
         conn = get_connection()
         cur = conn.cursor(dictionary=True)
-
-        # alumno
-        cur.execute(
-            "SELECT 1 FROM alumnos WHERE legajo = %s",
-            (alumno_id,)
-        )
+        
+        cur.execute("SELECT legajo FROM alumnos WHERE legajo = %s", (legajo_alumno,))
         alumno = cur.fetchone()
-
-        # evaluación
-        cur.execute(
-            "SELECT 1 FROM evaluaciones WHERE id_evaluacion = %s",
-            (evaluacion_id,)
-        )
+        
+        cur.execute("SELECT id_evaluacion FROM evaluaciones WHERE id_evaluacion = %s", (id_evaluacion,))
         evaluacion = cur.fetchone()
-
-        return alumno is not None and evaluacion is not None
-
+        
+        return (alumno is not None) and (evaluacion is not None)
     except Exception as e:
-        print(f"Error verificación existencia: {e}")
+        print(f"Error en verificar_alumno_evaluacion: {e}")
         return False
-
     finally:
         if cur: cur.close()
         if conn: conn.close()
 
-def guardar_o_actualizar_nota(alumno_id, evaluacion_id, calificacion):
-    # Inserta o actualiza nota si ya existe para ese alumno y evaluación (evita duplicados y mantiene historial de fechas)
+
+def guardar_actualizar_nota(legajo_alumno, id_evaluacion, calificacion):
     conn = None
     cur = None
     try:
@@ -833,31 +883,27 @@ def guardar_o_actualizar_nota(alumno_id, evaluacion_id, calificacion):
         cur = conn.cursor(dictionary=True)
 
         query = """
-            INSERT INTO notas (alumno_id, evaluacion_id, calificacion, fecha)
+            INSERT INTO notas (legajo_alumno, id_evaluacion, calificacion, fecha)
             VALUES (%s, %s, %s, CURDATE())
             ON DUPLICATE KEY UPDATE
                 calificacion = VALUES(calificacion),
                 fecha = CURDATE()
         """
-
-        cur.execute(query, (alumno_id, evaluacion_id, calificacion))
+        cur.execute(query, (legajo_alumno, id_evaluacion, calificacion))
         conn.commit()
 
-        # Devuelvo la nota actualizada para mostrar la fecha de modificación
         cur.execute("""
-            SELECT alumno_id, evaluacion_id, calificacion, fecha
+            SELECT legajo_alumno, id_evaluacion, calificacion, fecha
             FROM notas
-            WHERE alumno_id = %s AND evaluacion_id = %s
-        """, (alumno_id, evaluacion_id))
+            WHERE legajo_alumno = %s AND id_evaluacion = %s
+        """, (legajo_alumno, id_evaluacion))
 
         return cur.fetchone()
 
     except Exception as e:
-        if conn:
-            conn.rollback()
+        if conn: conn.rollback()
         print(f"Error guardar/actualizar nota: {e}")
         raise e
-
     finally:
         if cur: cur.close()
         if conn: conn.close()

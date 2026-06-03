@@ -37,22 +37,58 @@ def calendario_evaluaciones():
     # {"nombre":"Primer Parcial Teórico-Práctico", "tipo":"parcial", "fecha": "2027-12-20", "curso":2},
     # {"nombre":"Trabajo Práctico Integrador Final", "tipo":"TP", "fecha": "2026-05-01", "curso":2},
     # {"nombre":"Control de Lectura - Parcialito 1", "tipo":"parcialito", "fecha": "2026-05-13", "curso":1}]
-    response = requests.get('http://127.0.0.1:5001/api/evaluaciones/todas')
+
+    response = requests.get("http://127.0.0.1:5001/api/evaluaciones/todas")
     json = response.json()
-    eventos=[]
-    if (response.status_code == 204):
-    	eventos = {"error":"no hay eva para ese curso"}
+
+    eventos = []
+
+    if response.status_code == 204:
+        eventos = {"error": "no hay eva para ese curso"}
     else:
-    	for evento in json["body"]:
-    		d=datetime.strptime(evento[3][5:-4], "%d %b %Y %H:%M:%S")
-    		eventos.append({"nombre":evento[1], "tipo":evento[2], 
-    			"fecha": d.strftime("%Y-%m-%d"), "curso":evento[4]})
-    mes_nombre = ("enero","febrero","marzo","abril","mayo","junio","julio","agosto",
-                    "septiembre","octubre","noviembre","diciembre")
-    año_actual = 2026 
+        for evento in json["body"]:
+            d = datetime.strptime(
+                evento[3][5:-4],
+                "%d %b %Y %H:%M:%S"
+            )
+
+            eventos.append({
+                "nombre": evento[1],
+                "tipo": evento[2],
+                "fecha": d.strftime("%Y-%m-%d"),
+                "curso": evento[4]
+            })
+
+    mes_nombre = (
+        "enero", "febrero", "marzo", "abril", "mayo", "junio",
+        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+    )
+
+    año_actual = 2026
     mes_actual = 5
-    dias=(31, 28 + año_actual % 4, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+
+    dias = (
+        31,
+        28 + año_actual % 4,
+        31,
+        30,
+        31,
+        30,
+        31,
+        31,
+        30,
+        31,
+        30,
+        31
+    )
+
     # return render_template("prueba.html", eventos=eventos)
-    return render_template("calendario.html", mes_actual=mes_actual, 
-    	año_actual=año_actual, dias=dias, mes_nombre=mes_nombre,
-    	eventos=eventos)
+
+    return render_template(
+        "calendario.html",
+        mes_actual=mes_actual,
+        año_actual=año_actual,
+        dias=dias,
+        mes_nombre=mes_nombre,
+        eventos=eventos
+    )

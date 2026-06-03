@@ -2,6 +2,7 @@ from flask import Flask, render_template
 from routes.routes import inicio
 from routes.evaluaciones import evaluaciones_blueprint
 from routes.notas import notas_blueprint
+from routes.dashboard_profesor import dashboard_bp
 
 PORT = 8080
 
@@ -11,6 +12,7 @@ app.secret_key = "six_seven"
 app.register_blueprint(inicio)
 app.register_blueprint(evaluaciones_blueprint, url_prefix='/evaluaciones')
 app.register_blueprint(notas_blueprint, url_prefix='/notas')
+app.register_blueprint(dashboard_bp)
 
 # Solamente para testear
 @app.route("/alumnos")

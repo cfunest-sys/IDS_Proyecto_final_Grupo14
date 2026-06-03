@@ -3,7 +3,7 @@ from flask import request, jsonify
 from functools import wraps
 from datetime import datetime, timezone
 from werkzeug.security import check_password_hash, generate_password_hash
-from data.queries import get_profesor_by_email
+from data.queries import get_usuario_by_email
 from config import JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRES
 
 
@@ -31,23 +31,28 @@ def generate_token(usuario_id, rol):
 
 # Valida las credenciales del profesor y genera un token JWT si son correctas
 
-def validate_profesor_credentials(email, password):
-    profesor = get_profesor_by_email(email)
-    if not profesor:
+def validate_user_credentials(email, password):
+
+    usuario = get_usuario_by_email(email)
+
+    if not usuario:
         return None
 
-    if check_password_hash(profesor["password"], password):
+    if check_password_hash(usuario["password"], password):
 
         token = generate_token(
-            usuario_id=profesor["id"],
-            rol=profesor["rol"]
+            usuario_id=usuario["id_usuario"],
+            rol=usuario["rol"]
         )
+
         return {
-            "profesor": profesor,
+            "usuario": usuario,
             "token": token
         }
 
     return None
+
+
 
 
 # Decorador para proteger rutas que requieren autenticación
