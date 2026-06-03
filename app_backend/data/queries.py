@@ -16,32 +16,76 @@ from flask import jsonify
 #     cursor.close()
 #     connection.close()
 
-def get_profesor_by_email(email):
-    # JOIN entre usuarios y profesores
-    
+def get_usuario_by_email(email):
+
     conn = None
     cursor = None
+
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute(
-            """SELECT p.id_profesor as id, p.nombre, u.email, u.rol, u.contrasenia as password 
-           FROM profesores p
-           INNER JOIN usuarios u ON p.id_usuario = u.id_usuario
-           WHERE u.email = %s""",
-            (email,),
-        )
-        profesor = cursor.fetchone()
-        return profesor
+
+        query = """
+            SELECT
+                id_usuario,
+                email,
+                contrasenia AS password,
+                rol
+            FROM usuarios
+            WHERE email = %s
+        """
+
+        cursor.execute(query, (email,))
+        return cursor.fetchone()
 
     except Exception as e:
-        print(f"Error al obtener profesor: {e}")
+        print(f"Error al obtener usuario: {e}")
         return None
+
     finally:
         if cursor:
             cursor.close()
         if conn:
             conn.close()
+
+def get_user_profile(usuario):
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+
+        if usuario["rol"] == "profesor":
+
+            query = """
+                SELECT
+                    p.id_profesor,
+                    p.nombre,
+                    p.departamento
+                FROM profesores p
+                WHERE p.id_usuario = %s
+            """
+
+        elif usuario["rol"] == "alumno":
+
+            query = """
+                SELECT
+                    a.id_alumno,
+                    a.nombre,
+                    a.legajo
+                FROM alumnos a
+                WHERE a.id_usuario = %s
+            """
+
+        else:
+            return None
+
+        cursor.execute(query, (usuario["id_usuario"],))
+        return cursor.fetchone()
+
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def get_alumno(nombre, contrasenia):

@@ -1,6 +1,6 @@
 from urllib import response
 
-from flask import Blueprint, redirect, render_template, request, flash
+from flask import Blueprint, jsonify, redirect, render_template, request, flash, session
 import requests
 
 inicio = Blueprint("inicio", __name__)
@@ -21,7 +21,6 @@ def asistencia():
 
 @inicio.route("/reportes")
 def reportes():
-
     return render_template("reportes.html")
 
 @inicio.route("/register", methods=["GET", "POST"])
@@ -67,7 +66,7 @@ def equipos():
 
 @inicio.route("/login", methods=["GET", "POST"])
 def login():
-    
+
     if request.method == "POST":
 
         email = request.form.get("email")
@@ -79,18 +78,57 @@ def login():
         }
 
         response = requests.post(
-            "http://127.0.0.1:5001/api/profesores/login",
+            "http://127.0.0.1:5001/api/login",
             json=data,
             timeout=5
         )
 
         if response.ok:
+
+            resultado = response.json()
+            usuario = resultado["usuario"]
+
+            session["user_id"] = usuario["id"]
+            session["email"] = usuario["email"]
+            session["rol"] = usuario["rol"]
+
+            if usuario.get("perfil"):
+                session["nombre"] = usuario["perfil"].get("nombre")
+
             flash("Login exitoso", "success")
+
+            if usuario["rol"] == "profesor":
+                return redirect("/dashboard/profesor")
+
             return redirect("/")
 
         return render_template(
             "login.html",
-            error="No se pudo iniciar sesion"
+            error="No se pudo iniciar sesión"
         )
 
     return render_template("login.html")
+
+@inicio.route("/sesion")
+def ver_sesion():
+
+    return {
+        "user_id": session.get("user_id"),
+        "email": session.get("email"),
+        "rol": session.get("rol"),
+        "nombre": session.get("nombre")
+    }
+
+
+@inicio.route("/logout", methods=["GET"])
+def logout():
+
+    if not session.get("user_id"):
+        flash("No hay una sesión iniciada.", "warning")
+        return redirect("/")
+
+    session.clear()
+
+    flash("Sesión cerrada correctamente.", "success")
+
+    return redirect("/")
