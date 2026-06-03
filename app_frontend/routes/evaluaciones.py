@@ -3,12 +3,34 @@ from datetime import datetime
 from flask import Blueprint, redirect, render_template, request, flash
 import requests
 
-evaluaciones = Blueprint("evaluaciones", __name__)
+evaluaciones_blueprint = Blueprint("evaluaciones", __name__)
+# 1. RUTA PRINCIPAL: http://127.0.0.1:8080/evaluaciones
+# Acá se muestra el listado/gestión de evaluaciones
+@evaluaciones_blueprint.route("/", methods=["GET"])
+def listar_evaluaciones():
+    response = requests.get('http://127.0.0.1:5001/api/evaluaciones/todas')
+    evaluaciones = []
+    
+    if response.status_code != 204:
+        json_data = response.json()
+        for eva in json_data["body"]:
+            # Parseamos la fecha que viene del backend
+            d = datetime.strptime(eva[3][5:-4], "%d %b %Y %H:%M:%S")
+            evaluaciones.append({
+                "id": eva[0],
+                "nombre": eva[1],
+                "tipo": eva[2],
+                "fecha": d,
+                "curso": eva[4]
+            })
+            
+    return render_template("evaluaciones.html", evaluaciones=evaluaciones)
 
 # app.config["SESSION_PERMANENT"] = False     # Sessions expire when the browser is closed
 # app.config["SESSION_TYPE"] = "filesystem"   # Store session data in files
 # Session(app) 								# Initialize Flask-Session
-
+# 2. RUTA DEL CALENDARIO: http://127.0.0.1:8080/evaluaciones/calendario
+# Acá se muestra el calendario con las evaluaciones
 @evaluaciones.route("/calendario", methods=["GET"])
 def calendario_evaluaciones():
     # eventos = [{"nombre":"tp1", "tipo":"TP", "fecha": "2026-05-21", "curso":1},
