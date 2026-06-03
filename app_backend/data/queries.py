@@ -725,3 +725,73 @@ def get_promedio_notas(rol, usuario_id, alumno_id=None, evaluacion_id=None, id_c
     finally:
         if cur: cur.close()
         if conn: conn.close()
+
+def verificar_alumno_y_evaluacion(alumno_id, evaluacion_id):
+    # Verifica que existan alumno y evaluación en la base de datos para evitar errores al cargar una nota
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+
+        # alumno
+        cur.execute(
+            "SELECT 1 FROM alumnos WHERE legajo = %s",
+            (alumno_id,)
+        )
+        alumno = cur.fetchone()
+
+        # evaluación
+        cur.execute(
+            "SELECT 1 FROM evaluaciones WHERE id_evaluacion = %s",
+            (evaluacion_id,)
+        )
+        evaluacion = cur.fetchone()
+
+        return alumno is not None and evaluacion is not None
+
+    except Exception as e:
+        print(f"Error verificación existencia: {e}")
+        return False
+
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+def guardar_o_actualizar_nota(alumno_id, evaluacion_id, calificacion):
+    # Inserta o actualiza nota si ya existe para ese alumno y evaluación (evita duplicados y mantiene historial de fechas)
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+
+        query = """
+            INSERT INTO notas (alumno_id, evaluacion_id, calificacion, fecha)
+            VALUES (%s, %s, %s, CURDATE())
+            ON DUPLICATE KEY UPDATE
+                calificacion = VALUES(calificacion),
+                fecha = CURDATE()
+        """
+
+        cur.execute(query, (alumno_id, evaluacion_id, calificacion))
+        conn.commit()
+
+        # Devuelvo la nota actualizada para mostrar la fecha de modificación
+        cur.execute("""
+            SELECT alumno_id, evaluacion_id, calificacion, fecha
+            FROM notas
+            WHERE alumno_id = %s AND evaluacion_id = %s
+        """, (alumno_id, evaluacion_id))
+
+        return cur.fetchone()
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print(f"Error guardar/actualizar nota: {e}")
+        raise e
+
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
