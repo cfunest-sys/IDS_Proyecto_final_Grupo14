@@ -1,0 +1,137 @@
+{% extends "base.html" %} {% block title %} Material del Curso | Campus FIUBA {%
+endblock %} {% block content %}
+<main class="container-fluid py-4 px-lg-5">
+  <!-- HEADER -->
+  <section class="row mb-4 align-items-center">
+    <div class="col-lg-7">
+      <h1 class="page-title">Material del Curso</h1>
+      <p>Accedé a los materiales subidos por tus profesores.</p>
+    </div>
+    <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
+      <span class="text-muted">Total: {{ materiales|length }}</span>
+    </div>
+  </section>
+  <!-- FILTROS -->
+  <section class="mb-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label for="filtroTipo" class="form-label">Tipo de Material</label>
+        <select id="filtroTipo" class="form-select" onchange="filtrarCards()">
+          <option value="">Todos</option>
+          <option value="apunte">Apunte</option>
+          <option value="guia">Guía</option>
+          <option value="video">Video</option>
+          <option value="imagen">Imagen</option>
+          <option value="documento">Documento</option>
+          <option value="archivo">Archivo</option>
+          <option value="bibliografia">Bibliografía</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label for="filtroTema" class="form-label">Tema</label>
+        <input
+          type="text"
+          id="filtroTema"
+          class="form-control"
+          placeholder="Ej: Clase 1"
+          oninput="filtrarCards()"
+        />
+      </div>
+      <div class="col-md-4">
+        <span> </span>
+      </div>
+    </div>
+  </section>
+  <!-- SECCIÓN MATERIALES -->
+  <section class="mb-5">
+    <h2 class="page-title">Materiales del Curso</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4" id="listaMateriales">
+      {% for m in materiales %}
+      <div
+        class="col card-material"
+        data-tipo="{{ m.tipo_material }}"
+        data-tema="{{ m.tema or '' }}"
+      >
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-2">
+              <span class="fs-2 me-2">
+                {% if m.tipo_material == 'video' %}🎬 {% elif m.tipo_material ==
+                'imagen' %}📷 {% elif m.tipo_material == 'bibliografia' %}📚 {%
+                elif m.tipo_material == 'documento' %}📄 {% elif m.tipo_material
+                == 'archivo' %}📦 {% else %}📄{% endif %}
+              </span>
+              <span class="badge bg-secondary">{{ m.tipo_material }}</span>
+            </div>
+            <h5 class="card-title">{{ m.titulo }}</h5>
+            <p class="card-text text-muted">
+              {{ m.descripcion or "Sin descripción" }}
+            </p>
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted">
+                {{ m.tema or "Sin tema" }} · {{ m.fecha_material or "" }}
+              </small>
+              <a
+                href="/material/{{ m.id_material }}/descargar?token={{ token }}"
+                class="btn btn-sm btn-campus"
+              >
+                Descargar
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="col-12 text-center py-5">
+        <p class="text-muted">No hay materiales disponibles.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  <!-- SECCIÓN RECURSOS LIBRES -->
+  <section class="mb-5">
+    <h2 class="page-title">Recursos Libres</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for m in materiales %} {% if m.es_libre %}
+      <div class="col">
+        <div class="card h-100 shadow-sm border-success">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-2">
+              <span class="fs-2 me-2">🌐</span>
+              <span class="badge bg-success">Libre</span>
+            </div>
+            <h5 class="card-title">{{ m.titulo }}</h5>
+            <p class="card-text text-muted">
+              {{ m.descripcion or "Sin descripción" }}
+            </p>
+            <a
+              href="/material/{{ m.id_material }}/descargar?token={{ token }}"
+              class="btn btn-sm btn-campus"
+            >
+              Ver Recurso
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endif %} {% else %}
+      <div class="col-12 text-center py-5">
+        <p class="text-muted">No hay recursos libres disponibles.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+<!-- SCRIPT JS -->
+<script>
+  function filtrarCards() {
+    const tipo = document.getElementById("filtroTipo").value.toLowerCase();
+    const tema = document.getElementById("filtroTema").value.toLowerCase();
+    document.querySelectorAll(".card-material").forEach((card) => {
+      const matchTipo = !tipo || card.dataset.tipo.toLowerCase().includes(tipo);
+      const matchTema = !tema || card.dataset.tema.toLowerCase().includes(tema);
+      card.style.display = matchTipo && matchTema ? "" : "none";
+    });
+  }
+</script>
+{% endblock %}

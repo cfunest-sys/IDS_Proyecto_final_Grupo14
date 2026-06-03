@@ -1,0 +1,437 @@
+{% extends "base.html" %} {% block title %} Gestión de Materiales | Campus FIUBA
+{% endblock %} {% block content %}
+<main class="container-fluid py-4 px-lg-5">
+  <!-- ═══════════════ HEADER ═══════════════ -->
+  <section class="row mb-4 align-items-center">
+    <div class="col-lg-7">
+      <h1 class="page-title">Gestión de Materiales</h1>
+      <p>Subir, organizar y administrar materiales del curso.</p>
+    </div>
+    <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
+      <button
+        class="btn btn-campus btn-lg"
+        data-bs-toggle="modal"
+        data-bs-target="#modalSubirMaterial"
+      >
+        + Subir Material
+      </button>
+    </div>
+  </section>
+  <!-- ═══════════════ FILTROS ═══════════════ -->
+  <section class="mb-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label for="filtroTipo" class="form-label">Tipo de Material</label>
+        <select id="filtroTipo" class="form-select" onchange="filtrarTabla()">
+          <option value="">Todos</option>
+          <option value="apunte">Apunte</option>
+          <option value="guia">Guía</option>
+          <option value="video">Video</option>
+          <option value="imagen">Imagen</option>
+          <option value="documento">Documento</option>
+          <option value="archivo">Archivo</option>
+          <option value="bibliografia">Bibliografía</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="filtroTema" class="form-label">Tema</label>
+        <input
+          type="text"
+          id="filtroTema"
+          class="form-control"
+          placeholder="Ej: Clase 1"
+          oninput="filtrarTabla()"
+        />
+      </div>
+      <div class="col-md-3">
+        <label for="filtroEstado" class="form-label">Estado</label>
+        <select id="filtroEstado" class="form-select" onchange="filtrarTabla()">
+          <option value="">Todos</option>
+          <option value="borrador">Borrador</option>
+          <option value="publicado">Publicado</option>
+          <option value="archivado">Archivado</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <span class="form-label d-block"> </span>
+        <span>Total: {{ materiales|length }}</span>
+      </div>
+    </div>
+  </section>
+  <!-- ═══════════════ TABLA ═══════════════ -->
+  <section>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Tipo</th>
+            <th>Tema</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaMateriales">
+          {% for m in materiales %}
+          <tr
+            data-id="{{ m.id_material }}"
+            data-tipo="{{ m.tipo_material }}"
+            data-tema="{{ m.tema or '' }}"
+            data-estado="{{ m.estado }}"
+          >
+            <td>{{ m.titulo }}</td>
+            <td>
+              <span class="badge bg-secondary"> {{ m.tipo_material }} </span>
+            </td>
+            <td>{{ m.tema or "-" }}</td>
+            <td>{{ m.fecha_material or "-" }}</td>
+            <td>
+              {% if m.estado == 'publicado' %}
+              <span class="badge bg-success">Publicado</span>
+              {% elif m.estado == 'borrador' %}
+              <span class="badge bg-warning">Borrador</span>
+              {% else %}
+              <span class="badge bg-secondary">Archivado</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              <div class="d-flex justify-content-center gap-2">
+                <button
+                  class="btn btn-sm btn-light border"
+                  onclick="abrirEditar({{ m.id_material }}, '{{ m.titulo }}', '{{ m.descripcion or '' }}', '{{ m.tipo_material }}', '{{ m.tema or '' }}', '{{ m.estado }}', {{ 'true' if m.es_libre else 'false' }})"
+                >
+                  Editar
+                </button>
+                <button
+                  class="btn btn-sm btn-light border"
+                  onclick="confirmarEliminar({{ m.id_material }})"
+                >
+                  Eliminar
+                </button>
+                <a
+                  href="/material/{{ m.id_material }}/descargar?token={{ token }}"
+                  class="btn btn-sm btn-light border"
+                >
+                  Descargar
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="text-center py-5">
+              No hay materiales registrados.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- MODAL: SUBIR MATERIAL                              -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="modal fade" id="modalSubirMaterial" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Subir Nuevo Material</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <form
+        action="/material/subir?token={{ token }}"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="titulo" class="form-label">Título *</label>
+            <input
+              type="text"
+              id="titulo"
+              name="titulo"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea
+              id="descripcion"
+              name="descripcion"
+              class="form-control"
+              rows="3"
+            ></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="tipo_material" class="form-label"
+              >Tipo de Material *</label
+            >
+            <select
+              id="tipo_material"
+              name="tipo_material"
+              class="form-select"
+              required
+            >
+              <option value="">Seleccionar</option>
+              <option value="apunte">Apunte</option>
+              <option value="guia">Guía</option>
+              <option value="video">Video</option>
+              <option value="imagen">Imagen</option>
+              <option value="documento">Documento</option>
+              <option value="archivo">Archivo</option>
+              <option value="bibliografia">Bibliografía</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="id_curso" class="form-label">Curso *</label>
+            <select id="id_curso" name="id_curso" class="form-select" required>
+              <option value="">Seleccionar curso</option>
+              {% for curso in cursos %}
+              <option value="{{ curso.id_curso }}">{{ curso.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="tema" class="form-label">Tema / Unidad</label>
+            <input
+              type="text"
+              id="tema"
+              name="tema"
+              class="form-control"
+              placeholder="Ej: Clase 3"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">¿Es un enlace externo?</label>
+            <div class="form-check form-switch">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="es_externo"
+                name="es_externo"
+                onchange="toggleCamposArchivo()"
+              />
+              <label class="form-check-label" for="es_externo"
+                >Sí, es una URL</label
+              >
+            </div>
+          </div>
+          <div class="mb-3" id="campoArchivo">
+            <label for="archivo" class="form-label"
+              >Archivo (PDF, DOCX, etc.)</label
+            >
+            <input
+              type="file"
+              id="archivo"
+              name="archivo"
+              class="form-control"
+            />
+          </div>
+          <div class="mb-3 d-none" id="campoUrl">
+            <label for="archivo_ruta" class="form-label">URL del recurso</label>
+            <input
+              type="url"
+              id="archivo_ruta"
+              name="archivo_ruta"
+              class="form-control"
+              placeholder="https://..."
+            />
+          </div>
+          <div class="mb-3">
+            <label for="estado" class="form-label">Estado</label>
+            <select id="estado" name="estado" class="form-select">
+              <option value="publicado">Publicado</option>
+              <option value="borrador">Borrador</option>
+              <option value="archivado">Archivado</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="es_libre"
+                name="es_libre"
+                value="true"
+              />
+              <label class="form-check-label" for="es_libre"
+                >Recurso libre (visible para todos)</label
+              >
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-campus">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- MODAL: EDITAR MATERIAL                             -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="modal fade" id="modalEditarMaterial" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar Material</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <form
+        id="formEditar"
+        method="POST"
+        enctype="application/x-www-form-urlencoded"
+      >
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="editar_titulo" class="form-label">Título *</label>
+            <input
+              type="text"
+              id="editar_titulo"
+              name="titulo"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="editar_descripcion" class="form-label"
+              >Descripción</label
+            >
+            <textarea
+              id="editar_descripcion"
+              name="descripcion"
+              class="form-control"
+              rows="3"
+            ></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="editar_tipo" class="form-label"
+              >Tipo de Material *</label
+            >
+            <select
+              id="editar_tipo"
+              name="tipo_material"
+              class="form-select"
+              required
+            >
+              <option value="apunte">Apunte</option>
+              <option value="guia">Guía</option>
+              <option value="video">Video</option>
+              <option value="imagen">Imagen</option>
+              <option value="documento">Documento</option>
+              <option value="archivo">Archivo</option>
+              <option value="bibliografia">Bibliografía</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="editar_tema" class="form-label">Tema / Unidad</label>
+            <input
+              type="text"
+              id="editar_tema"
+              name="tema"
+              class="form-control"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="editar_estado" class="form-label">Estado</label>
+            <select id="editar_estado" name="estado" class="form-select">
+              <option value="publicado">Publicado</option>
+              <option value="borrador">Borrador</option>
+              <option value="archivado">Archivado</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="editar_es_libre"
+                name="es_libre"
+                value="true"
+              />
+              <label class="form-check-label" for="editar_es_libre"
+                >Recurso libre</label
+              >
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-campus">Actualizar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCRIPT JS                                         -->
+<!-- ═══════════════════════════════════════════════════ -->
+<script>
+  // --- Toggle archivo / URL ---
+  function toggleCamposArchivo() {
+    const esExterno = document.getElementById("es_externo").checked;
+    document
+      .getElementById("campoArchivo")
+      .classList.toggle("d-none", esExterno);
+    document.getElementById("campoUrl").classList.toggle("d-none", !esExterno);
+  }
+  // --- Filtrado local de la tabla ---
+  function filtrarTabla() {
+    const tipo = document.getElementById("filtroTipo").value.toLowerCase();
+    const tema = document.getElementById("filtroTema").value.toLowerCase();
+    const estado = document.getElementById("filtroEstado").value.toLowerCase();
+    document.querySelectorAll("#tablaMateriales tr[data-id]").forEach((row) => {
+      const matchTipo = !tipo || row.dataset.tipo.toLowerCase().includes(tipo);
+      const matchTema = !tema || row.dataset.tema.toLowerCase().includes(tema);
+      const matchEstado =
+        !estado || row.dataset.estado.toLowerCase().includes(estado);
+      row.style.display = matchTipo && matchTema && matchEstado ? "" : "none";
+    });
+  }
+  // --- Abrir modal editar con datos precargados ---
+  function abrirEditar(id, titulo, descripcion, tipo, tema, estado, esLibre) {
+    document.getElementById("editar_titulo").value = titulo;
+    document.getElementById("editar_descripcion").value = descripcion;
+    document.getElementById("editar_tipo").value = tipo;
+    document.getElementById("editar_tema").value = tema;
+    document.getElementById("editar_estado").value = estado;
+    document.getElementById("editar_es_libre").checked = esLibre;
+    document.getElementById("formEditar").action =
+      `/material/${id}/editar?token={{ token }}`;
+    new bootstrap.Modal(document.getElementById("modalEditarMaterial")).show();
+  }
+  // --- Confirmar eliminación ---
+  function confirmarEliminar(id) {
+    if (confirm("¿Eliminar este material?")) {
+      window.location.href = `/material/${id}/eliminar?token={{ token }}`;
+    }
+  }
+</script>
+{% endblock %}

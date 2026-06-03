@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS alumnos;
 DROP TABLE IF EXISTS profesores;
 DROP TABLE IF EXISTS cursos;
 DROP TABLE IF EXISTS usuarios;
+DROP TABLE IF EXISTS materiales;
 
 CREATE TABLE usuarios (
     id_usuario INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -81,6 +82,68 @@ CREATE TABLE miembros_equipo (
     UNIQUE(id_equipo, legajo_alumno)
 ) ENGINE=InnoDB;
 
+CREATE TABLE materiales(
+  id_material INT AUTO_INCREMENT PRIMARY KEY,
+    id_curso INT NOT NULL,
+    id_profesor INT NOT NULL,
+
+    -- Información general
+    titulo VARCHAR(200) NOT NULL,
+    descripcion TEXT,
+
+    -- Clasificación
+    tipo_material ENUM(
+        'apunte',
+        'guia',
+        'video',
+        'imagen',
+        'documento',
+        'archivo',
+        'bibliografia',
+        'otro'
+    ) NOT NULL,
+
+    -- Organización
+    tema VARCHAR(100),
+    orden_material INT DEFAULT 0,
+
+    -- Archivo o enlace
+    archivo_ruta VARCHAR(500) NOT NULL,
+    es_externo BOOLEAN DEFAULT FALSE,
+    tipo_archivo VARCHAR(50),
+    tamaño_bytes BIGINT,
+
+    -- Publicación
+    fecha_material DATE,
+    es_libre BOOLEAN DEFAULT FALSE,
+    activo BOOLEAN DEFAULT TRUE,
+
+    estado ENUM(
+        'borrador',
+        'publicado',
+        'archivado'
+    ) DEFAULT 'publicado',
+
+    -- Auditoría
+    fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    -- Relaciones
+    FOREIGN KEY (id_curso)
+        REFERENCES cursos(id_curso)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (id_profesor)
+        REFERENCES profesores(id_profesor)
+        ON DELETE RESTRICT,
+    -- indices
+    INDEX idx_curso (id_curso),
+    INDEX idx_profesor (id_profesor),
+    INDEX idx_tema (tema),
+    INDEX idx_tipo (tipo_material),
+    INDEX idx_curso_tipo (id_curso, tipo_material)
+);
 
 INSERT INTO usuarios (email, contrasenia, rol)
 VALUES
