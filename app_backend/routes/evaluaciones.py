@@ -3,7 +3,10 @@ from flask import Blueprint, request, jsonify
 from data.queries import get_connection
 
 from data.queries import (
+    # crear_base_datos,
+    get_evaluacion_todas,
     get_evaluacion,
+    get_evaluacion_por_curso,
     crear_evaluacion,
     cambiar_evaluacion,
     eliminar_evaluacion
@@ -15,6 +18,21 @@ evaluaciones_bp = Blueprint('evaluaciones', __name__)
 def obtener_eva(id):
     evaluacion = get_evaluacion(id)
     return evaluacion
+
+@evaluaciones_bp.route('/curso/<int:id_curso>', methods=['GET'])
+def obtener_evas_curso(id_curso):
+    evaluacion = get_evaluacion_por_curso(id_curso)
+    if (len(evaluacion) <= 0):
+        return jsonify({"body":evaluacion, "status":204})
+    return jsonify({"body":evaluacion, "status":200})
+
+@evaluaciones_bp.route('/todas', methods=['GET'])
+def obtener_evas_todas():
+    evaluacion = get_evaluacion_todas()
+    if (len(evaluacion) <= 0):
+        return jsonify({"body":evaluacion, "status":204})
+    return jsonify({"body":evaluacion, "status":200})
+
 
 @evaluaciones_bp.route('/crear', methods=['POST'])
 def crear_eva():

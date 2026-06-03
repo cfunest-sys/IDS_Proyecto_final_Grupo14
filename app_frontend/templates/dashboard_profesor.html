@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard Profesor
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <h1 class="mb-4">
+        Bienvenido {{ nombre }}
+    </h1>
+    <p class="text-muted">
+        Profesor del Campus FIUBA
+    </p>
+    <div class="row mb-5">
+
+    <div class="col-md-4">
+
+        <div class="card shadow text-center">
+
+            <div class="card-body">
+
+                <h5>Alumnos</h5>
+
+                <h2>
+                    {{ resumen.alumnos }}
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card shadow text-center">
+
+            <div class="card-body">
+
+                <h5>Evaluaciones</h5>
+
+                <h2>
+                    {{ resumen.evaluaciones }}
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card shadow text-center">
+
+            <div class="card-body">
+
+                <h5>Cursos</h5>
+
+                <h2>
+                    {{ resumen.cursos }}
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="col-md-4">
+
+        <div class="card shadow text-center">
+
+            <div class="card-body">
+
+                <h5>Alumnos Activos</h5>
+
+                <h2>
+                    {{ resumen.alumnos_activos }}
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="col-md-4">
+
+        <div class="card shadow text-center">
+
+            <div class="card-body">
+
+                <h5>Alumnos Inactivos</h5>
+
+                <h2>
+                    {{ resumen.alumnos_inactivos }}
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="col-md-4">
+
+        <div class="card shadow text-center">
+
+            <div class="card-body">
+
+                <h5>Equipos</h5>
+
+                <h2>
+                    {{ resumen.equipos }}
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="row g-4">
+
+        <div class="col-md-4">
+
+            <a href="/alumnos" class="text-decoration-none">
+
+                <div class="card dashboard-card shadow-sm h-100">
+
+                    <div class="card-body text-center">
+
+                        <i class="bi bi-people-fill dashboard-icon"></i>
+
+                        <h4 class="mt-3">
+                            Alumnos
+                        </h4>
+
+                        <p class="text-muted">
+                            ABM e importación CSV
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <a href="/evaluaciones" class="text-decoration-none">
+
+                <div class="card dashboard-card shadow-sm h-100">
+
+                    <div class="card-body text-center">
+
+                        <i class="bi bi-journal-check dashboard-icon"></i>
+
+                        <h4 class="mt-3">
+                            Evaluaciones
+                        </h4>
+
+                        <p class="text-muted">
+                            Gestionar Evaluaciones
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+        
+
+        <div class="col-md-4">
+
+            <a href="/notas" class="text-decoration-none">
+
+                <div class="card dashboard-card shadow-sm h-100">
+
+                    <div class="card-body text-center">
+
+                        <i class="bi bi-pencil-square dashboard-icon"></i>
+
+                        <h4 class="mt-3">
+                            Notas
+                        </h4>
+
+                        <p class="text-muted">
+                            Carga y consulta
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <a href="/asistencia" class="text-decoration-none">
+
+                <div class="card dashboard-card shadow-sm h-100">
+
+                    <div class="card-body text-center">
+
+                        <i class="bi bi-qr-code dashboard-icon"></i>
+
+                        <h4 class="mt-3">
+                            Asistencias
+                        </h4>
+
+                        <p class="text-muted">
+                            Generar QR y Gestionar Asistencias
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+        
+
+        <div class="col-md-4">
+
+            <a href="/reportes" class="text-decoration-none">
+
+                <div class="card dashboard-card shadow-sm h-100">
+
+                    <div class="card-body text-center">
+
+                        <i class="bi bi-file-earmark-bar-graph-fill dashboard-icon"></i>
+
+                        <h4 class="mt-3">
+                            Reportes
+                        </h4>
+
+                        <p class="text-muted">
+                            Reportes Académicos
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+        
+
+        
+
+        <div class="col-md-4">
+
+            <a href="/perfil" class="text-decoration-none">
+
+                <div class="card dashboard-card shadow-sm h-100">
+
+                    <div class="card-body text-center">
+
+                        <i class="bi bi-person-circle dashboard-icon"></i>
+
+                        <h4 class="mt-3">
+                            Perfil
+                        </h4>
+
+                        <p class="text-muted">
+                            Datos del profesor
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

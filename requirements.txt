@@ -8,4 +8,3 @@ PyJWT
 werkzeug
 flask-jwt-extended
 python-dotenv
-

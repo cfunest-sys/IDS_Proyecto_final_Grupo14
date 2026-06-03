@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from database.db import get_connection
 from utils.auth import hash_password
 import random
@@ -149,3 +149,18 @@ def reset_password_with_token():
             cur.close()
         if conn:
             conn.close()
+
+@auth_bp.route("/logout", methods=["POST"])
+def logout():
+
+    if "user_id" not in session:
+        return jsonify({
+            "error": "No hay una sesión activa"
+        }), 401
+
+    session.clear()
+
+    return jsonify({
+        "success": True,
+        "message": "Sesión cerrada correctamente"
+    }), 200

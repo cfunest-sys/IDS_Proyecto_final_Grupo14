@@ -1,32 +1,91 @@
+from werkzeug.security import generate_password_hash
+
 from database.db import get_connection
 from flask import jsonify
 
+# def crear_base_datos():
+#     connection = get_connection()
+#     cursor = connection.cursor()
+#     f = open("data/db_init.sql", 'r')
+#     lineas = f.readlines()
+#     f.close()
+#     for linea in lineas:
+#         if (linea != "" and linea != None):
+#             cursor.execute(linea)
+#             connection.commit()
+#     cursor.close()
+#     connection.close()
 
-def get_profesor_by_email(email):
-    # JOIN entre usuarios y profesores
+def get_usuario_by_email(email):
+
     conn = None
     cursor = None
+
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute(
-            """SELECT p.id_profesor as id, p.nombre, u.email, u.contrasenia as password 
-           FROM profesores p
-           INNER JOIN usuarios u ON p.id_usuario = u.id_usuario
-           WHERE u.email = %s""",
-            (email,),
-        )
-        profesor = cursor.fetchone()
-        return profesor
+
+        query = """
+            SELECT
+                id_usuario,
+                email,
+                contrasenia AS password,
+                rol
+            FROM usuarios
+            WHERE email = %s
+        """
+
+        cursor.execute(query, (email,))
+        return cursor.fetchone()
 
     except Exception as e:
-        print(f"Error al obtener profesor: {e}")
+        print(f"Error al obtener usuario: {e}")
         return None
+
     finally:
         if cursor:
             cursor.close()
         if conn:
             conn.close()
+
+def get_user_profile(usuario):
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+
+        if usuario["rol"] == "profesor":
+
+            query = """
+                SELECT
+                    p.id_profesor,
+                    p.nombre,
+                    p.departamento
+                FROM profesores p
+                WHERE p.id_usuario = %s
+            """
+
+        elif usuario["rol"] == "alumno":
+
+            query = """
+                SELECT
+                    a.id_alumno,
+                    a.nombre,
+                    a.legajo
+                FROM alumnos a
+                WHERE a.id_usuario = %s
+            """
+
+        else:
+            return None
+
+        cursor.execute(query, (usuario["id_usuario"],))
+        return cursor.fetchone()
+
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def get_alumno(nombre, contrasenia):
@@ -228,6 +287,55 @@ def get_evaluacion(id):
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM evaluaciones WHERE id = %s", (id))
         evaluacion = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        if cursor.rowcount == 0:
+            return evaluacion, 204
+        return evaluacion, 200
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+def get_evaluacion_por_curso(curso_id):
+    try:
+        connection = get_connection()
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM evaluaciones WHERE id_curso = %s", (curso_id,))
+        # cursor.execute("SELECT * FROM evaluaciones")
+        evaluacion = cursor.fetchall()
+        cursor.close()
+        connection.close()
+        return evaluacion
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+def get_evaluacion_profesor(id_profesor):
+    try:
+        connection = get_connection()
+        cursor = connection.cursor()
+        query = """select evaluaciones.* from evaluaciones  
+                   inner join profesor_curso pc on pc.id_curso = evaluaciones.id_curso 
+                   where pc.id_profesor=%s;"""
+        cursor.execute(query, (id_profesor,))
+        evaluacion = cursor.fetchall()
+        cursor.close()
+        connection.close()
+        return evaluacion
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+# select evaluaciones.* from evaluaciones  
+# inner join profesor_curso pc on pc.id_curso = evaluaciones.id_curso 
+# where pc.id_profesor=2;
+
+def get_evaluacion_todas():
+    try:
+        connection = get_connection()
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM evaluaciones")
+        evaluacion = cursor.fetchall()
         cursor.close()
         connection.close()
         return evaluacion
@@ -472,7 +580,7 @@ def delete_equipo(id_equipo):
             conexion.close()
 
 
-def crear_alumno(alumno):
+def crear_profesor(profesor):
 
     conn = None
     cur = None
@@ -491,31 +599,33 @@ def crear_alumno(alumno):
             VALUES (%s, %s, %s)
         """
 
+        password_hash = generate_password_hash(profesor["password"])
+
         cur.execute(
             query_usuario,
             (
-                alumno["email"],
-                alumno["password"],
-                "alumno"
+                profesor["email"],
+                password_hash,
+                "profesor"
             )
         )
 
         id_usuario = cur.lastrowid
 
-        query_alumno = """
-            INSERT INTO alumnos (
+        query_profesor = """
+            INSERT INTO profesores (
                 nombre,
-                estado,
+                departamento,
                 id_usuario
             )
             VALUES (%s, %s, %s)
         """
 
         cur.execute(
-            query_alumno,
+            query_profesor,
             (
-                alumno["nombre"],
-                "activo",
+                profesor["nombre"],
+                profesor["departamento"],
                 id_usuario
             )
         )
@@ -788,3 +898,19 @@ def eliminar_material(id_material):
     finally:
         conn.close()
 
+def registrar_login(id_usuario, email, resultado, ip):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        INSERT INTO logs_login
+        (id_usuario, email, resultado, ip)
+        VALUES (%s, %s, %s, %s)
+        """,
+        (id_usuario, email, resultado, ip)
+    )
+
+    conn.commit()
+    cur.close()
+    conn.close()

@@ -3,6 +3,8 @@ from flask import jsonify
 from flask_jwt_extended import create_access_token, verify_jwt_in_request, get_jwt_identity, get_jwt
 from flask_jwt_extended.exceptions import JWTExtendedException
 from werkzeug.security import check_password_hash, generate_password_hash
+from data.queries import get_usuario_by_email
+from config import JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRES
 
 from data.queries import get_profesor_by_email
 
@@ -16,15 +18,23 @@ def generate_token(usuario_id, rol):
 # Valida las credenciales del profesor y genera un token JWT si son correctas
 
 
-def validate_profesor_credentials(email, password):
-    profesor = get_profesor_by_email(email)
-    if not profesor:
+def validate_user_credentials(email, password):
+    usuario = get_usuario_by_email(email)
+    if not usuario:
         return None
-    if not check_password_hash(profesor["password"], password):
+    if not check_password_hash(usuario["password"], password):
         return None
 
-    token = generate_token(usuario_id=profesor["id"], rol=profesor["rol"])
-    return {"profesor": profesor, "token": token}
+    token = generate_token(
+        usuario_id=usuario["id_usuario"],
+        rol=usuario["rol"]
+    )
+    return {
+        "usuario": usuario,
+        "token": token
+    }
+
+
 
 
 # Decorador para proteger rutas que requieren autenticación

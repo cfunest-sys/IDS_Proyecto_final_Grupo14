@@ -1,11 +1,11 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from utils.auth import validate_profesor_credentials
+from data.queries import crear_profesor, registrar_login
 
 profesores_bp = Blueprint("profesores", __name__)
 
 
-@profesores_bp.route("/login", methods=["POST"])
+"""@profesores_bp.route("/login", methods=["POST"])
 def login():
 
     data = request.get_json()
@@ -22,9 +22,21 @@ def login():
     profesor = validate_profesor_credentials(email, password)
 
     if not profesor:
+        registrar_login(
+        None,
+        email,
+        "fallido",
+        request.remote_addr
+    )
         return jsonify({"error": "Email o contraseña inválidos"}), 401
+    registrar_login(
+        profesor["profesor"]["id"],
+        email,
+        "exitoso",
+        request.remote_addr
+    )
 
-    access_token = create_access_token(identity=str(profesor["id"]))
+    access_token = create_access_token(identity=str(profesor["token"]))
 
     return (
         jsonify(
@@ -32,11 +44,11 @@ def login():
                 "success": True,
                 "message": "Login exitoso",
                 "token": access_token,
-                "profesor": {"id": profesor["id"], "nombre": profesor["nombre"], "email": profesor["email"]},
+                "profesor": {"id": profesor["profesor"]["id"], "nombre": profesor["profesor"]["nombre"], "email": profesor["profesor"]["email"]},
             }
         ),
         200,
-    )
+    )"""
 
 
 @profesores_bp.route("/me", methods=["GET"])
@@ -44,3 +56,47 @@ def login():
 def get_current_profesor():
     profesor_id = get_jwt_identity()
     return jsonify({"profesor_id": profesor_id}), 200
+
+
+@profesores_bp.route('/register', methods=['POST'])
+def register():
+
+    try:
+
+        data = request.json
+
+
+        nombre = data.get("nombre")
+        email = data.get("email")
+        password = data.get("password")
+        departamento = data.get("departamento")
+
+
+        if not nombre or not email or not password:
+
+            return jsonify({
+                "error": "Faltan datos obligatorios"
+            }), 400
+
+        profesor = {
+            "nombre": nombre,
+            "email": email,
+            "password": password,
+            "departamento": departamento
+        }
+
+        id_profesor = crear_profesor(profesor)
+
+        return jsonify({
+            "mensaje": "Profesor registrado correctamente",
+            "id": id_profesor
+        }), 201
+
+    except Exception as e:
+        
+        print(e)
+
+        return jsonify({
+            "error": str(e)
+        }), 500
+    
