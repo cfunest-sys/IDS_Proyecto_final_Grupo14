@@ -6,6 +6,7 @@ from routes.profesores import profesores_bp
 from routes.auth import auth_bp
 from routes.reportes import reportes_bp
 from routes.evaluaciones import evaluaciones_bp
+from routes.notas import notas_bp
 from routes.equipos import equipos_bp
 from routes.perfil import perfil_bp
 
@@ -19,6 +20,7 @@ jwt = JWTManager(app)
 app.register_blueprint(alumnos_bp, url_prefix="/api/alumnos")
 app.register_blueprint(profesores_bp, url_prefix="/api/profesores")
 app.register_blueprint(evaluaciones_bp, url_prefix="/api/evaluaciones")
+app.register_blueprint(notas_bp, url_prefix="/api/notas")
 app.register_blueprint(auth_bp)
 app.register_blueprint(reportes_bp)
 app.register_blueprint(equipos_bp, url_prefix='/api/equipos')
