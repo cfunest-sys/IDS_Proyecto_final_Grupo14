@@ -1,47 +1,167 @@
-from flask import Blueprint, request, jsonify, session
-from database.db import get_connection 
+from flask import Blueprint, request, jsonify
+from database.db import get_connection
+from datetime import datetime, timedelta
+import secrets
 
 asistencia_bp = Blueprint("asistencia", __name__)
-
-@asistencia_bp.route("/api/asistencia/registrar", methods= ["POST"])
-def asistencia_registro():
-
-    if 'usuario_id' not in session or session.get('rol') != 'alumno':
-        return jsonify({"error": "No autorizado. Debe iniciar sesion como alumno"}), 401
-    
-    alumno_id = session.get('alumno_id')
-
-    data = request.get_json()
-    if not data or 'qr_code' not in data:
-        return jsonify({"error": "Codigo QR no proporcionado"}), 400
-    
-    qr_code = data.get('qr_code')
-    if not qr_code: 
-            return jsonify({"error": "El codigo QR es invalido ha expirado"}), 400
+#GENERAR QR
+@asistencia_bp.route("/generar-qr", methods=["POST"])
+def generar_qr():
 
     try:
+
         connection = get_connection()
         cursor = connection.cursor()
 
-        #Evitemos que se duplique la asistencia
-        query_duplicado= "SELECT id FROM asistencia WHERE alumno_id = %s and fecha = CURDATE() "
-        cursor.execute(query_duplicado, (alumno_id,))
-        if cursor.fetchone():
-             cursor.close()
-             connection.close()
-             return jsonify({"error": "Ya has registrado tu asistencia en la clase de hoy"}), 400
-        
-        #Registramos asistencia
-        query_asistencia = "INSERT INTO asistencia (alumno_id, fecha, qr_code, registrado_en) VALUES (%s, CURDATE(), %s, NOW())"
-        cursor.execute(query_asistencia, (alumno_id, qr_code))
+        # Desactivar QR anteriores
+        query_desactivar = """ UPDATE qr_asistencia SET activo = FALSE WHERE activo = TRUE """
+
+        cursor.execute(query_desactivar)
+
+        # Generar código aleatorio
+        codigo_qr = secrets.token_urlsafe(16)
+
+        expiracion = datetime.now() + timedelta(minutes=45)
+
+        query_insert = """ INSERT INTO qr_asistencia ( codigo, fecha_generacion, expiracion, activo ) VALUES ( %s, NOW(), %s, TRUE) """
+
+        cursor.execute(
+            query_insert,
+            (
+                codigo_qr,
+                expiracion
+            )
+        )
+
         connection.commit()
+
         cursor.close()
         connection.close()
-        return jsonify({"message": "¡Asistencia guardada con éxito!"}), 200
+
+        return jsonify({
+            "success": True,
+            "message": "QR generado correctamente",
+            "qr_code": codigo_qr,
+            "expira": expiracion.strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+        }), 200
+
     except Exception as e:
-         try:
-              connection.rollback()
-              connection.close()
-         except: 
-              pass
-         return jsonify({"error": f"Error del servidor {str(e)}"}), 500
+
+        try:
+            connection.rollback()
+            connection.close()
+        except:
+            pass
+
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+#REGISTRAR ASISTENCIA
+@asistencia_bp.route("/registrar", methods=["POST"])
+def registrar_asistencia():
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({
+            "error": "No se recibieron datos"
+        }), 400
+
+    legajo = data.get("legajo")
+    qr_code = data.get("qr_code")
+
+    if not legajo:
+        return jsonify({
+            "error": "Legajo no proporcionado"
+        }), 400
+
+    if not qr_code:
+        return jsonify({
+            "error": "Código QR no proporcionado"
+        }), 400
+
+    try:
+
+        connection = get_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # Verificar QR activo
+        query_qr = """ SELECT * FROM qr_asistencia WHERE codigo = %s AND activo = TRUE AND expiracion > NOW() """
+
+        cursor.execute(query_qr, (qr_code,))
+        qr = cursor.fetchone()
+
+        if not qr:
+
+            cursor.close()
+            connection.close()
+
+            return jsonify({
+                "error": "QR inválido o expirado"
+            }), 400
+
+        # Verificar alumno existente
+        query_alumno = """ SELECT legajo FROM alumnos WHERE legajo = %s """
+
+        cursor.execute(query_alumno, (legajo,))
+        alumno = cursor.fetchone()
+
+        if not alumno:
+
+            cursor.close()
+            connection.close()
+
+            return jsonify({
+                "error": "Alumno inexistente"
+            }), 404
+
+        # Verificar asistencia duplicada
+        query_duplicado = """ SELECT * FROM asistencia WHERE alumno_legajo = %s AND fecha = CURDATE() """
+
+        cursor.execute(query_duplicado, (legajo,))
+
+        if cursor.fetchone():
+
+            cursor.close()
+            connection.close()
+
+            return jsonify({
+                "error": "La asistencia ya fue registrada"
+            }), 400
+
+        # Registrar asistencia
+        query_insert = """ INSERT INTO asistencia ( alumno_legajo, qr_id , fecha, registrado_en) VALUES ( %s, CURDATE(), %s, NOW()) """
+
+        cursor.execute(
+            query_insert,
+            (
+                legajo,
+                qr["id_qr"]
+            )
+        )
+
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+
+        return jsonify({
+            "message": "Asistencia registrada correctamente"
+        }), 201
+
+    except Exception as e:
+
+        try:
+            connection.rollback()
+            connection.close()
+        except:
+            pass
+
+        return jsonify({
+            "error": f"Error del servidor: {str(e)}"
+        }), 500

@@ -13,6 +13,8 @@ DROP TABLE IF EXISTS alumnos;
 DROP TABLE IF EXISTS profesores;
 DROP TABLE IF EXISTS cursos;
 DROP TABLE IF EXISTS usuarios;
+DROP TABLE IF EXISTS qr_asistencia;
+DROP TABLE IF EXISTS asistencia;
 CREATE TABLE usuarios (
     id_usuario INTEGER PRIMARY KEY AUTO_INCREMENT,
     email TEXT NOT NULL,
@@ -90,6 +92,23 @@ CREATE TABLE miembros_equipo (
     FOREIGN KEY (legajo_alumno) REFERENCES alumnos(legajo),
     UNIQUE(id_equipo, legajo_alumno)
 ) ENGINE=InnoDB;
+CREATE TABLE qr_asistencia (
+    id_qr INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(255) NOT NULL,
+    fecha_generacion DATETIME NOT NULL,
+    expiracion DATETIME NOT NULL,
+    activo BOOLEAN DEFAULT TRUE
+);
+CREATE TABLE asistencia (
+    id_asistencia INT AUTO_INCREMENT PRIMARY KEY,
+    alumno_legajo INT NOT NULL,
+    qr_id INT NOT NULL,
+    fecha DATE NOT NULL,
+    registrado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (alumno_legajo) REFERENCES alumnos(legajo),
+    FOREIGN KEY (qr_id) REFERENCES qr_asistencia(id_qr)
+);
+
 INSERT INTO usuarios (email, contrasenia, rol)
 VALUES
  ('admin@example.com', 'scrypt:32768:8:1$Hid9QZTkQuxvOQsc$75db4c395ec522e9159b5e58cf012086b1f51e05388e72c4a898b9b76ec8ace4fb08590a30e9a3ce04acb71b6e633462d1773c1e8aed8ed6112bd5a0a7f3e0a8', 'admin'),
