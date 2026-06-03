@@ -1,29 +1,31 @@
 from flask import Flask, render_template
 from routes.routes import inicio
-from routes.evaluaciones import evaluaciones
+from routes.evaluaciones import evaluaciones_blueprint
+from routes.notas import notas_blueprint
 
 PORT = 8080
 
 app = Flask(__name__)
-app.register_blueprint(inicio)
-app.register_blueprint(evaluaciones)
-
 app.secret_key = "six_seven"
 
-@app.route("/alumnos")##solamente de prueba
+app.register_blueprint(inicio)
+app.register_blueprint(evaluaciones_blueprint, url_prefix='/evaluaciones')
+app.register_blueprint(notas_blueprint, url_prefix='/notas')
+
+# Solamente para testear
+@app.route("/alumnos")
 def mostrar_alumnos():
-    alumnos = ({"nombre":"pepe", "legajo":112533, "estado": "activo"},
+    alumnos = [
+        {"nombre":"pepe", "legajo":112533, "estado": "activo"},
         {"nombre":"maria", "legajo":114529, "estado": "activo"},
         {"nombre":"pedro", "legajo":111572, "estado": "inactivo"},
         {"nombre":"laura", "legajo":115343, "estado": "activo"},
-        {"nombre":"juan", "legajo":113323, "estado": "inactivo"});
+        {"nombre":"juan", "legajo":113323, "estado": "inactivo"}
+    ]
     return render_template("alumnos.html", alumnos=alumnos)
 
-@app.route("/notas")
-def notas():
-    return render_template("notas.html")
-
-
+import os
 
 if __name__ == "__main__":
-    app.run(debug=True, port=PORT)
+    debug_mode = os.environ.get("FLASK_DEBUG", "False").lower() in ("true", "1", "t")
+    app.run(debug=debug_mode, port=PORT)
