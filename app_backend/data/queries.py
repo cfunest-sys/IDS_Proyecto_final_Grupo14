@@ -902,6 +902,183 @@ def eliminar_material(id_material):
     finally:
         conn.close()
 
+def get_notas_filtradas(rol, usuario_id, legajo_alumno=None, id_evaluacion=None, id_curso=None, limit=10, offset=0):
+    """Obtiene el listado de notas aplicando paginación y seguridad estricta por rol."""
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT a.nombre AS alumno, e.nombre AS evaluacion, n.calificacion, n.fecha
+            FROM notas n
+            INNER JOIN alumnos a ON n.legajo_alumno = a.legajo
+            INNER JOIN evaluaciones e ON n.id_evaluacion = e.id_evaluacion
+            INNER JOIN cursos c ON e.id_curso = c.id_curso
+        """
+        condiciones = []
+        parametros = []
+
+        # alumno: Solo ve sus propias notas
+        if rol == "alumno":
+            condiciones.append("a.id_usuario = %s")
+            parametros.append(usuario_id)
+
+        # profesor: Solo ve notas de los cursos que dicta
+        elif rol == "profesor":
+            query += """
+                INNER JOIN profesor_curso pc ON c.id_curso = pc.id_curso
+                INNER JOIN profesores p ON pc.id_profesor = p.id_profesor
+            """
+            condiciones.append("p.id_usuario = %s")
+            parametros.append(usuario_id)
+
+        # Filtros opcionales de búsqueda
+        if legajo_alumno:
+            condiciones.append("n.legajo_alumno = %s")
+            parametros.append(legajo_alumno)
+
+        if id_evaluacion:
+            condiciones.append("n.id_evaluacion = %s")
+            parametros.append(id_evaluacion)
+
+        if id_curso:
+            condiciones.append("e.id_curso = %s")
+            parametros.append(id_curso)
+
+        if condiciones:
+            query += " WHERE " + " AND ".join(condiciones)
+
+        query += " LIMIT %s OFFSET %s"
+        parametros.extend([limit, offset])
+
+        cur.execute(query, parametros)
+        return cur.fetchall()
+
+    except Exception as e:
+        print(f"Error en queries.get_notas_filtradas: {e}")
+        raise e
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+
+def get_promedio_notas(rol, usuario_id, legajo_alumno=None, id_evaluacion=None, id_curso=None):
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT AVG(n.calificacion) AS promedio
+            FROM notas n
+            INNER JOIN alumnos a ON n.legajo_alumno = a.legajo
+            INNER JOIN evaluaciones e ON n.id_evaluacion = e.id_evaluacion
+            INNER JOIN cursos c ON e.id_curso = c.id_curso
+        """
+        condiciones = []
+        parametros = []
+
+        if rol == "alumno":
+            condiciones.append("a.id_usuario = %s")
+            parametros.append(usuario_id)
+            
+        elif rol == "profesor":
+            query += """
+                INNER JOIN profesor_curso pc ON c.id_curso = pc.id_curso
+                INNER JOIN profesores p ON pc.id_profesor = p.id_profesor
+            """
+            condiciones.append("p.id_usuario = %s")
+            parametros.append(usuario_id)
+
+        if legajo_alumno:
+            condiciones.append("n.legajo_alumno = %s")
+            parametros.append(legajo_alumno)
+
+        if id_evaluacion:
+            condiciones.append("n.id_evaluacion = %s")
+            parametros.append(id_evaluacion)
+
+        if id_curso:
+            condiciones.append("e.id_curso = %s")
+            parametros.append(id_curso)
+
+        if condiciones:
+            query += " WHERE " + " AND ".join(condiciones)
+
+        cur.execute(query, parametros)
+        resultado = cur.fetchone()
+        
+        if resultado and resultado['promedio'] is not None:
+            return round(float(resultado['promedio']), 2)
+        return 0.0
+
+    except Exception as e:
+        print(f"Error en queries.get_promedio_notas: {e}")
+        raise e
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+
+def verificar_alumno_evaluacion(legajo_alumno, id_evaluacion):
+    # Verifica la existencia del alumno y la evaluación antes de insertar o actualizar una nota
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        
+        cur.execute("SELECT legajo FROM alumnos WHERE legajo = %s", (legajo_alumno,))
+        alumno = cur.fetchone()
+        
+        cur.execute("SELECT id_evaluacion FROM evaluaciones WHERE id_evaluacion = %s", (id_evaluacion,))
+        evaluacion = cur.fetchone()
+        
+        return (alumno is not None) and (evaluacion is not None)
+    except Exception as e:
+        print(f"Error en verificar_alumno_evaluacion: {e}")
+        return False
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+
+def guardar_actualizar_nota(legajo_alumno, id_evaluacion, calificacion):
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+
+        query = """
+            INSERT INTO notas (legajo_alumno, id_evaluacion, calificacion, fecha)
+            VALUES (%s, %s, %s, CURDATE())
+            ON DUPLICATE KEY UPDATE
+                calificacion = VALUES(calificacion),
+                fecha = CURDATE()
+        """
+        cur.execute(query, (legajo_alumno, id_evaluacion, calificacion))
+        conn.commit()
+
+        cur.execute("""
+            SELECT legajo_alumno, id_evaluacion, calificacion, fecha
+            FROM notas
+            WHERE legajo_alumno = %s AND id_evaluacion = %s
+        """, (legajo_alumno, id_evaluacion))
+
+        return cur.fetchone()
+
+    except Exception as e:
+        if conn: conn.rollback()
+        print(f"Error guardar/actualizar nota: {e}")
+        raise e
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+        
 def registrar_login(id_usuario, email, resultado, ip):
     conn = get_connection()
     cur = conn.cursor()

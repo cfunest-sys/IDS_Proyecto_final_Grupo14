@@ -1,6 +1,6 @@
 from urllib import response
 from datetime import datetime
-from flask import Blueprint, redirect, render_template, request, flash
+from flask import Blueprint, redirect, render_template, request, flash, session
 import requests
 
 evaluaciones_blueprint = Blueprint("evaluaciones", __name__)
@@ -26,19 +26,24 @@ def listar_evaluaciones():
             
     return render_template("evaluaciones.html", evaluaciones=evaluaciones)
 
-# app.config["SESSION_PERMANENT"] = False     # Sessions expire when the browser is closed
-# app.config["SESSION_TYPE"] = "filesystem"   # Store session data in files
-# Session(app) 								# Initialize Flask-Session
 # 2. RUTA DEL CALENDARIO: http://127.0.0.1:8080/evaluaciones/calendario
 # Acá se muestra el calendario con las evaluaciones
 @evaluaciones_blueprint.route("/calendario", methods=["GET"])
 def calendario_evaluaciones():
-    # eventos = [{"nombre":"tp1", "tipo":"TP", "fecha": "2026-05-21", "curso":1},
-    # {"nombre":"Primer Parcial Teórico-Práctico", "tipo":"parcial", "fecha": "2027-12-20", "curso":2},
-    # {"nombre":"Trabajo Práctico Integrador Final", "tipo":"TP", "fecha": "2026-05-01", "curso":2},
-    # {"nombre":"Control de Lectura - Parcialito 1", "tipo":"parcialito", "fecha": "2026-05-13", "curso":1}]
+    # eventos = [{"nombre":"tp1", "tipo":"TP", "fecha": "2026-05-21", "curso":1},]
 
-    response = requests.get("http://127.0.0.1:5001/api/evaluaciones/todas")
+    # activar esto para probar el calendario sin iniciar sesion
+    # session["rol"] = "profesor"
+    # session["user_id"] = 2 
+    
+    data = {
+    	"rol": session["rol"],
+    	"user_id": session["user_id"]
+    }
+    response = requests.get(
+    	"http://127.0.0.1:5001/api/evaluaciones/usuario",
+    	json=data)
+
     json = response.json()
 
     eventos = []
@@ -51,7 +56,6 @@ def calendario_evaluaciones():
                 evento[3][5:-4],
                 "%d %b %Y %H:%M:%S"
             )
-
             eventos.append({
                 "nombre": evento[1],
                 "tipo": evento[2],
