@@ -31,7 +31,7 @@ def listar_evaluaciones():
 # Session(app) 								# Initialize Flask-Session
 # 2. RUTA DEL CALENDARIO: http://127.0.0.1:8080/evaluaciones/calendario
 # Acá se muestra el calendario con las evaluaciones
-@evaluaciones.route("/calendario", methods=["GET"])
+@evaluaciones_blueprint.route("/calendario", methods=["GET"])
 def calendario_evaluaciones():
     # eventos = [{"nombre":"tp1", "tipo":"TP", "fecha": "2026-05-21", "curso":1},
     # {"nombre":"Primer Parcial Teórico-Práctico", "tipo":"parcial", "fecha": "2027-12-20", "curso":2},
