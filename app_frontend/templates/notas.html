@@ -88,14 +88,10 @@
 
                 </label>
 
-                <select id="filtroEstado"
-                        class="form-select">
-
+                <select id="filtroEstado" class="form-select">
                     <option value="">Todas</option>
                     <option value="Aprobado">Aprobado</option>
-                    <option value="Desaprobado">Desaprobado</option>
-                    <option value="Ausente">Ausente</option>
-
+                    <option value="Insuficiente">Insuficiente</option>
                 </select>
 
             </div>
@@ -165,183 +161,70 @@
 
                         <th>Padrón / LU</th>
                         <th>Alumno</th>
-                        <th>Evaluación</th>
-                        <th>Nota Numérica</th>
-                        <th>Estado</th>
-                        <th class="text-center">Acciones</th>
+                        <th>Prom. TPs</th>
+                        <th>Prom. Parciales</th>
+                        <th>Prom. Parcialitos</th>
+                        <th>Prom. Final</th>
+                        <th>Condición</th>
 
                     </tr>
 
                 </thead>
 
                 <tbody>
-
-                    <!-- FILA -->
+                {% for alumno in resumen %}
                     <tr>
 
-                        <td>114947</td>
+                        <td>{{ alumno.padron }}</td>
 
                         <td class="fw-semibold alumno-columna">
-                            Nicolás Pattini
-                        </td>
-
-                        <td class="evaluacion-columna">
-                            Parcial 1
+                            {{ alumno.nombre }}
                         </td>
 
                         <td>
                             <span class="nota-box">
-                                6
+                                {{ alumno.prom_tp }}
                             </span>
-                        </td>
-
-                        <td class="estado-columna">
-
-                            <span class="badge uba-badge-success">
-                                Aprobado
-                            </span>
-
-                        </td>
-
-                        <td class="text-center">
-
-                            <button class="btn btn-sm btn-light border"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalNota">
-
-                                <i class="bi bi-pencil-square"></i>
-
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                    <!-- FILA -->
-                    <tr>
-
-                        <td>115660</td>
-
-                        <td class="fw-semibold alumno-columna">
-                            Julieta Fernández
-                        </td>
-
-                        <td class="evaluacion-columna">
-                            Trabajo Práctico
                         </td>
 
                         <td>
                             <span class="nota-box">
-                                7
+                                {{ alumno.prom_parcial }}
                             </span>
-                        </td>
-
-                        <td class="estado-columna">
-
-                            <span class="badge uba-badge-success">
-                                Aprobado
-                            </span>
-
-                        </td>
-
-                        <td class="text-center">
-
-                            <button class="btn btn-sm btn-light border"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalNota">
-
-                                <i class="bi bi-pencil-square"></i>
-
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                    <!-- FILA -->
-                    <tr>
-
-                        <td>115585</td>
-
-                        <td class="fw-semibold alumno-columna">
-                            Celeste Funes Taya
-                        </td>
-
-                        <td class="evaluacion-columna">
-                            Parcial 2
                         </td>
 
                         <td>
-                            <span class="nota-box nota-danger">
-                                7
+                            <span class="nota-box">
+                                {{ alumno.prom_parcialito }}
                             </span>
-                        </td>
-
-                        <td class="estado-columna">
-
-                            <span class="badge uba-badge-succes">
-                                Aprobado
-                            </span>
-
-                        </td>
-
-                        <td class="text-center">
-
-                            <button class="btn btn-sm btn-light border"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalNota">
-
-                                <i class="bi bi-pencil-square"></i>
-
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                    <!-- FILA -->
-                    <tr>
-
-                        <td>113987</td>
-
-                        <td class="fw-semibold alumno-columna">
-                            Lucca Moyano
-                        </td>
-
-                        <td class="evaluacion-columna">
-                            Parcial 2
                         </td>
 
                         <td>
-
-                            <span class="nota-box nota-ausente">
-                                -
+                            <span class="nota-box {% if alumno.prom_final < 4 %}nota-danger{% endif %}">
+                                {{ alumno.prom_final }}
                             </span>
-
                         </td>
 
                         <td class="estado-columna">
-
-                            <span class="badge uba-badge-warning">
-                                Ausente
-                            </span>
-
-                        </td>
-
-                        <td class="text-center">
-
-                            <button class="btn btn-sm btn-light border"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalNota">
-
-                                <i class="bi bi-pencil-square"></i>
-
-                            </button>
-
+                            {% if alumno.condicion == 'Aprobado' %}
+                                <span class="badge uba-badge-success bg-success">
+                                    Aprobado
+                                </span>
+                            {% else %}
+                                <span class="badge uba-badge-danger bg-danger">
+                                    Insuficiente
+                                </span>
+                            {% endif %}
                         </td>
 
                     </tr>
-
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 empty-state">
+                            No hay actas ni promedios registrados en el sistema.
+                        </td>
+                    </tr>
+                {% endfor %}
                 </tbody>
 
             </table>
@@ -462,114 +345,51 @@
 
 <!-- SCRIPT -->
 <script>
-
 document.addEventListener("DOMContentLoaded", () => {
-
-    const filtroEvaluacion =
-        document.getElementById("filtroEvaluacion");
-
-    const filtroEstado =
-        document.getElementById("filtroEstado");
-
-    const busquedaAlumno =
-        document.getElementById("busquedaAlumno");
-
-    const btnLimpiar =
-        document.getElementById("btnLimpiarFiltros");
-
-    const filas =
-        document.querySelectorAll("#tablaNotas tbody tr");
+    // Como el select de evaluación ya no aplica a promedios consolidados, 
+    // controlamos si existe para evitar errores en la carga de la página
+    const filtroEstado = document.getElementById("filtroEstado");
+    const busquedaAlumno = document.getElementById("busquedaAlumno");
+    const btnLimpiar = document.getElementById("btnLimpiarFiltros");
+    const filas = document.querySelectorAll("#tablaNotas tbody tr");
 
     function aplicarFiltros() {
-
-        const evaluacion =
-            filtroEvaluacion.value.toLowerCase();
-
-        const estado =
-            filtroEstado.value.toLowerCase();
-
-        const busqueda =
-            busquedaAlumno.value.toLowerCase();
+        const estado = filtroEstado ? filtroEstado.value.toLowerCase() : "";
+        const busqueda = busquedaAlumno ? busquedaAlumno.value.toLowerCase() : "";
 
         filas.forEach(fila => {
+            // Validamos que no sea la fila de "No hay actas"
+            const alumnoCol = fila.querySelector(".alumno-columna");
+            if (!alumnoCol) return; 
 
-            const alumno =
-                fila.querySelector(".alumno-columna")
-                    .innerText
-                    .toLowerCase();
+            const alumno = alumnoCol.innerText.toLowerCase();
+            const padron = fila.children[0].innerText.toLowerCase(); // Primer TD: Padrón
+            const estadoFila = fila.querySelector(".estado-columna").innerText.toLowerCase();
 
-            const padron =
-                fila.children[0]
-                    .innerText
-                    .toLowerCase();
+            const coincideEstado = estado === "" || estadoFila.includes(estado);
+            const coincideBusqueda = alumno.includes(busqueda) || padron.includes(busqueda);
 
-            const evaluacionFila =
-                fila.querySelector(".evaluacion-columna")
-                    .innerText
-                    .toLowerCase();
-
-            const estadoFila =
-                fila.querySelector(".estado-columna")
-                    .innerText
-                    .toLowerCase();
-
-            const coincideEvaluacion =
-                evaluacion === "" ||
-                evaluacionFila.includes(evaluacion);
-
-            const coincideEstado =
-                estado === "" ||
-                estadoFila.includes(estado);
-
-            const coincideBusqueda =
-                alumno.includes(busqueda) ||
-                padron.includes(busqueda);
-
-            if (
-                coincideEvaluacion &&
-                coincideEstado &&
-                coincideBusqueda
-            ) {
-
+            if (coincideEstado && coincideBusqueda) {
                 fila.style.display = "";
-
             } else {
-
                 fila.style.display = "none";
-
             }
-
         });
-
     }
 
-    filtroEvaluacion.addEventListener(
-        "change",
-        aplicarFiltros
-    );
+    if (filtroEstado) filtroEstado.addEventListener("change", aplicarFiltros);
+    if (busquedaAlumno) busquedaAlumno.addEventListener("keyup", aplicarFiltros);
 
-    filtroEstado.addEventListener(
-        "change",
-        aplicarFiltros
-    );
-
-    busquedaAlumno.addEventListener(
-        "keyup",
-        aplicarFiltros
-    );
-
-    btnLimpiar.addEventListener("click", () => {
-
-        filtroEvaluacion.value = "";
-        filtroEstado.value = "";
-        busquedaAlumno.value = "";
-
-        aplicarFiltros();
-
-    });
-
+    if (btnLimpiar) {
+        btnLimpiar.addEventListener("click", () => {
+            if (filtroEstado) filtroEstado.value = "";
+            if (busquedaAlumno) busquedaAlumno.value = "";
+            const filtroEvaluacion = document.getElementById("filtroEvaluacion");
+            if (filtroEvaluacion) filtroEvaluacion.value = "";
+            aplicarFiltros();
+        });
+    }
 });
-
 </script>
 
 {% endblock %}

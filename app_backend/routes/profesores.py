@@ -1,12 +1,11 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from utils.auth import validate_profesor_credentials
 from data.queries import crear_profesor, registrar_login
 
 profesores_bp = Blueprint("profesores", __name__)
 
 
-@profesores_bp.route("/login", methods=["POST"])
+"""@profesores_bp.route("/login", methods=["POST"])
 def login():
 
     data = request.get_json()
@@ -49,7 +48,7 @@ def login():
             }
         ),
         200,
-    )
+    )"""
 
 
 @profesores_bp.route("/me", methods=["GET"])

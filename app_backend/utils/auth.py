@@ -1,109 +1,65 @@
-import jwt
-from flask import request, jsonify
 from functools import wraps
-from datetime import datetime, timezone
+from flask import jsonify
+from flask_jwt_extended import create_access_token, verify_jwt_in_request, get_jwt_identity, get_jwt
+from flask_jwt_extended.exceptions import JWTExtendedException
 from werkzeug.security import check_password_hash, generate_password_hash
-from data.queries import get_profesor_by_email
+from data.queries import get_usuario_by_email
 from config import JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRES
 
+from data.queries import get_profesor_by_email
 
 # Genera los tokens JWT para los usuarios autenticados
 
+
 def generate_token(usuario_id, rol):
-
-    now = datetime.now(timezone.utc)
-
-    payload = {
-        "sub": usuario_id,
-        "rol": rol,
-        "iat": now,
-        "exp": now + JWT_ACCESS_TOKEN_EXPIRES
-    }
-
-    token = jwt.encode(
-        payload,
-        JWT_SECRET_KEY,
-        algorithm="HS256"
-    )
-
-    return token
+    return create_access_token(identity=str(usuario_id), additional_claims={"rol": rol})
 
 
 # Valida las credenciales del profesor y genera un token JWT si son correctas
 
-def validate_profesor_credentials(email, password):
-    profesor = get_profesor_by_email(email)
-    if not profesor:
+
+def validate_user_credentials(email, password):
+    usuario = get_usuario_by_email(email)
+    if not usuario:
+        return None
+    if not check_password_hash(usuario["password"], password):
         return None
 
-    if check_password_hash(profesor["password"], password):
+    token = generate_token(
+        usuario_id=usuario["id_usuario"],
+        rol=usuario["rol"]
+    )
+    return {
+        "usuario": usuario,
+        "token": token
+    }
 
-        token = generate_token(
-            usuario_id=profesor["id"],
-            rol=profesor["rol"]
-        )
-        return {
-            "profesor": profesor,
-            "token": token
-        }
 
-    return None
 
 
 # Decorador para proteger rutas que requieren autenticación
-
 def token_required(f):
 
     @wraps(f)
     def decorated(*args, **kwargs):
 
-        auth_header = request.headers.get("Authorization")
-        # Si no se proporciona el token en el encabezado de autorización, se devuelve un error 401
-        if not auth_header:
-            return jsonify({
-                "message": "Token faltante"
-            }), 401
-
-        parts = auth_header.split()
-        # Verifica formato: Bearer <token>
-        if len(parts) != 2 or parts[0] != "Bearer":
-            return jsonify({
-                "message": "Formato de token inválido"
-            }), 401
-
-        token = parts[1]
-
         try:
+            verify_jwt_in_request()
 
-            # Se recupera el payload del token para obtener la información del usuario autenticado
-            payload = jwt.decode(
-                token,
-                JWT_SECRET_KEY,
-                algorithms=["HS256"]
-            )
+            user_id = get_jwt_identity()
+            claims = get_jwt()
 
-            current_user = {
-                "id": payload["sub"],
-                "rol": payload["rol"]
-            }
-        # Si el token ha expirado, se devuelve un error 401 indicando que el token ha expirado
-        except jwt.ExpiredSignatureError:
-            return jsonify({
-                "message": "Token expirado"
-            }), 401
-        # Si el token es inválido por cualquier otra razón, se devuelve un error 401 indicando que el token es inválido
-        except jwt.InvalidTokenError:
-            return jsonify({
-                "message": "Token inválido"
-            }), 401
-        # Si el token es válido, se llama a la función decorada pasando la información del usuario autenticado como argumento
+            current_user = {"id": int(user_id), "rol": claims.get("rol")}
+        except JWTExtendedException:
+            return jsonify({"message": "Token inválido o expirado"}), 401
+
         return f(current_user, *args, **kwargs)
 
     return decorated
 
 
-
 # Decorador para proteger rutas que requieren un rol específico
+
 
 def rol_required(expected_role):
     def decorator(f):
@@ -112,9 +68,7 @@ def rol_required(expected_role):
 
             if current_user["rol"] != expected_role:
 
-                return jsonify({
-                    "message": "Forbidden"
-                }), 403
+                return jsonify({"message": "Forbidden"}), 403
 
             return f(current_user, *args, **kwargs)
 
@@ -124,6 +78,5 @@ def rol_required(expected_role):
 
 
 # Función para hashear contraseñas
-
 def hash_password(password):
     return generate_password_hash(password)

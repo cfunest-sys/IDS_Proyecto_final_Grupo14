@@ -1,9 +1,9 @@
 from flask import Blueprint, redirect, render_template, request, flash, jsonify
 import requests
 
-equipos = Blueprint("equipos",__name__)
+equipos_bp = Blueprint("equipos_bp",__name__)
 
-@equipos.route("/equipos", methods=['GET'])
+@equipos_bp.route("/equipos", methods=['GET'])
 def ver_equipos():
     id_curso = request.args.get("id_curso")
     id_equipo = request.args.get("id_equipo")
@@ -49,7 +49,7 @@ def ver_equipos():
     return render_template("equipos.html", equipos=lista_equipos, cursos=lista_cursos)
 
 
-@equipos.route("/equipos/crear", methods=['POST'])
+@equipos_bp.route("/equipos/crear", methods=['POST'])
 def crear_equipo():
     nombre = request.form.get("nombre_equipo")
     id_curso = request.form.get("id_curso")
@@ -78,7 +78,7 @@ def crear_equipo():
     return redirect("/equipos")
 
 
-@equipos.route("/equipos/modificar", methods=['POST'])
+@equipos_bp.route("/equipos/modificar", methods=['POST'])
 def modificar_equipo():
     id_equipo = request.form.get("id_equipo")
     nombre = request.form.get("nombre_equipo")
@@ -108,7 +108,7 @@ def modificar_equipo():
     return redirect("/equipos")
 
 
-@equipos.route("/equipos/eliminar", methods=['POST'])
+@equipos_bp.route("/equipos/eliminar", methods=['POST'])
 def eliminar_equipo():
     id_equipo = request.form.get("id_equipo")
 
@@ -130,7 +130,7 @@ def eliminar_equipo():
     return redirect("/equipos")
 
 
-@equipos.route("/equipos/agregar-alumno", methods=['POST'])
+@equipos_bp.route("/equipos/agregar-alumno", methods=['POST'])
 def agregar_alumno_equipo():
     id_equipo = request.form.get("id_equipo")
     legajo_alumno = request.form.get("legajo_alumno")
@@ -158,7 +158,7 @@ def agregar_alumno_equipo():
     return redirect("/equipos")
 
 
-@equipos.route("/equipos/eliminar-alumno", methods=['POST'])
+@equipos_bp.route("/equipos/eliminar-alumno", methods=['POST'])
 def eliminar_alumno_equipo():
     id_miembro = request.form.get("id_miembro")
 
@@ -180,7 +180,7 @@ def eliminar_alumno_equipo():
 
 
 #Ruta auxiliar para los datos que necesita js
-@equipos.route("/equipos/datos/<id_equipo>", methods=['GET'])
+@equipos_bp.route("/equipos/datos/<id_equipo>", methods=['GET'])
 def obtener_datos_equipos(id_equipo):
     try:
         response = requests.get(f"http://127.0.0.1:5001/api/equipos/{id_equipo}")

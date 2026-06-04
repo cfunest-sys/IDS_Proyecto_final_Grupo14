@@ -1,137 +1,149 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap");
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: 'Montserrat', sans-serif;
-    background-color: #f4f4f4;
+  font-family: "Montserrat", sans-serif;
+  background-color: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
-
+main {
+  flex: 1;
+}
 /* NAVBAR */
 
 .navbar-custom {
-    background-color: #7fa7d8;
-    padding: 15px 30px;
+  background-color: #7fa7d8;
+  padding: 15px 30px;
 }
 
 .navbar-brand {
-    font-weight: bold;
-    color: white !important;
+  font-weight: bold;
+  color: white !important;
 }
 
 .nav-link {
-    color: white !important;
-    font-weight: 600;
-    margin-left: 15px;
+  color: white !important;
+  font-weight: 600;
+  margin-left: 15px;
 }
 
 .uba-logo {
-    height: 60px;
-    width: auto;
+  height: 60px;
+  width: auto;
+}
+/* MOBILE */
+
+.navbar-toggler:focus {
+  box-shadow: none;
+}
+
+.uba-logo {
+  height: 60px;
+  width: auto;
 }
 
 /* HERO */
 
 .hero-section {
-    min-height: 90vh;
+  min-height: 90vh;
 
-    background-image:
-        linear-gradient(
-            rgba(255,255,255,0.65),
-            rgba(255,255,255,0.65)
-        ),
-        url('images/background.jpeg');
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.65)),
+    url("images/background.jpeg");
 
-    background-size: cover;
-    background-position: center;
+  background-size: cover;
+  background-position: center;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-    text-align: center;
-    padding: 40px;
+  text-align: center;
+  padding: 40px;
 }
 
 .overlay {
-    width: 100%;
+  width: 100%;
 }
 
 .titulo-principal {
-    font-size: 4rem;
-    font-weight: 700;
-    color: #1f1f1f;
+  font-size: 4rem;
+  font-weight: 700;
+  color: #1f1f1f;
 
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .subtitulo {
-    font-size: 1.3rem;
-    color: #333;
+  font-size: 1.3rem;
+  color: #333;
 
-    margin-bottom: 50px;
+  margin-bottom: 50px;
 }
 
 /* BOTONES */
 
 .btn-campus {
-    background-color: #1f0f9b;
-    color: white;
-    border-radius: 20px;
+  background-color: #1f0f9b;
+  color: white;
+  border-radius: 20px;
 
-    padding: 15px 40px;
+  padding: 15px 40px;
 
-    font-weight: bold;
-    border: none;
+  font-weight: bold;
+  border: none;
 
-    transition: 0.3s;
+  transition: 0.3s;
 }
 
 .btn-campus:hover {
-    background-color: #14096d;
-    color: white;
+  background-color: #14096d;
+  color: white;
 }
 
 .btn-azul-ids {
-    background-color:  #1d2554;
-    border: none; 
+  background-color: #1d2554;
+  border: none;
 }
 .btn-azul-ids:hover {
-    background-color:  #91bde1;
+  background-color: #91bde1;
 }
 /* Línea divisoria vertical sutil del login */
 .divisor-vertical {
-    border-left: 1px solid #e0e0e0;
+  border-left: 1px solid #e0e0e0;
 }
 
 /* CARDS */
 
 .card-custom {
-    border-radius: 20px;
-    border: none;
+  border-radius: 20px;
+  border: none;
 }
 
 /* FOOTER */
 
 .footer-custom {
-    background-color: #7fa7d8;
+  background-color: #7fa7d8;
 
-    color: white;
+  color: white;
 
-    text-align: center;
+  text-align: center;
 
-    padding: 15px;
+  padding: 15px;
 }
 
 /* TITULOS */
 
 .page-title {
-    font-weight: bold;
-    margin-bottom: 30px;
+  font-weight: bold;
+  margin-bottom: 30px;
 }
 
 /*CSS de equipos*/
@@ -251,6 +263,7 @@ h2, h3 {
     font-weight: 700;
 }
 
+<<<<<<< HEAD
 .tabla-equipos-vacia {
     text-align: center;
     font-weight: bold;
@@ -262,4 +275,227 @@ h2, h3 {
     display: flex !important;
     justify-content: space-between;
     align-items: center;
+=======
+/* perfil */
+
+.body-perfil {
+    background-color: #fafafa;
+    padding: 2rem 1rem;
+}
+
+.contenedor-principal {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* HEADER */
+.header-plataforma {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #eaeaea;
+}
+
+.logo-texto { font-size: 3rem; font-weight: 600; margin-top: 40px; }
+.subtitulo-texto { font-size: 0.75rem; color: #888; }
+.badge-rol { font-size: 0.8rem; background: #eee; padding: 0.3rem 0.8rem; border-radius: 4px; }
+
+/* REGLAS DE COLUMNAS */
+.grid-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+@media (min-width: 768px) {
+    .grid-layout { flex-direction: row; }
+    .columna-izquierda { flex: 1; }
+    .columna-derecha { flex: 2; }
+}
+
+.columna-izquierda, .columna-derecha {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* ESTILO BASE CAJAS BLANCAS */
+.tarjeta-foto, .tarjeta-datos, .tarjeta-academica {
+    background: #ffffff;
+    padding: 1.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+/* FOTO PERFIL */
+.tarjeta-foto {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.avatar-iniciales {
+    width: 80px;
+    height: 80px;
+    background: #5192c2;
+    color: #fff;
+    font-size: 1.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+}
+
+.nombre-alumno { 
+    font-size: 1.2rem; 
+    font-weight: 700; 
+}
+
+.badge-estado { 
+    font-size: 0.7rem; 
+    color: #16a34a; 
+    font-weight: 700; 
+    margin-top: 0.5rem; 
+}
+
+/* DATOS LATERALES */
+.titulo-seccion-lateral, .titulo-seccion-principal {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #666;
+    margin-bottom: 1rem;
+}
+
+.item-dato { 
+    margin-bottom: 0.75rem; 
+}
+.etiqueta-dato { 
+    font-size: 0.7rem; 
+    color: #999; 
+    display: block; 
+}
+.valor-dato { 
+    font-size: 0.9rem; 
+    font-weight: 600; 
+}
+
+.sub-grid-datos { 
+    display: flex; 
+    gap: 1rem; 
+}
+.sub-grid-datos div { 
+    flex: 1; 
+}
+.valor-badge-dato { 
+    font-size: 0.9rem; 
+    font-weight: 700; 
+    background: #f5f5f5; 
+    padding: 0.25rem 0.5rem; 
+    border-radius: 4px; 
+}
+
+/* CONTENIDO ACADÉMICO */
+.titulo-seccion-principal { 
+    font-size: 1rem; 
+    color: #222; 
+    border-bottom: 1px solid #eee; 
+    padding-bottom: 0.5rem; 
+}
+
+.contenedor-equipo {
+    background: #fafafa;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #eaeaea;
+}
+.nombre-equipo { 
+    font-size: 1.1rem; 
+    font-weight: 700; 
+}
+.subetiqueta-equipo { 
+    font-size: 0.7rem; 
+    color: #2563eb; 
+    font-weight: 600; 
+}
+.footer-equipo { 
+    margin-top: 1rem; 
+    padding-top: 0.5rem; 
+    border-top: 1px solid #eee; 
+    display: flex; 
+    justify-content: space-between; 
+    font-size: 0.8rem; 
+    color: #666; 
+}
+
+/* EVALUACIONES */
+.lista-evaluaciones { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.tarjeta-evaluacion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 6px;
+}
+
+.borde-parcial { 
+    border-left: 3px solid #ef4444; 
+}
+.borde-tp { 
+    border-left: 3px solid #3b82f6; 
+}
+
+.nombre-evaluacion { 
+    font-size: 0.9rem; 
+    font-weight: 600; 
+}
+.tipo-evaluacion { 
+    font-size: 0.7rem; 
+    color: #666; 
+    font-weight: 600; 
+    text-transform: uppercase; 
+}
+.badge-fecha { 
+    font-size: 0.85rem; 
+    font-weight: 700; 
+    background: #f5f5f5; 
+    padding: 0.3rem 0.6rem; 
+    border-radius: 4px; 
+}
+.texto-fecha-label { 
+    font-size: 0.7rem; 
+    color: #999; 
+    margin-right: 0.25rem; 
+}
+
+/*Profesores*/
+
+.badge-profesor {
+    background-color: #dbeafe !important; 
+    color: #001f3f !important; 
+    border-color: #93c5fd !important;
+}
+
+.avatar-profesor {
+    background: #4b5563 !important;
+} 
+
+.badge-activo-prof {
+    font-size: 0.7rem; 
+    color: #2563eb; 
+    font-weight: 700; 
+    margin-top: 0.5rem;
+}
+
+.text-profesor {
+    color: #2d208f !important;
+>>>>>>> main
 }
