@@ -1,12 +1,14 @@
 from flask import Flask, render_template
 from routes.routes import inicio
 from routes.evaluaciones import evaluaciones
+from routes.equipos import equipos
 
 PORT = 8080
 
 app = Flask(__name__)
 app.register_blueprint(inicio)
 app.register_blueprint(evaluaciones)
+app.register_blueprint(equipos)
 
 app.secret_key = "six_seven"
 

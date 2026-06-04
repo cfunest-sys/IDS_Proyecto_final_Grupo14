@@ -152,3 +152,91 @@ if (formulario) {
     });
 
 }
+
+
+// Modificar equipo
+const inputIdModificar = document.getElementById("modificar_id_equipo");
+const inputNombreModificar = document.getElementById("modificar_nombre_equipo");
+const inputCursoModificar = document.getElementById("modificar_id_curso");
+
+if (inputIdModificar) {
+    inputIdModificar.addEventListener("input", function() {
+        const idBuscado = this.value;
+
+        if (idBuscado !== "") {
+            fetch(`/equipos/datos/${idBuscado}`)
+                .then(response => {
+                    return response.json().then(data => {
+                        if (!response.ok) {
+                            throw new Error(data.error || "Error del servidor");
+                        }
+                        return data;
+                    });
+                })
+                .then(equipo => {
+                    inputNombreModificar.value = equipo.nombre_equipo;
+                    inputCursoModificar.value = equipo.id_curso;
+                })
+                .catch(error => {
+                    console.warn(`Buscando...: ${error.message}`);
+                    inputNombreModificar.value = ""
+                    inputCursoModificar.value = ""
+                });
+        } else {
+            inputNombreModificar.value = "";
+            inputCursoModificar.value = "";
+        }
+    });
+}
+
+// Modificar alumnos de equipos
+const modalAlumnos = document.getElementById('modal_alumnos');
+
+if (modalAlumnos) {
+    modalAlumnos.addEventListener('show.bs.modal', function (event) {
+        const botonElemento = event.relatedTarget;
+        const idEquipo = botonElemento.getAttribute('data-id');
+        const inputHiddenEquipo = document.getElementById('modal_alumnos_id_equipo');
+        const tituloModal = document.getElementById('titulo_alumnos_modal');
+        const grupoLista = document.getElementById('grupo_lista_alumnos');
+
+        inputHiddenEquipo.value = idEquipo;
+        tituloModal.innerText = `Alumnos asignados al Equipo ${idEquipo}:`;
+
+        grupoLista.innerHTML = "";
+        const moldeCargando = document.getElementById('molde_cargando').content.cloneNode(true);
+        grupoLista.appendChild(moldeCargando);
+
+        fetch(`/equipos/datos/${idEquipo}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error del servidor");
+                }
+                return response.json();
+            })
+            .then(equipo => {
+                grupoLista.innerHTML = "";
+
+                if (!equipo.alumnos || equipo.alumnos.length === 0) {
+                    const moldeVacio = document.getElementById('molde_vacio').content.cloneNode(true);
+                    grupoLista.appendChild(moldeVacio);
+                    return;
+                }
+
+                equipo.alumnos.forEach(alumno => {
+                    const moldeFila = document.getElementById('molde_alumno_fila').content.cloneNode(true);
+                    
+                    moldeFila.querySelector('.txt-legajo').innerText = `Padrón: ${alumno.legajo_alumno}`;
+                    moldeFila.querySelector('.input-id-miembro').value = alumno.id_miembro;
+                    
+                    grupoLista.appendChild(moldeFila);
+                });
+            })
+            .catch(error => {
+                console.error(error);
+                grupoLista.innerHTML = '';
+                const moldeError = document.getElementById('molde_error').content.cloneNode(true);
+                grupoLista.appendChild(moldeError);
+            });
+    });
+} 
