@@ -1,9 +1,9 @@
 CREATE DATABASE IF NOT EXISTS data_base;
 USE data_base;
-SET FOREIGN_KEY_CHECKS = 0; -- Deshabilitar temporalmente las comprobaciones de claves foráneas para evitar errores de tablas
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS miembros_equipo;
-DROP TABLE IF EXISTS profesor_curso;
 DROP TABLE IF EXISTS logs_login;
+DROP TABLE IF EXISTS materiales;
 DROP TABLE IF EXISTS equipos;
 DROP TABLE IF EXISTS evaluaciones;
 DROP TABLE IF EXISTS notas;
@@ -12,9 +12,12 @@ DROP TABLE IF EXISTS password_reset_tokens;
 DROP TABLE IF EXISTS alumnos;
 DROP TABLE IF EXISTS profesores;
 DROP TABLE IF EXISTS cursos;
+DROP TABLE IF EXISTS evaluaciones;
 DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS qr_asistencia;
 DROP TABLE IF EXISTS asistencia;
+
+
 CREATE TABLE usuarios (
     id_usuario INTEGER PRIMARY KEY AUTO_INCREMENT,
     email TEXT NOT NULL,
@@ -32,8 +35,14 @@ CREATE TABLE password_reset_tokens (
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );
 CREATE TABLE alumnos (
-    legajo INTEGER PRIMARY KEY,
+    legajo INTEGER PRIMARY KEY AUTO_INCREMENT,
     nombre TEXT NOT NULL,
+    apellido TEXT NOT NULL,
+    dni TEXT NOT NULL UNIQUE,
+    email TEXT,
+    curso TEXT,
+    anio INTEGER,
+    cuatrimestre INTEGER, 
     estado TEXT NOT NULL,
     id_usuario INTEGER,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
@@ -66,14 +75,26 @@ CREATE TABLE evaluaciones (
     id_curso INT NOT NULL,
     FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
 );
+
 CREATE TABLE notas (
-    id_nota INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     legajo_alumno INT NOT NULL,
     id_evaluacion INT NOT NULL,
-    nota DECIMAL(5,2) NOT NULL,
+    calificacion DECIMAL(4,2) NOT NULL,
+    fecha DATE NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_notas_alumno_id (legajo_alumno),
+    INDEX idx_notas_evaluacion_id (id_evaluacion),
+
+    CONSTRAINT unique_alumno_evaluacion UNIQUE (legajo_alumno, id_evaluacion),
+    CONSTRAINT chk_calificacion_range CHECK (calificacion >= 0 AND calificacion <= 10),
+
     FOREIGN KEY (legajo_alumno) REFERENCES alumnos(legajo),
     FOREIGN KEY (id_evaluacion) REFERENCES evaluaciones(id_evaluacion)
-);
+    
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE equipos (
     id_equipo INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     nombre_equipo VARCHAR(255) NOT NULL,
@@ -84,6 +105,7 @@ CREATE TABLE equipos (
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE miembros_equipo (
     id_miembro INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     id_equipo INT NOT NULL,
@@ -92,6 +114,51 @@ CREATE TABLE miembros_equipo (
     FOREIGN KEY (legajo_alumno) REFERENCES alumnos(legajo),
     UNIQUE(id_equipo, legajo_alumno)
 ) ENGINE=InnoDB;
+CREATE TABLE materiales(
+  id_material INT AUTO_INCREMENT PRIMARY KEY,
+    id_curso INT NOT NULL,
+    id_profesor INT NOT NULL,
+    titulo VARCHAR(200) NOT NULL,
+    descripcion TEXT,
+    tipo_material ENUM(
+        'apunte',
+        'guia',
+        'video',
+        'imagen',
+        'documento',
+        'archivo',
+        'bibliografia',
+        'otro'
+    ) NOT NULL,
+    tema VARCHAR(100),
+    orden_material INT DEFAULT 0,
+    archivo_ruta VARCHAR(500) NOT NULL,
+    es_externo BOOLEAN DEFAULT FALSE,
+    tipo_archivo VARCHAR(50),
+    tamaño_bytes BIGINT,
+    fecha_material DATE,
+    es_libre BOOLEAN DEFAULT FALSE,
+    activo BOOLEAN DEFAULT TRUE,
+    estado ENUM(
+        'borrador',
+        'publicado',
+        'archivado'
+    ) DEFAULT 'publicado',
+    fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_curso)
+        REFERENCES cursos(id_curso)
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_profesor)
+        REFERENCES profesores(id_profesor)
+        ON DELETE RESTRICT,
+    INDEX idx_curso (id_curso),
+    INDEX idx_profesor (id_profesor),
+    INDEX idx_tema (tema),
+    INDEX idx_tipo (tipo_material),
+    INDEX idx_curso_tipo (id_curso, tipo_material)
+);
 CREATE TABLE qr_asistencia (
     id_qr INT AUTO_INCREMENT PRIMARY KEY,
     codigo VARCHAR(255) NOT NULL,
@@ -115,33 +182,57 @@ VALUES
  ('profesor@example.com', 'scrypt:32768:8:1$8DIUDP0hWtiGIYf5$dfa9cafbc33ae053c7ec1aa3e680074e0f8fb6a220fc7ba763c063c3b36dce8a6ab3a71f3ab9d375b1766402c2a54d61228070f531dcbaa2cd5fa89b76ac355d', 'profesor'),
  ('alumno@example.com', 'scrypt:32768:8:1$CJT3ez7XdwNDV3oS$f86dd776ceaa5b38df2ccd16164b3e6f50dd3fc76bc951b353ac9316283e57e59ece0079bc76eeb98290e8a04ba95d0428e87632dfb39b6c43cd5525ff6536cc', 'alumno'),
  ('JuanPerez@gmail.com', 'scrypt:32768:8:1$xVqTD27xuA95I8wt$51965ef800581032c12342c890ecdff213d189e043a57b8fb7485cd10e6b40fc31c880cd42cf05c6ddb5df14545648e173793d4478825f65af12669a8593427c', 'profesor');
+ 
 INSERT INTO profesores (nombre, departamento, id_usuario)
 VALUES
  ('Dr. Smith', 'Matemáticas', 2),
  ('juan', 'intro DS', 4 );
 
-INSERT INTO alumnos (legajo, nombre, estado, id_usuario)
-VALUES
- (115598, 'Juan Pérez', 'activo', 3);
+INSERT INTO alumnos (
+    legajo,
+    nombre,
+    apellido,
+    dni,
+    curso,
+    anio,
+    cuatrimestre,
+    estado,
+    id_usuario
+)
+VALUES (
+    115598,
+    'Juan',
+    'Pérez',
+    '40123456',
+    '75.40',
+    2,
+    1,
+    'activo',
+    3
+);
 INSERT INTO cursos (nombre, anio, semestre)
 VALUES
  ('Introducción al Desarrollo', 2024, 1),
  ('Fundamentos de Programación', 2024, 2);
+
 INSERT INTO evaluaciones (nombre, tipo, fecha, id_curso)
 VALUES 
     ('Primer Parcial Teórico-Práctico', 'parcial', '2026-05-20', 1),
     ('Trabajo Práctico Integrador Final', 'TP', '2026-06-17', 1),
     ('Control de Lectura - Parcialito 1', 'parcialito', '2026-05-13', 2);
-INSERT INTO notas (legajo_alumno, id_evaluacion, nota)
+
+INSERT INTO notas (legajo_alumno, id_evaluacion, calificacion, fecha)
 VALUES
-    (115598, 1, 8.5),
-    (115598, 2, 9.0),
-    (115598, 3, 7.5);
+    (115598, 1, 8.5, CURDATE()),
+    (115598, 2, 9.0, CURDATE()),
+    (115598, 3, 7.5, CURDATE());
+
 INSERT INTO equipos (nombre_equipo, id_curso)
 VALUES 
     ('Equipo Artemis 3', 1),
     ('Equipo Backend Masters', 1),
     ('Equipo Gastronómico Control', 2);
+
 INSERT INTO miembros_equipo (id_equipo, legajo_alumno)
 VALUES
     (1, 115598);
@@ -150,4 +241,4 @@ VALUES
  (2, 1),
  (2, 2),
  (1, 1);
-SET FOREIGN_KEY_CHECKS = 1;  -- Restaurar la verificación de claves foráneas
+SET FOREIGN_KEY_CHECKS = 1;

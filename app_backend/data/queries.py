@@ -2,6 +2,8 @@ from werkzeug.security import generate_password_hash
 
 from database.db import get_connection
 from flask import jsonify
+import csv
+import io
 
 # def crear_base_datos():
 #     connection = get_connection()
@@ -731,6 +733,352 @@ def delete_miembro(id_miembro):
         if conexion:
             conexion.close()
 
+
+# <------------------- MATERIALES  ----------------------------->
+CAMPOS_PERMITIDOS_UPDATE = {
+    'titulo', 'descripcion', 'tema', 'fecha_material',
+    'estado', 'orden_material', 'es_libre', 'tipo_material'
+}
+ESTADOS_VALIDOS = {'borrador', 'publicado', 'archivado'}
+
+def insertar_material(
+    id_curso,
+    id_profesor,
+    titulo,
+    descripcion,
+    tipo_material,
+    tema=None,
+    orden_material=0,
+    archivo_ruta=None,
+    es_externo=False,
+    tipo_archivo=None,
+    tamano_bytes=None,
+    fecha_material=None,
+    es_libre=False,
+    estado='publicado'
+):
+    if estado not in ESTADOS_VALIDOS:
+        raise ValueError(f"Estado inválido: {estado}")
+    if not id_curso or not id_profesor or not titulo:
+        raise ValueError("id_curso, id_profesor y titulo son obligatorios")
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        query = """
+            INSERT INTO materiales
+            (id_curso, id_profesor, titulo, descripcion, tipo_material,
+             tema, orden_material, archivo_ruta, es_externo, tipo_archivo,
+             tamano_bytes, fecha_material, es_libre, estado)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(query, (
+            id_curso, id_profesor, titulo, descripcion, tipo_material,
+            tema, orden_material, archivo_ruta, es_externo, tipo_archivo,
+            tamano_bytes, fecha_material, es_libre, estado
+        ))
+        conn.commit()
+        return cursor.lastrowid
+    except Exception as e:
+        conn.rollback()
+        print(f"Error inserting material: {e}")
+        return None
+    finally:
+        conn.close()
+
+def get_materiales(
+    id_curso=None,
+    id_profesor=None,
+    tipo_material=None,
+    tema=None,
+    estado=None,
+    es_libre=None,
+    activo=True,
+    pagina=1,
+    limite=20
+):
+    conn = get_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        where_clauses = []
+        params = []
+        if activo is not None:
+            where_clauses.append("activo = %s")
+            params.append(activo)
+        if id_curso:
+            where_clauses.append("id_curso = %s")
+            params.append(id_curso)
+        if id_profesor:
+            where_clauses.append("id_profesor = %s")
+            params.append(id_profesor)
+        if tipo_material:
+            where_clauses.append("tipo_material = %s")
+            params.append(tipo_material)
+        if tema:
+            where_clauses.append("tema = %s")
+            params.append(tema)
+        if estado:
+            where_clauses.append("estado = %s")
+            params.append(estado)
+        if es_libre is not None:
+            where_clauses.append("es_libre = %s")
+            params.append(es_libre)
+        where_sql = " AND ".join(where_clauses) if where_clauses else "1=1"
+        cursor.execute(f"SELECT COUNT(*) as total FROM materiales WHERE {where_sql}", params)
+        total = cursor.fetchone()['total']
+        offset = (pagina - 1) * limite
+        query = f"""
+            SELECT * FROM materiales
+            WHERE {where_sql}
+            ORDER BY fecha_subida DESC
+            LIMIT %s OFFSET %s
+        """
+        params.extend([limite, offset])
+        cursor.execute(query, params)
+        materiales = cursor.fetchall()
+        return total, materiales
+    except Exception as e:
+        print(f"Error getting materiales: {e}")
+        return 0, []
+    finally:
+        conn.close()
+
+def get_material(id_material):
+    conn = get_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT * FROM materiales WHERE id_material = %s AND activo = TRUE",
+            (id_material,)
+        )
+        return cursor.fetchone()
+    except Exception as e:
+        print(f"Error getting material: {e}")
+        return None
+    finally:
+        conn.close()
+
+def actualizar_material(id_material, **kwargs):
+    updates = {k: v for k, v in kwargs.items() if k in CAMPOS_PERMITIDOS_UPDATE}
+    if not updates:
+        return False
+    if 'estado' in updates and updates['estado'] not in ESTADOS_VALIDOS:
+        raise ValueError(f"Estado inválido: {updates['estado']}")
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        set_clauses = [f"{campo} = %s" for campo in updates.keys()]
+        set_sql = ", ".join(set_clauses)
+        query = f"""
+            UPDATE materiales
+            SET {set_sql}, fecha_actualizacion = NOW()
+            WHERE id_material = %s AND activo = TRUE
+        """
+        values = list(updates.values())
+        values.append(id_material)
+        cursor.execute(query, values)
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        conn.rollback()
+        print(f"Error updating material: {e}")
+        return False
+    finally:
+        conn.close()
+
+def eliminar_material(id_material):
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE materiales SET activo = FALSE WHERE id_material = %s AND activo = TRUE",
+            (id_material,)
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        conn.rollback()
+        print(f"Error deleting material: {e}")
+        return False
+    finally:
+        conn.close()
+
+def get_notas_filtradas(rol, usuario_id, legajo_alumno=None, id_evaluacion=None, id_curso=None, limit=10, offset=0):
+    """Obtiene el listado de notas aplicando paginación y seguridad estricta por rol."""
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT a.nombre AS alumno, e.nombre AS evaluacion, n.calificacion, n.fecha
+            FROM notas n
+            INNER JOIN alumnos a ON n.legajo_alumno = a.legajo
+            INNER JOIN evaluaciones e ON n.id_evaluacion = e.id_evaluacion
+            INNER JOIN cursos c ON e.id_curso = c.id_curso
+        """
+        condiciones = []
+        parametros = []
+
+        # alumno: Solo ve sus propias notas
+        if rol == "alumno":
+            condiciones.append("a.id_usuario = %s")
+            parametros.append(usuario_id)
+
+        # profesor: Solo ve notas de los cursos que dicta
+        elif rol == "profesor":
+            query += """
+                INNER JOIN profesor_curso pc ON c.id_curso = pc.id_curso
+                INNER JOIN profesores p ON pc.id_profesor = p.id_profesor
+            """
+            condiciones.append("p.id_usuario = %s")
+            parametros.append(usuario_id)
+
+        # Filtros opcionales de búsqueda
+        if legajo_alumno:
+            condiciones.append("n.legajo_alumno = %s")
+            parametros.append(legajo_alumno)
+
+        if id_evaluacion:
+            condiciones.append("n.id_evaluacion = %s")
+            parametros.append(id_evaluacion)
+
+        if id_curso:
+            condiciones.append("e.id_curso = %s")
+            parametros.append(id_curso)
+
+        if condiciones:
+            query += " WHERE " + " AND ".join(condiciones)
+
+        query += " LIMIT %s OFFSET %s"
+        parametros.extend([limit, offset])
+
+        cur.execute(query, parametros)
+        return cur.fetchall()
+
+    except Exception as e:
+        print(f"Error en queries.get_notas_filtradas: {e}")
+        raise e
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+
+def get_promedio_notas(rol, usuario_id, legajo_alumno=None, id_evaluacion=None, id_curso=None):
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT AVG(n.calificacion) AS promedio
+            FROM notas n
+            INNER JOIN alumnos a ON n.legajo_alumno = a.legajo
+            INNER JOIN evaluaciones e ON n.id_evaluacion = e.id_evaluacion
+            INNER JOIN cursos c ON e.id_curso = c.id_curso
+        """
+        condiciones = []
+        parametros = []
+
+        if rol == "alumno":
+            condiciones.append("a.id_usuario = %s")
+            parametros.append(usuario_id)
+            
+        elif rol == "profesor":
+            query += """
+                INNER JOIN profesor_curso pc ON c.id_curso = pc.id_curso
+                INNER JOIN profesores p ON pc.id_profesor = p.id_profesor
+            """
+            condiciones.append("p.id_usuario = %s")
+            parametros.append(usuario_id)
+
+        if legajo_alumno:
+            condiciones.append("n.legajo_alumno = %s")
+            parametros.append(legajo_alumno)
+
+        if id_evaluacion:
+            condiciones.append("n.id_evaluacion = %s")
+            parametros.append(id_evaluacion)
+
+        if id_curso:
+            condiciones.append("e.id_curso = %s")
+            parametros.append(id_curso)
+
+        if condiciones:
+            query += " WHERE " + " AND ".join(condiciones)
+
+        cur.execute(query, parametros)
+        resultado = cur.fetchone()
+        
+        if resultado and resultado['promedio'] is not None:
+            return round(float(resultado['promedio']), 2)
+        return 0.0
+
+    except Exception as e:
+        print(f"Error en queries.get_promedio_notas: {e}")
+        raise e
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+
+def verificar_alumno_evaluacion(legajo_alumno, id_evaluacion):
+    # Verifica la existencia del alumno y la evaluación antes de insertar o actualizar una nota
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        
+        cur.execute("SELECT legajo FROM alumnos WHERE legajo = %s", (legajo_alumno,))
+        alumno = cur.fetchone()
+        
+        cur.execute("SELECT id_evaluacion FROM evaluaciones WHERE id_evaluacion = %s", (id_evaluacion,))
+        evaluacion = cur.fetchone()
+        
+        return (alumno is not None) and (evaluacion is not None)
+    except Exception as e:
+        print(f"Error en verificar_alumno_evaluacion: {e}")
+        return False
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+
+def guardar_actualizar_nota(legajo_alumno, id_evaluacion, calificacion):
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+
+        query = """
+            INSERT INTO notas (legajo_alumno, id_evaluacion, calificacion, fecha)
+            VALUES (%s, %s, %s, CURDATE())
+            ON DUPLICATE KEY UPDATE
+                calificacion = VALUES(calificacion),
+                fecha = CURDATE()
+        """
+        cur.execute(query, (legajo_alumno, id_evaluacion, calificacion))
+        conn.commit()
+
+        cur.execute("""
+            SELECT legajo_alumno, id_evaluacion, calificacion, fecha
+            FROM notas
+            WHERE legajo_alumno = %s AND id_evaluacion = %s
+        """, (legajo_alumno, id_evaluacion))
+
+        return cur.fetchone()
+
+    except Exception as e:
+        if conn: conn.rollback()
+        print(f"Error guardar/actualizar nota: {e}")
+        raise e
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+        
 def registrar_login(id_usuario, email, resultado, ip):
     conn = get_connection()
     cur = conn.cursor()
@@ -747,3 +1095,180 @@ def registrar_login(id_usuario, email, resultado, ip):
     conn.commit()
     cur.close()
     conn.close()
+
+# <===================== CARGAR ALUMNOS COMO USUARIOS =========================>
+
+def cargar_alumnos_csv(archivo_csv):
+    """
+    CSV ejemplo:
+    legajo,nombre,apellido,dni,email,curso,anio,cuatrimestre
+
+    """
+    from utils.auth import hash_password
+    exitosos = 0
+    errores = []
+
+    def agregar_error(fila, motivo):
+        errores.append({
+            "fila": fila,
+            "motivo": motivo
+        })
+
+    conn = get_connection()
+    cur = None
+    try:
+        cur = conn.cursor()
+        lector = csv.DictReader(io.StringIO(archivo_csv))
+        columnas_requeridas = {
+            "legajo",
+            "nombre",
+            "apellido",
+            "dni",
+            "email",
+            "curso",
+            "anio",
+            "cuatrimestre"
+        }
+
+        if not lector.fieldnames:
+            raise ValueError("El archivo CSV está vacío")
+        faltantes = columnas_requeridas - set(lector.fieldnames)
+
+        if faltantes:
+            raise ValueError(
+                f"Faltan columnas: {', '.join(sorted(faltantes))}"
+            )
+
+        for numero_fila, fila in enumerate(lector, start=2):
+            try:
+                if not any(fila.values()):
+                    continue
+                legajo = int(fila["legajo"])
+                nombre = fila["nombre"].strip()
+                apellido = fila["apellido"].strip()
+                dni = fila["dni"].strip()
+                email = fila["email"].strip()
+                curso = fila["curso"].strip()
+                anio = int(fila["anio"])
+                cuatrimestre = int(fila["cuatrimestre"])
+
+                # Verificar legajo existente
+
+                cur.execute(
+                    "SELECT 1 FROM alumnos WHERE legajo = %s",
+                    (legajo,)
+                )
+
+                if cur.fetchone():
+                    agregar_error(
+                        numero_fila,
+                        f"Legajo {legajo} ya existe"
+                    )
+                    continue
+
+                # Verificar DNI existente
+                cur.execute(
+                    "SELECT 1 FROM alumnos WHERE dni = %s",
+                    (dni,)
+                )
+
+                if cur.fetchone():
+                    agregar_error(
+                        numero_fila,
+                        f"DNI {dni} ya registrado"
+                    )
+                    continue
+                # Verificar email existente
+                cur.execute(
+                    "SELECT 1 FROM usuarios WHERE email = %s",
+                    (email,)
+                )
+
+                if cur.fetchone():
+                    agregar_error(
+                        numero_fila,
+                        f"Email {email} ya registrado"
+                    )
+                    continue
+                # Crear usuario
+
+                cur.execute(
+                    """
+                    INSERT INTO usuarios
+                    (email, contrasenia, rol)
+                    VALUES (%s, %s, 'alumno')
+                    """,
+                    (
+                        email,
+                        hash_password(dni)
+                    )
+                )
+
+                id_usuario = cur.lastrowid
+                # Crear alumnos
+
+                cur.execute(
+                    """
+                    INSERT INTO alumnos (
+                        legajo,
+                        nombre,
+                        apellido,
+                        dni,
+                        email,
+                        curso,
+                        anio,
+                        cuatrimestre,
+                        estado,
+                        id_usuario
+                    )
+                    VALUES (
+                        %s, %s, %s, %s,
+                        %s, %s, %s, %s,
+                        'activo',
+                        %s
+                    )
+                    """,
+                    (
+                        legajo,
+                        nombre,
+                        apellido,
+                        dni,
+                        email,
+                        curso,
+                        anio,
+                        cuatrimestre,
+                        id_usuario
+                    )
+                )
+
+                exitosos += 1
+
+            except ValueError:
+                agregar_error(
+                    numero_fila,
+                    "Error de formato en campos numéricos"
+                )
+
+            except Exception as e:
+                agregar_error(
+                    numero_fila,
+                    str(e)
+                )
+
+        conn.commit()
+
+        return {
+            "exitosos": exitosos,
+            "errores": errores
+        }
+
+    except Exception as e:
+
+        conn.rollback()
+        raise Exception(f"Error procesando CSV: {e}")
+
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()

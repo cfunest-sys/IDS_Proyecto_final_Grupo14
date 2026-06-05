@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 from routes.routes import inicio
+from routes.equipos import equipos_bp
 from routes.evaluaciones import evaluaciones_blueprint
 from routes.notas import notas_blueprint
 from routes.dashboard_profesor import dashboard_bp
@@ -13,6 +14,7 @@ app.register_blueprint(inicio)
 app.register_blueprint(evaluaciones_blueprint, url_prefix='/evaluaciones')
 app.register_blueprint(notas_blueprint, url_prefix='/notas')
 app.register_blueprint(dashboard_bp)
+app.register_blueprint(equipos_bp)
 
 @app.route("/perfil/profesor") #Temporal para testeo
 def perfil_profesor():
@@ -22,19 +24,42 @@ def perfil_profesor():
 def perfil_alumno():
     return render_template("perfil_alumno.html")
 
-# Solamente para testear
 @app.route("/alumnos")
 def mostrar_alumnos():
-    alumnos = [
-        {"nombre":"pepe", "legajo":112533, "estado": "activo"},
-        {"nombre":"maria", "legajo":114529, "estado": "activo"},
-        {"nombre":"pedro", "legajo":111572, "estado": "inactivo"},
-        {"nombre":"laura", "legajo":115343, "estado": "activo"},
-        {"nombre":"juan", "legajo":113323, "estado": "inactivo"}
-    ]
+    import requests
+
+    try:
+        resp = requests.get("http://127.0.0.1:5000/api/alumnos/", timeout=5)
+        if resp.ok:
+            alumnos = resp.json()
+        else:
+            alumnos = []
+    except Exception:
+        alumnos = []
     return render_template("alumnos.html", alumnos=alumnos)
 
+
+@app.route("/calendario")
+def mostrar_calendario():
+    eventos = (
+        {"nombre": "tp1", "tipo": "TP", "dia": "21", "curso": 1},
+        {"nombre": "Primer Parcial Teórico-Práctico", "tipo": "parcial", "dia": "20", "curso": 2},
+        {"nombre": "Trabajo Práctico Integrador Final", "tipo": "TP", "dia": "1", "curso": 1},
+        {"nombre": "Control de Lectura - Parcialito 1", "tipo": "parcialito", "dia": "13", "curso": 1},
+    )
+    mes = "febrero"
+    dias = 29
+    año = 2026
+    bisiesto = False
+    return render_template("calendario.html", mes=mes, dias=dias, año=año, bisiesto=bisiesto, eventos=eventos)
+
+
+@app.route("/notas")
+def notas():
+    return render_template("notas.html")
+
 import os
+
 
 if __name__ == "__main__":
     debug_mode = os.environ.get("FLASK_DEBUG", "False").lower() in ("true", "1", "t")
