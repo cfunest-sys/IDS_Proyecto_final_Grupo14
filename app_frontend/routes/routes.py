@@ -13,14 +13,48 @@ def index():
 
 @inicio.route("/asistencia", methods=["GET", "POST"])
 def asistencia():
-
+    #LOGICA SOLO PARA LA GENERACION DE QR y EL REGISTRO DE LA ASISTENCIA
+    qr_generado = None
+    mensaje = None
+    rol= session.get("rol")
     if request.method == "POST":
+        if rol == "profesor":
+            try:
 
-        alumno = request.form.get("alumno")
-        fecha = request.form.get("fecha")
+                respuesta = requests.post( "http://localhost:5001/api/asistencia/generar-qr")
+                data = respuesta.json()
+                if respuesta.status_code == 200:
+                    qr_generado = data.get("qr_code")
+                else:
+                    mensaje = data.get("error")
+            except Exception as e:
+                mensaje = str(e)
 
-    return render_template("asistencia.html")
+        elif rol == "alumno":
+            legajo = request.form.get("legajo")
+            qr_code = request.form.get("qr_code")
+            try:
 
+                respuesta = requests.post( "http://localhost:5001/api/asistencia/registrar",
+                    json={
+                        "legajo": legajo,
+                        "qr_code": qr_code
+                    }
+                )
+                data = respuesta.json()
+                mensaje = (
+                    data.get("message")
+                    or data.get("error")
+                )
+            except Exception as e:
+                mensaje = str(e)
+
+    return render_template(
+        "asistencia.html",
+        rol=rol,
+        qr_generado=qr_generado,
+        mensaje=mensaje
+    )
 
 @inicio.route("/reportes")
 def reportes():

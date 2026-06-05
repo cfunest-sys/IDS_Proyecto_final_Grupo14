@@ -6,6 +6,64 @@ Asistencia
 
 {% block content %}
 
+{% if rol == "profesor" %}
+
+<div class="container mt-5 mb-5">
+
+    <h1 class="page-title">
+        Generación de QR para Asistencia
+    </h1>
+
+    <div class="card shadow p-4 card-custom">
+
+        <p class="text-muted">
+            Presione el botón para generar un nuevo código QR de asistencia.
+        </p>
+
+        <form action="{{ url_for('inicio.asistencia') }}" method="POST">
+
+            <button
+                type="submit" class="btn btn-primary btn-lg rounded-3 py-2" style="font-size: 1.1rem; background-color: #1d2554;">
+
+                Generar QR
+
+            </button>
+
+        </form>
+
+        {% if qr_generado %}
+
+        <div class="alert alert-success mt-4">
+
+            <h5 class="mb-2">
+                QR generado correctamente
+            </h5>
+
+            <p class="mb-1">
+                <strong>Código:</strong>
+                {{ qr_generado }}
+            </p>
+
+        </div>
+
+        {% endif %}
+
+        {% if mensaje %}
+
+        <div class="alert alert-danger mt-4">
+
+            {{ mensaje }}
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% elif rol == "alumno" %}
+
 <div class="container mt-5 mb-5">
 
     <h1 class="page-title">
@@ -14,47 +72,85 @@ Asistencia
 
     <div class="card shadow p-4 card-custom">
 
-        <form
-            method="POST"
-            action="/asistencia">
+        <form action="{{ url_for('inicio.asistencia') }}" method="POST">
 
             <div class="mb-3">
 
                 <label class="form-label">
-                    Alumno
+                    Legajo
+                </label>
+
+                <input
+                    type="number"
+                    class="form-control"
+                    name="legajo"
+                    required>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Código de asistencia
                 </label>
 
                 <input
                     type="text"
                     class="form-control"
-                    placeholder="Nombre del alumno"
-                    name="alumno"
-                >
+                    name="qr_code"
+                    required>
 
             </div>
 
-            <div class="mb-3">
+            <button
+                type="submit" class="btn btn-primary btn-lg rounded-3 py-2" style="font-size: 1.1rem; background-color: #1d2554;">
 
-                <label class="form-label">
-                    Fecha
-                </label>
-
-                <input
-                    type="date"
-                    class="form-control"
-                    name="fecha"
-                >
-
-            </div>
-
-            <button class="btn btn-campus">
                 Registrar asistencia
+
             </button>
 
         </form>
 
+        {% if mensaje %}
+
+        <div class="alert alert-info mt-4">
+
+            {{ mensaje }}
+
+        </div>
+
+        {% endif %}
+
     </div>
 
 </div>
+
+{% else %}
+
+<div class="container mt-5">
+
+    <div class="alert alert-warning text-center">
+
+        <h4>
+            Acceso restringido
+        </h4>
+
+        <p>
+            Debes iniciar sesión para acceder al sistema de asistencia.
+        </p>
+
+        <a
+            href="{{ url_for('inicio.login') }}"
+            class="btn btn-campus">
+
+            Iniciar sesión
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endif %}
 
 {% endblock %}
