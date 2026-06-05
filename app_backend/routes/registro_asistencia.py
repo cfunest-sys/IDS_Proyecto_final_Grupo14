@@ -135,7 +135,7 @@ def registrar_asistencia():
             }), 400
 
         # Registrar asistencia
-        query_insert = """ INSERT INTO asistencia ( alumno_legajo, qr_id , fecha, registrado_en) VALUES ( %s, CURDATE(), %s, NOW()) """
+        query_insert = """ INSERT INTO asistencia ( alumno_legajo, qr_id , fecha, registrado_en) VALUES ( %s, %s, CURDATE(), NOW()) """
 
         cursor.execute(
             query_insert,
