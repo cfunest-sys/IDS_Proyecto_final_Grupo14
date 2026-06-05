@@ -421,29 +421,6 @@ def eliminar_evaluacion(id):
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
 
-def get_user_by_id(user_id):
-    conn = None
-    cur = None
-    try:
-        conn = get_connection()
-        cur = conn.cursor(dictionary=True)
-        
-        query = "SELECT id_usuario, email, rol FROM usuarios WHERE id_usuario = %s"
-        cur.execute(query, (user_id,))
-        
-        user = cur.fetchone() 
-        return user
-
-    except Exception as e:
-        print(f"Error en MySQL get_user_by_id: {e}")
-        return None 
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
-
-
 def get_equipos_filtrados(id_equipo=None, nombre_equipo=None, id_curso=None):
     conexion = None
     cursor = None
@@ -1272,3 +1249,86 @@ def cargar_alumnos_csv(archivo_csv):
             cur.close()
         if conn:
             conn.close()
+
+#-------------------Perfil-------------------------#
+
+def obtener_usuario_por_id(id_usuario):
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        query = "SELECT id_usuario, email, rol FROM usuarios WHERE id_usuario = %s"
+        cur.execute(query, (id_usuario,))
+        return cur.fetchone()
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+
+def obtener_detalles_alumno(id_usuario):
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        
+        query_alumno = """
+            SELECT legajo, nombre, apellido, dni, curso, anio, cuatrimestre, estado 
+            FROM alumnos 
+            WHERE id_usuario = %s
+        """
+        cur.execute(query_alumno, (id_usuario,))
+        alumno = cur.fetchone()
+        
+        if alumno:
+            query_notas = """
+                SELECT notas.calificacion, evaluaciones.nombre AS evaluacion_nombre, evaluaciones.tipo AS evaluacion_tipo
+                FROM notas
+                INNER JOIN evaluaciones ON notas.id_evaluacion = evaluaciones.id_evaluacion
+                WHERE notas.legajo_alumno = %s
+            """
+            cur.execute(query_notas, (alumno['legajo'],))
+            alumno['evaluaciones'] = cur.fetchall()
+            
+        return alumno
+    except Exception as e:
+        print(f"Error en alumno: {e}")
+        return None
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+
+def obtener_detalles_profesor(id_usuario):
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        
+        query_prof = "SELECT id_profesor, nombre, departamento FROM profesores WHERE id_usuario = %s"
+        cur.execute(query_prof, (id_usuario,))
+        profesor = cur.fetchone()
+        
+        if profesor:
+            
+            query_cursos = """
+                SELECT cursos.nombre AS curso_nombre, cursos.anio, cursos.semestre
+                FROM profesor_curso
+                INNER JOIN cursos ON profesor_curso.id_curso = cursos.id_curso
+                WHERE profesor_curso.id_profesor = %s
+            """
+            cur.execute(query_cursos, (profesor['id_profesor'],))
+            profesor['cursos_asignados'] = cur.fetchall()
+            
+        return profesor
+    except Exception as e:
+        print(f"Error en profesor: {e}")
+        return None
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
