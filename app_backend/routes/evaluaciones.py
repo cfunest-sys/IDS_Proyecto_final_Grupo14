@@ -4,6 +4,8 @@ from data.queries import get_connection
 
 from data.queries import (
     # crear_base_datos,
+    get_user_profile,
+    get_evaluacion_profesor,
     get_evaluacion_todas,
     get_evaluacion,
     get_evaluacion_por_curso,
@@ -24,6 +26,22 @@ def obtener_evas_curso(id_curso):
     evaluacion = get_evaluacion_por_curso(id_curso)
     if (len(evaluacion) <= 0):
         return jsonify({"body":evaluacion, "status":204})
+    return jsonify({"body":evaluacion, "status":200})
+
+@evaluaciones_bp.route('/usuario', methods=['GET'])
+def obtener_eva_usuario():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No se enviaron datos"}), 400
+    usuario = {}
+    usuario["rol"] = data.get("rol", "")
+    usuario["id_usuario"] = data.get("user_id", "")
+    perfil = get_user_profile(usuario)
+    if perfil == None:
+        return jsonify({"body":"Usuario no encontrado", "status":204})
+    evaluacion = get_evaluacion_profesor(perfil["id_profesor"])
+    if (evaluacion == None or len(evaluacion) == 0):
+        return jsonify({"body":"Evaluaciones no encontradas", "status":204})
     return jsonify({"body":evaluacion, "status":200})
 
 @evaluaciones_bp.route('/todas', methods=['GET'])
