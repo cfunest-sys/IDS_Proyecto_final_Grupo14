@@ -77,7 +77,7 @@ def register():
             "password": password,
             "departamento": departamento
         }
-
+        
         response = requests.post(
             "http://127.0.0.1:5001/api/profesores/register",
             json=data,
