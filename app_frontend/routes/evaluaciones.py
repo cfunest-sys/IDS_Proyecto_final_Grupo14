@@ -47,18 +47,19 @@ def calendario_evaluaciones():
     json = response.json()
 
     eventos = []
+    if (json["body"].get("error", "") == ""):
+        for evento in json["body"]:
+            d = datetime.strptime(
+                evento[3][5:-4],
+                "%d %b %Y %H:%M:%S"
+            )
+            eventos.append({
+                "nombre": evento[1],
+                "tipo": evento[2],
+                "fecha": d.strftime("%Y-%m-%d"),
+                "curso": evento[4]
+            })
 
-    for evento in json["body"]:
-        d = datetime.strptime(
-            evento[3][5:-4],
-            "%d %b %Y %H:%M:%S"
-        )
-        eventos.append({
-            "nombre": evento[1],
-            "tipo": evento[2],
-            "fecha": d.strftime("%Y-%m-%d"),
-            "curso": evento[4]
-        })
 
     mes_nombre = (
         "enero", "febrero", "marzo", "abril", "mayo", "junio",

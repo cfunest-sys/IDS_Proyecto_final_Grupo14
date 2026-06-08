@@ -34,11 +34,13 @@ def get_usuario_by_email(email):
                 contrasenia AS password,
                 rol
             FROM usuarios
-            WHERE email = %s
+            WHERE email = %s;
         """
 
         cursor.execute(query, (email,))
-        return cursor.fetchone()
+        usuario = cursor.fetchone()
+        cursor.reset()
+        return usuario
 
     except Exception as e:
         print(f"Error al obtener usuario: {e}")

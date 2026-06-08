@@ -38,7 +38,7 @@ def obtener_eva_usuario():
     usuario["id_usuario"] = data.get("user_id", "")
     perfil = get_user_profile(usuario)
     if perfil == None:
-        return jsonify({"body":"Usuario no encontrado", "status":204})
+        return jsonify({"body":{"error":"Usuario no encontrado"}, "status":204})
     evaluacion = get_evaluacion_profesor(perfil["id_profesor"])
     if (evaluacion == None or len(evaluacion) == 0):
         return jsonify({"body": []}), 200
