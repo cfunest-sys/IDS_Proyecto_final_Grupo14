@@ -227,7 +227,7 @@ def cargar_csv():
         flash("No se envió archivo", "danger")
         return redirect("/alumnos")
     resp = requests.post(
-        "http://127.0.0.1:5000/api/alumnos/cargar-csv",
+        "http://127.0.0.1:5001/api/alumnos/cargar-csv",
         files={"archivo": (archivo.filename, archivo.stream, archivo.content_type)},
         timeout=30,
     )

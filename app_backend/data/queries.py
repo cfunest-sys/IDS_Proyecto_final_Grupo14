@@ -72,7 +72,7 @@ def get_user_profile(usuario):
 
             query = """
                 SELECT
-                    a.id_alumno,
+                    a.curso,
                     a.nombre,
                     a.legajo
                 FROM alumnos a
@@ -88,6 +88,66 @@ def get_user_profile(usuario):
     finally:
         cursor.close()
         conn.close()
+
+def crear_alumno(alumno_data):
+
+    conn = None
+    cur = None
+
+    try:
+
+        conn = get_connection()
+        cur = conn.cursor()
+
+        query_usuario = """
+            INSERT INTO usuarios (
+                email,
+                contrasenia,
+                rol
+            )
+            VALUES (%s, %s, %s)
+        """
+
+        password_hash = generate_password_hash(alumno_data["password"])
+
+        cur.execute(
+            query_usuario,
+            (
+                alumno_data["email"],
+                password_hash,
+                "alumno"
+            )
+        )
+
+        id_usuario = cur.lastrowid
+
+        query_alumno = """
+            INSERT INTO alumnos (
+                nombre,
+                id_usuario
+            )
+            VALUES (%s, %s)
+        """
+
+        cur.execute(
+            query_alumno,
+            (
+                alumno_data["nombre"],
+                id_usuario
+            )
+        )
+
+        conn.commit()
+
+        return cur.lastrowid
+
+    finally:
+
+        if cur:
+            cur.close()
+
+        if conn:
+            conn.close()
 
 
 def get_alumno(nombre, contrasenia):
@@ -321,6 +381,8 @@ def get_evaluacion_profesor(id_profesor):
                    where pc.id_profesor=%s;"""
         cursor.execute(query, (id_profesor,))
         evaluacion = cursor.fetchall()
+        for row in evaluacion:
+            print(row)
         cursor.close()
         connection.close()
         return evaluacion
@@ -1332,3 +1394,28 @@ def obtener_detalles_profesor(id_usuario):
     finally:
         if cur: cur.close()
         if conn: conn.close()
+
+def registrar_login(id_usuario, email, resultado, ip):
+    conn = None
+    cur = None
+
+
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO logs_login
+            (id_usuario, email, resultado, ip)
+            VALUES (%s, %s, %s, %s)
+            """,
+            (id_usuario, email, resultado, ip)
+        )
+        conn.commit()
+    except Exception as e:
+        print(f"Error al registrar el login: {e}")
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()

@@ -48,20 +48,17 @@ def calendario_evaluaciones():
 
     eventos = []
 
-    if response.status_code == 204:
-        eventos = {"error": "no hay eva para ese curso"}
-    else:
-        for evento in json["body"]:
-            d = datetime.strptime(
-                evento[3][5:-4],
-                "%d %b %Y %H:%M:%S"
-            )
-            eventos.append({
-                "nombre": evento[1],
-                "tipo": evento[2],
-                "fecha": d.strftime("%Y-%m-%d"),
-                "curso": evento[4]
-            })
+    for evento in json["body"]:
+        d = datetime.strptime(
+            evento[3][5:-4],
+            "%d %b %Y %H:%M:%S"
+        )
+        eventos.append({
+            "nombre": evento[1],
+            "tipo": evento[2],
+            "fecha": d.strftime("%Y-%m-%d"),
+            "curso": evento[4]
+        })
 
     mes_nombre = (
         "enero", "febrero", "marzo", "abril", "mayo", "junio",

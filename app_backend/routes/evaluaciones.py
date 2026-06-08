@@ -41,7 +41,7 @@ def obtener_eva_usuario():
         return jsonify({"body":"Usuario no encontrado", "status":204})
     evaluacion = get_evaluacion_profesor(perfil["id_profesor"])
     if (evaluacion == None or len(evaluacion) == 0):
-        return jsonify({"body":"Evaluaciones no encontradas", "status":204})
+        return jsonify({"body": []}), 200
     return jsonify({"body":evaluacion, "status":200})
 
 @evaluaciones_bp.route('/todas', methods=['GET'])

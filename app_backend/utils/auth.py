@@ -6,7 +6,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from data.queries import get_usuario_by_email
 from config import JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRES
 
-from data.queries import get_profesor_by_email
 
 # Genera los tokens JWT para los usuarios autenticados
 

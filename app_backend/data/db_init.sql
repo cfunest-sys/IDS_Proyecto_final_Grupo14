@@ -26,6 +26,15 @@ CREATE TABLE usuarios (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+CREATE TABLE logs_login (
+    id_log INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT,
+    email VARCHAR(255),
+    fecha_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    resultado ENUM('exitoso', 'fallido'),
+    ip VARCHAR(45),
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
+);
 CREATE TABLE password_reset_tokens (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     id_usuario INTEGER NOT NULL,
@@ -38,7 +47,7 @@ CREATE TABLE alumnos (
     legajo INTEGER PRIMARY KEY AUTO_INCREMENT,
     nombre TEXT NOT NULL,
     apellido TEXT NOT NULL,
-    dni TEXT NOT NULL UNIQUE,
+    dni VARCHAR(20) NOT NULL UNIQUE,
     email TEXT,
     curso TEXT,
     anio INTEGER,

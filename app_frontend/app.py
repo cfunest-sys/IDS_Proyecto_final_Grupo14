@@ -29,7 +29,7 @@ def mostrar_alumnos():
     import requests
 
     try:
-        resp = requests.get("http://127.0.0.1:5000/api/alumnos/", timeout=5)
+        resp = requests.get("http://127.0.0.1:5001/api/alumnos/", timeout=5)
         if resp.ok:
             alumnos = resp.json()
         else:
