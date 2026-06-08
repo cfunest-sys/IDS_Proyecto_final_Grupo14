@@ -6,8 +6,6 @@ from data.queries import registrar_login, get_user_profile
 login_bp = Blueprint("login", __name__)
 
 
-
-
 @login_bp.route("/", methods=["POST"])
 def login():
 
@@ -23,38 +21,30 @@ def login():
 
     if not usuario:
 
-        registrar_login(
-            None,
-            email,
-            "fallido",
-            request.remote_addr
-        )
+        registrar_login(None, email, "fallido", request.remote_addr)
 
-        return jsonify(
-            {"error": "Email o contraseña inválidos"}
-        ), 401
+        return jsonify({"error": "Email o contraseña inválidos"}), 401
 
-    perfil = get_user_profile(usuario["usuario"])
+    perfil = get_user_profile(usuario)
 
-    registrar_login(
-        usuario["usuario"]["id_usuario"],
-        email,
-        "exitoso",
-        request.remote_addr
+    registrar_login(usuario["id_usuario"], email, "exitoso", request.remote_addr)
+
+    access_token = create_access_token(identity=str(usuario["id_usuario"]), additional_claims={"rol": usuario["rol"]})
+
+    return (
+        jsonify(
+            {
+                "success": True,
+                "message": "Login exitoso",
+                "token": access_token,
+                "usuario": {
+                    "id": usuario["id_usuario"],
+                    "email": usuario["email"],
+                    "rol": usuario["rol"],
+                    "perfil": perfil,
+                },
+            }
+        ),
+        200,
     )
 
-    access_token = create_access_token(
-        identity=str(usuario["token"])
-    )
-
-    return jsonify({
-        "success": True,
-        "message": "Login exitoso",
-        "token": access_token,
-        "usuario": {
-            "id": usuario["usuario"]["id_usuario"],
-            "email": usuario["usuario"]["email"],
-            "rol": usuario["usuario"]["rol"],
-            "perfil": perfil
-        }
-    }), 200

@@ -185,6 +185,16 @@ CREATE TABLE asistencia (
     FOREIGN KEY (qr_id) REFERENCES qr_asistencia(id_qr)
 );
 
+CREATE TABLE logs_login(
+    id_log INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id_usuario INTEGER,
+    email TEXT NOT NULL,
+    resultado TEXT NOT NULL,
+    ip TEXT,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
+);
+
 INSERT INTO usuarios (email, contrasenia, rol)
 VALUES
  ('admin@example.com', 'scrypt:32768:8:1$Hid9QZTkQuxvOQsc$75db4c395ec522e9159b5e58cf012086b1f51e05388e72c4a898b9b76ec8ace4fb08590a30e9a3ce04acb71b6e633462d1773c1e8aed8ed6112bd5a0a7f3e0a8', 'admin'),

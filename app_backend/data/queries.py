@@ -1419,3 +1419,34 @@ def registrar_login(id_usuario, email, resultado, ip):
             cur.close()
         if conn:
             conn.close()
+
+
+def crear_alumno(alumno):
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        password_hash = generate_password_hash(alumno["password"])
+        query_usuario = """
+            INSERT INTO usuarios (email, contrasenia, rol)
+            VALUES (%s, %s, 'alumno')
+        """
+        cur.execute(query_usuario, (alumno["email"], password_hash))
+        id_usuario = cur.lastrowid
+        query_alumno = """
+            INSERT INTO alumnos (id_usuario, nombre, estado)
+            VALUES (%s, %s, 'activo')
+        """
+        cur.execute(query_alumno, (id_usuario, alumno["nombre"]))
+        conn.commit()
+        return cur.lastrowid  # legajo
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise Exception(f"Error creando alumno: {e}")
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
