@@ -381,8 +381,6 @@ def get_evaluacion_profesor(id_profesor):
                    where pc.id_profesor=%s;"""
         cursor.execute(query, (id_profesor,))
         evaluacion = cursor.fetchall()
-        for row in evaluacion:
-            print(row)
         cursor.close()
         connection.close()
         return evaluacion
