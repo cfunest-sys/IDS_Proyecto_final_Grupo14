@@ -263,6 +263,18 @@ h2, h3 {
     font-weight: 700;
 }
 
+.tabla-equipos-vacia {
+    text-align: center;
+    font-weight: bold;
+    color:#1e293b;
+    font-size: medium;
+}
+
+.listado-alumnos-equipos {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+
 /* perfil */
 
 .body-perfil {
