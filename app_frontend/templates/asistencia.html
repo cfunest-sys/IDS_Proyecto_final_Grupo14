@@ -39,10 +39,22 @@ Asistencia
                 QR generado correctamente
             </h5>
 
-            <p class="mb-1">
-                <strong>Código:</strong>
-                {{ qr_generado }}
-            </p>
+            <div
+    
+            id="qrcode"
+    
+            data-qr="{{ qr_generado }}">
+         
+            </div>
+
+
+            <!--<p class="mt-3 mb-1">
+    
+            <strong>Código:</strong>
+    
+            {{ qr_generado }}
+
+            </p>-->
 
         </div>
 
@@ -51,69 +63,6 @@ Asistencia
         {% if mensaje %}
 
         <div class="alert alert-danger mt-4">
-
-            {{ mensaje }}
-
-        </div>
-
-        {% endif %}
-
-    </div>
-
-</div>
-
-{% elif rol == "alumno" %}
-
-<div class="container mt-5 mb-5">
-
-    <h1 class="page-title">
-        Registro de Asistencia
-    </h1>
-
-    <div class="card shadow p-4 card-custom">
-
-        <form action="{{ url_for('inicio.asistencia') }}" method="POST">
-
-            <div class="mb-3">
-
-                <label class="form-label">
-                    Legajo
-                </label>
-
-                <input
-                    type="number"
-                    class="form-control"
-                    name="legajo"
-                    required>
-
-            </div>
-
-            <div class="mb-3">
-
-                <label class="form-label">
-                    Código de asistencia
-                </label>
-
-                <input
-                    type="text"
-                    class="form-control"
-                    name="qr_code"
-                    required>
-
-            </div>
-
-            <button
-                type="submit" class="btn btn-primary btn-lg rounded-3 py-2" style="font-size: 1.1rem; background-color: #1d2554;">
-
-                Registrar asistencia
-
-            </button>
-
-        </form>
-
-        {% if mensaje %}
-
-        <div class="alert alert-info mt-4">
 
             {{ mensaje }}
 
@@ -149,8 +98,10 @@ Asistencia
 
     </div>
 
-</div>
-
+</div> 
 {% endif %}
+
+<!--LIBRERIA PARA PODER GENERAR EL QR DESDE EL FORNT CON JAVA-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 {% endblock %}

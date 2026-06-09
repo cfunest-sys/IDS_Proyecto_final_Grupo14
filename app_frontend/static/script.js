@@ -240,3 +240,35 @@ if (modalAlumnos) {
             });
     });
 } 
+
+// GENERACION DE QR
+
+function generarQR() {
+
+    const contenedorQR = document.getElementById("qrcode");
+
+    if (!contenedorQR) {
+        return;
+    }
+
+    const codigoQR = contenedorQR.dataset.qr;
+
+    if (!codigoQR) {
+        return;
+    }
+
+    new QRCode(
+        contenedorQR,
+        {
+            text: codigoQR,
+            width: 250,
+            height: 250
+        }
+    );
+
+}
+
+document.addEventListener(
+    "DOMContentLoaded",
+    generarQR
+);
