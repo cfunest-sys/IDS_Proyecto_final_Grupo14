@@ -35,11 +35,13 @@ def calendario_evaluaciones():
     # activar esto para probar el calendario sin iniciar sesion
     # session["rol"] = "profesor"
     # session["user_id"] = 2 
-
-    data = {
-    	"rol": session["rol"],
-    	"user_id": session["user_id"]
-    }
+    if (session) :   
+        data = {
+        	"rol": session.get("rol", ""),
+        	"user_id": session.get("user_id", "")
+        }
+    else:
+        data = {}
     response = requests.get(
     	"http://127.0.0.1:5001/api/evaluaciones/usuario",
     	json=data)
