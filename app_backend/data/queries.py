@@ -1355,6 +1355,16 @@ def obtener_detalles_alumno(id_usuario):
             """
             cur.execute(query_notas, (alumno['legajo'],))
             alumno['evaluaciones'] = cur.fetchall()
+
+            query_equipos = """
+                SELECT eq.nombre_equipo, c.nombre AS curso_nombre, c.anio, c.semestre
+                FROM miembros_equipo me
+                INNER JOIN equipos eq ON me.id_equipo = eq.id_equipo
+                INNER JOIN cursos c ON eq.id_curso = c.id_curso
+                WHERE me.legajo_alumno = %s
+            """
+        cur.execute(query_equipos, (alumno['legajo'],))
+        alumno['equipos'] = cur.fetchall()
             
         return alumno
     except Exception as e:
@@ -1386,6 +1396,24 @@ def obtener_detalles_profesor(id_usuario):
             """
             cur.execute(query_cursos, (profesor['id_profesor'],))
             profesor['cursos_asignados'] = cur.fetchall()
+            query_evaluaciones = """
+                SELECT 
+                    e.nombre AS evaluacion_nombre,
+                    e.tipo AS evaluacion_tipo,
+                    e.fecha,
+                    CASE 
+                        WHEN COUNT(n.id) > 0 THEN 'corregida'
+                        ELSE 'pendiente'
+                    END AS estado_evaluacion
+                FROM evaluaciones e
+                INNER JOIN cursos c ON e.id_curso = c.id_curso
+                INNER JOIN profesor_curso pc ON c.id_curso = pc.id_curso
+                LEFT JOIN notas n ON e.id_evaluacion = n.id_evaluacion
+                WHERE pc.id_profesor = %s
+                GROUP BY e.id_evaluacion
+            """
+            cur.execute(query_evaluaciones, (profesor['id_profesor'],))
+            profesor['evaluaciones'] = cur.fetchall()
             
         return profesor
     except Exception as e:

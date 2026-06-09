@@ -32,7 +32,7 @@ def obtener_evas_curso(id_curso):
 def obtener_eva_usuario():
     data = request.get_json()
     if not data:
-        return jsonify({"error": "No se enviaron datos"}), 400
+        return jsonify({"body":{"error": "No se enviaron datos"}, "status":400})
     usuario = {}
     usuario["rol"] = data.get("rol", "")
     usuario["id_usuario"] = data.get("user_id", "")
@@ -40,15 +40,16 @@ def obtener_eva_usuario():
     if perfil == None:
         return jsonify({"body":{"error":"Usuario no encontrado"}, "status":204})
     evaluacion = get_evaluacion_profesor(perfil["id_profesor"])
-    if (evaluacion == None or len(evaluacion) == 0):
-        return jsonify({"body": []}), 200
+    if (evaluacion == None or len(evaluacion) <= 0):
+        return jsonify({"body": []}), 204
     return jsonify({"body":evaluacion, "status":200})
+
 
 @evaluaciones_bp.route('/todas', methods=['GET'])
 def obtener_evas_todas():
     evaluacion = get_evaluacion_todas()
-    if (len(evaluacion) <= 0):
-        return jsonify({"body":evaluacion, "status":204})
+    if (len(evaluacion) <= 0 or evaluacion == None):
+        return jsonify({"body":[], "status":204})
     return jsonify({"body":evaluacion, "status":200})
 
 

@@ -273,7 +273,7 @@
             </div>
 
             <!-- FORM -->
-            <form action="#"
+            <form action="/notas"
                   method="POST">
 
                 <div class="modal-body">
@@ -283,6 +283,9 @@
                         <label for="alumno" class="form-label">Alumno</label>
                         <select id="alumno" name="alumno" class="form-select" required>
                             <option value="">Seleccionar alumno</option>
+                            {% for alumno in resumen %}
+                            <option value="{{ alumno.padron }}">{{ alumno.nombre }}</option>   
+                            {% endfor %}
                             <option value="Nicolás Pattini">Nicolás Pattini</option>
                             <option value="Julieta Fernández">Julieta Fernández</option>
                             <option value="Celeste Funes Taya">Celeste Funes Taya</option>
@@ -300,20 +303,20 @@
                         </select>
                     </div>
 
-<div class="mb-4">
-    <label for="nota" class="form-label">Nota Numérica</label>
-    <input type="number" id="nota" name="nota" class="form-control" min="0" max="10" placeholder="Ingrese una nota" required>
-</div>
+                    <div class="mb-4">
+                        <label for="nota" class="form-label">Nota Numérica</label>
+                        <input type="number" id="nota" name="nota" class="form-control" min="0" max="10" placeholder="Ingrese una nota" required>
+                    </div>
 
-<div class="mb-4">
-    <label for="estado" class="form-label">Estado</label>
-    <select id="estado" name="estado" class="form-select" required>
-        <option value="">Seleccionar estado</option>
-        <option value="Aprobado">Aprobado</option>
-        <option value="Desaprobado">Desaprobado</option>
-        <option value="Ausente">Ausente</option>
-    </select>
-</div>
+                    <div class="mb-4">
+                        <label for="estado" class="form-label">Estado</label>
+                        <select id="estado" name="estado" class="form-select" required>
+                            <option value="">Seleccionar estado</option>
+                            <option value="Aprobado">Aprobado</option>
+                            <option value="Desaprobado">Desaprobado</option>
+                            <option value="Ausente">Ausente</option>
+                        </select>
+                    </div>
 
                 <!-- FOOTER -->
                 <div class="modal-footer border-0 pt-0">

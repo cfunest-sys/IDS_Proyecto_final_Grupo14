@@ -13,7 +13,7 @@ def index():
 
 @inicio.route("/asistencia", methods=["GET", "POST"])
 def asistencia():
-    #LOGICA SOLO PARA LA GENERACION DE QR y EL REGISTRO DE LA ASISTENCIA
+    #LOGICA SOLO PARA LA GENERACION DE QR
     qr_generado = None
     mensaje = None
     rol= session.get("rol")
@@ -24,28 +24,10 @@ def asistencia():
                 respuesta = requests.post( "http://localhost:5001/api/asistencia/generar-qr")
                 data = respuesta.json()
                 if respuesta.status_code == 200:
-                    qr_generado = data.get("qr_code")
+                    codigo = data.get("qr_code")
+                    qr_generado = (f"http://localhost:8080/"f"registrar-asistencia?qr={codigo}")
                 else:
                     mensaje = data.get("error")
-            except Exception as e:
-                mensaje = str(e)
-
-        elif rol == "alumno":
-            legajo = request.form.get("legajo")
-            qr_code = request.form.get("qr_code")
-            try:
-
-                respuesta = requests.post( "http://localhost:5001/api/asistencia/registrar",
-                    json={
-                        "legajo": legajo,
-                        "qr_code": qr_code
-                    }
-                )
-                data = respuesta.json()
-                mensaje = (
-                    data.get("message")
-                    or data.get("error")
-                )
             except Exception as e:
                 mensaje = str(e)
 
@@ -55,6 +37,7 @@ def asistencia():
         qr_generado=qr_generado,
         mensaje=mensaje
     )
+
 
 @inicio.route("/reportes")
 def reportes():
@@ -242,3 +225,42 @@ def cargar_csv():
     else:
         flash("Error al cargar el archivo", "danger")
     return redirect("/alumnos")
+
+@inicio.route("/registrar-asistencia", methods=["GET", "POST"])
+def registrar_asistencia():
+#LOGICA PARA REGISTRAR QR
+    mensaje = None
+
+    qr_code = request.args.get("qr")
+
+    if request.method == "POST":
+
+        legajo = request.form.get("legajo")
+        qr_code = request.form.get("qr_code")
+
+        try:
+
+            respuesta = requests.post(
+                "http://localhost:5001/api/asistencia/registrar",
+                json={
+                    "legajo": legajo,
+                    "qr_code": qr_code
+                }
+            )
+
+            data = respuesta.json()
+
+            mensaje = (
+                data.get("message")
+                or data.get("error")
+            )
+
+        except Exception as e:
+
+            mensaje = str(e)
+
+    return render_template(
+        "registrar_asistencia.html",
+        qr_code=qr_code,
+        mensaje=mensaje
+    )
