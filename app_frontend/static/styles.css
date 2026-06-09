@@ -274,6 +274,7 @@ h2, h3 {
     display: flex !important;
     justify-content: space-between;
     align-items: center;
+}
 
 /* perfil */
 
@@ -491,6 +492,16 @@ h2, h3 {
     margin-right: 0.25rem; 
 }
 
+.borde-parcial { 
+    border-left: 3px solid #87CEEB;
+}
+.borde-Tp { 
+    border-left: 3px solid #2563eb; 
+}
+.borde-parcialito { 
+    border-left: 3px solid #87CEEB; 
+}
+
 /*Profesores*/
 
 .badge-profesor {
@@ -505,11 +516,61 @@ h2, h3 {
 
 .badge-activo-prof {
     font-size: 0.7rem; 
-    color: #2563eb; 
+    color: #16a34a; 
     font-weight: 700; 
     margin-top: 0.5rem;
 }
 
 .text-profesor {
     color: #2d208f;
+}
+
+.fecha-evaluacion {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.badge-fecha {
+    min-width: 90px;
+    text-align: center;
+}
+
+.badge-corregido {
+    background-color: #16a34a; 
+    color: white;
+}
+
+.badge-pendiente {
+    background-color: #dc2626; 
+    color: white;
+}
+
+.calificacion-pendiente {
+    background-color: #6c757d;
+    color: white;
+}
+
+.calificacion-baja {
+    background-color: #dc3545;
+    color: white;
+}
+
+.calificacion-alta {
+    background-color: #198754;
+    color: white;
+}
+
+.calificacion-baja,
+.calificacion-alta,
+.calificacion-pendiente {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 30px;
+    border-radius: 999px;
+    color: white;
+    font-weight: bold;
+    text-align: center;
 }
