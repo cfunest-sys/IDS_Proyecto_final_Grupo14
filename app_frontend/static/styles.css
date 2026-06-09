@@ -33,20 +33,15 @@ main {
   font-weight: 600;
   margin-left: 15px;
 }
-
 .uba-logo {
   height: 60px;
   width: auto;
 }
+
 /* MOBILE */
 
 .navbar-toggler:focus {
   box-shadow: none;
-}
-
-.uba-logo {
-  height: 60px;
-  width: auto;
 }
 
 /* HERO */
@@ -263,7 +258,6 @@ h2, h3 {
     font-weight: 700;
 }
 
-<<<<<<< HEAD
 .tabla-equipos-vacia {
     text-align: center;
     font-weight: bold;
@@ -275,7 +269,8 @@ h2, h3 {
     display: flex !important;
     justify-content: space-between;
     align-items: center;
-=======
+}
+
 /* perfil */
 
 .body-perfil {
@@ -497,5 +492,4 @@ h2, h3 {
 
 .text-profesor {
     color: #2d208f !important;
->>>>>>> main
 }
