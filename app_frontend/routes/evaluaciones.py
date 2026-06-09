@@ -35,7 +35,7 @@ def calendario_evaluaciones():
     # activar esto para probar el calendario sin iniciar sesion
     # session["rol"] = "profesor"
     # session["user_id"] = 2 
-    if (session) :   
+    if (session):   
         data = {
         	"rol": session.get("rol", ""),
         	"user_id": session.get("user_id", "")
