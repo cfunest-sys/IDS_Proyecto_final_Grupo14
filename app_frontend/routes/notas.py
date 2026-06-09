@@ -1,7 +1,7 @@
-from flask import Blueprint, render_template, flash
+from flask import Blueprint, render_template, flash, request, session
 import requests
 
-notas_blueprint = Blueprint("notas_blueprint", __name__)
+notas_blueprint = Blueprint("notas", __name__)
 
 BACKEND_URL = "http://127.0.0.1:5001/api/notas"
 
@@ -15,7 +15,9 @@ def ver_notas():
         #     "rol": session["rol"],
         #     "user_id": session["user_id"]
         # }
-        response = requests.get(f"{BACKEND_URL}/resumen-promedios", timeout=5)
+        token = session.get("token", "")
+        response = requests.get(f"{BACKEND_URL}/resumen-promedios", 
+            headers={'Authorization':'Bearer '+token}, timeout=5)
         if response.ok:
             resumen_promedios = response.json()
         else:
@@ -30,15 +32,17 @@ def cargar_nota():
     resumen_promedios = []
     try:
         body = {
-            "legajo_alumno":request.args.get("alumno"),
-            "id_evaluacion": request.args.get("evaluacion"),
-            "calificacion": request.args.get("nota"),
+            "legajo_alumno":request.form.get("alumno"),
+            "id_evaluacion": request.form.get("evaluacion"),
+            "calificacion": request.form.get("nota"),
             }
-        response = requests.post(f"{BACKEND_URL}/notas", json=body, timeout=5)
+        token = session.get("token", "")
+        response = requests.post(f"{BACKEND_URL}/notas", 
+        headers={'Authorization':'Bearer '+token}, json=body,timeout=5)
         if response.ok:
             resumen_promedios = response.json()
         else:
-            flash("No se pudieron procesar las actas académicas", "warning")
+            flash(response.json().get("error"), "warning")
     except requests.exceptions.RequestException:
         flash("El servidor de datos (Backend) no responde", "danger")
 

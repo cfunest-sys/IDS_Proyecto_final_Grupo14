@@ -160,6 +160,7 @@ def login():
             session["user_id"] = usuario["id"]
             session["email"] = usuario["email"]
             session["rol"] = usuario["rol"]
+            session["token"] = resultado.get("token", "") 
 
             if usuario.get("perfil"):
                 session["nombre"] = usuario["perfil"].get("nombre")

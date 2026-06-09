@@ -14,7 +14,7 @@
             <div class="page-header">
 
                 <h1 class="page-title">
-                    Gestión de Notas
+                    Gestión de Notas {{mensaje}}
                 </h1>
 
                 <p class="page-subtitle">
@@ -286,9 +286,6 @@
                             {% for alumno in resumen %}
                             <option value="{{ alumno.padron }}">{{ alumno.nombre }}</option>   
                             {% endfor %}
-                            <option value="Nicolás Pattini">Nicolás Pattini</option>
-                            <option value="Julieta Fernández">Julieta Fernández</option>
-                            <option value="Celeste Funes Taya">Celeste Funes Taya</option>
                         </select>
                     </div>
 

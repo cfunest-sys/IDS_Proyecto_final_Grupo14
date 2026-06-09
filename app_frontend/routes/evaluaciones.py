@@ -45,29 +45,25 @@ def calendario_evaluaciones():
     response = requests.get(
     	"http://127.0.0.1:5001/api/evaluaciones/usuario",
     	json=data)
-
-    json = response.json()
-
     eventos = []
-    if (json["body"].get("error", "") == ""):
-        for evento in json["body"]:
-            d = datetime.strptime(
-                evento[3][5:-4],
-                "%d %b %Y %H:%M:%S"
-            )
-            eventos.append({
-                "nombre": evento[1],
-                "tipo": evento[2],
-                "fecha": d.strftime("%Y-%m-%d"),
-                "curso": evento[4]
-            })
-
-
+    if response.ok and response.status_code != 204:
+        json = response.json()
+        if (json["body"].get("error", "") == ""):
+            for evento in json["body"]:
+                d = datetime.strptime(
+                    evento[3][5:-4],
+                    "%d %b %Y %H:%M:%S"
+                )
+                eventos.append({
+                    "nombre": evento[1],
+                    "tipo": evento[2],
+                    "fecha": d.strftime("%Y-%m-%d"),
+                    "curso": evento[4]
+                })
     mes_nombre = (
         "enero", "febrero", "marzo", "abril", "mayo", "junio",
         "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
     )
-
     año_actual = 2026
     mes_actual = 5
 
