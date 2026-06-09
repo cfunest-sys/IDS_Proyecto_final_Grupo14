@@ -249,33 +249,20 @@ main {
 }
 
 .input-group-text {
-    background-color: #1d2554 !important;
-    color: white !important;
-    border-color: #1d2554 !important;
+    background-color: #1d2554;
+    color: white;
+    border-color: #1d2554;
 }
 
 h2, h3 {
-    font-weight: 700 !important;
-    color: #1e293b !important; 
+    font-weight: 700;
+    color: #1e293b; 
 }
 
 .modal-title {
     font-weight: 700;
 }
 
-<<<<<<< HEAD
-.tabla-equipos-vacia {
-    text-align: center;
-    font-weight: bold;
-    color:#1e293b;
-    font-size: medium;
-}
-
-.listado-alumnos-equipos {
-    display: flex !important;
-    justify-content: space-between;
-    align-items: center;
-=======
 /* perfil */
 
 .body-perfil {
@@ -298,9 +285,21 @@ h2, h3 {
     border-bottom: 2px solid #eaeaea;
 }
 
-.logo-texto { font-size: 3rem; font-weight: 600; margin-top: 40px; }
-.subtitulo-texto { font-size: 0.75rem; color: #888; }
-.badge-rol { font-size: 0.8rem; background: #eee; padding: 0.3rem 0.8rem; border-radius: 4px; }
+.logo-texto { 
+    font-size: 3rem; 
+    font-weight: 600; 
+    margin-top: 40px; 
+}
+.subtitulo-texto { 
+    font-size: 0.75rem; 
+    color: #888; 
+}
+.badge-rol { 
+    font-size: 0.8rem; 
+    background: #eee; 
+    padding: 0.3rem 0.8rem; 
+    border-radius: 4px; 
+}
 
 /* REGLAS DE COLUMNAS */
 .grid-layout {
@@ -434,7 +433,11 @@ h2, h3 {
 }
 
 /* EVALUACIONES */
-.lista-evaluaciones { display: flex; flex-direction: column; gap: 0.75rem; }
+.lista-evaluaciones { 
+    display: flex;
+    flex-direction: column; 
+    gap: 0.75rem; 
+}
 
 .tarjeta-evaluacion {
     display: flex;
@@ -479,13 +482,13 @@ h2, h3 {
 /*Profesores*/
 
 .badge-profesor {
-    background-color: #dbeafe !important; 
-    color: #001f3f !important; 
-    border-color: #93c5fd !important;
+    background-color: #dbeafe; 
+    color: #001f3f; 
+    border-color: #93c5fd;
 }
 
 .avatar-profesor {
-    background: #4b5563 !important;
+    background: #4b5563;
 } 
 
 .badge-activo-prof {
@@ -496,6 +499,5 @@ h2, h3 {
 }
 
 .text-profesor {
-    color: #2d208f !important;
->>>>>>> main
+    color: #2d208f;
 }
