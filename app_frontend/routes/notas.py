@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, flash, request, session
+from flask import Blueprint, render_template, flash, request, session, redirect, url_for
 import requests
 
 notas_blueprint = Blueprint("notas", __name__)
@@ -22,6 +22,7 @@ def ver_notas():
             resumen_promedios = response.json()
         else:
             flash("No se pudieron procesar las actas académicas", "warning")
+
     except requests.exceptions.RequestException:
         flash("El servidor de datos (Backend) no responde", "danger")
 
@@ -45,5 +46,5 @@ def cargar_nota():
             flash(response.json().get("error"), "warning")
     except requests.exceptions.RequestException:
         flash("El servidor de datos (Backend) no responde", "danger")
-
-    return render_template("notas.html", resumen=resumen_promedios)
+    return redirect(url_for('notas.ver_notas'))
+    # return render_template("notas.html", resumen=resumen_promedios)
