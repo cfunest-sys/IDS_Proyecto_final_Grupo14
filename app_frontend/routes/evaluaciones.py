@@ -43,7 +43,7 @@ def calendario_evaluaciones():
     eventos = []
     if response.ok and response.status_code != 204:
         json = response.json()
-        if json["body"].get("error", "") == "":
+        if json.get("error", "") == "":
             for evento in json["body"]:
                 d = datetime.strptime(evento[3][5:-4], "%d %b %Y %H:%M:%S")
                 eventos.append({

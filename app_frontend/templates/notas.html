@@ -293,20 +293,17 @@
                         <label for="evaluacion" class="form-label">Evaluación</label>
                         <select id="evaluacion" name="evaluacion" class="form-select" required>
                             <option value="">Seleccionar evaluación</option>
-                            <option value="1">Primer Parcial Teórico-Práctico</option>
-                            <option value="2">Trabajo Práctico Integrador Final</option>
-                            <option value="3">Control de Lectura - Parcialito 1</option>
+                            {% for evento in eventos %}
+                                <option value="{{ evento.id_evaluacion }}">
+                                {{ evento.nombre }} {{ evento.id_evaluacion }}
+                                </option>   
+                            {% endfor %}
                         </select>
                     </div>
 
                     <div class="mb-4">
                         <label for="nota" class="form-label">Nota Numérica</label>
                         <input type="number" id="nota" name="nota" class="form-control" min="0" max="10" placeholder="Ingrese una nota" required>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="estado" class="form-label">Estado</label>
-                        </select>
                     </div>
 
                 <!-- FOOTER -->
