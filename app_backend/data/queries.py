@@ -672,6 +672,33 @@ def crear_profesor(profesor):
         if conn:
             conn.close()
 
+def existe_usuario_por_email(email):
+
+    conn = None
+    cur = None
+
+    try:
+
+        conn = get_connection()
+        cur = conn.cursor()
+
+        query_usuario = """
+            SELECT id_usuario
+            FROM usuarios
+            WHERE email = %s
+        """
+
+        cur.execute(query_usuario, (email,))
+
+        return cur.fetchone() is not None
+
+    finally:
+
+        if cur:
+            cur.close()
+
+        if conn:
+            conn.close()
 
 def get_miembros_equipo(id_miembro=None, id_equipo=None, legajo_alumno=None):
     conexion = None
