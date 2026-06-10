@@ -15,10 +15,13 @@ def listar_evaluaciones():
 
     if response.status_code != 204:
         json_data = response.json()
-        for eva in json_data["body"]:
+        for eva in json_data:
             # Parseamos la fecha que viene del backend
-            d = datetime.strptime(eva[3][5:-4], "%d %b %Y %H:%M:%S")
-            evaluaciones.append({"id": eva[0], "nombre": eva[1], "tipo": eva[2], "fecha": d, "curso": eva[4]})
+            fecha_str = eva[3][5:-4]
+            if fecha_str:
+                d = datetime.strptime(fecha_str, "%d %b %Y %H:%M:%S")
+            else:
+                d = None
 
     return render_template("evaluaciones.html", evaluaciones=evaluaciones)
 
