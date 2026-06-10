@@ -118,13 +118,9 @@ La arquitectura del sistema mantiene una separación estricta entre la API lógi
 │   │   ├── notas.py              # Notas
 │   │   └── perfil.py             # Perfil
 │   ├── static/
-│   │   ├── css/
-│   │   │   └── bootstrap.min.css
 │   │   ├── images/
 │   │   │   ├── background.jpeg   # Fondo (edificio de Paseo Colón)
 │   │   │   └── logo.png          # Logo de la FIUBA
-│   │   ├── js/
-│   │   │   └── bootstrap.bundle.min.js
 │   │   ├── script.js             # Interactividad del lado del cliente
 │   │   └── styles.css            # Estilos del panel de administración
 │   ├── templates/                # 20 templates HTML (Jinja2)
