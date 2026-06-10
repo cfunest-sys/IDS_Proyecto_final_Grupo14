@@ -7,3 +7,4 @@ reportlab
 PyJWT
 werkzeug
 python-dotenv
+Flask-Mail
