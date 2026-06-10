@@ -25,8 +25,8 @@ def obtener_eva(id):
 def obtener_evas_curso(id_curso):
     evaluacion = get_evaluacion_por_curso(id_curso)
     if (len(evaluacion) <= 0):
-        return jsonify({"body":evaluacion, "status":204})
-    return jsonify({"body":evaluacion, "status":200})
+        return evalaucion
+    return evaluacion
 
 @evaluaciones_bp.route('/usuario', methods=['GET'])
 def obtener_eva_usuario():
@@ -42,7 +42,7 @@ def obtener_eva_usuario():
     evaluacion = get_evaluacion_profesor(perfil["id_profesor"])
     if (evaluacion == None or len(evaluacion) <= 0):
         return jsonify({"body": []}), 204
-    return jsonify({"body":evaluacion, "status":200})
+    return evaluacion
 
 
 @evaluaciones_bp.route('/todas', methods=['GET'])
@@ -50,7 +50,7 @@ def obtener_evas_todas():
     evaluacion = get_evaluacion_todas()
     if (len(evaluacion) <= 0 or evaluacion == None):
         return jsonify({"body":[], "status":204})
-    return jsonify({"body":evaluacion, "status":200})
+    return evaluacion
 
 
 @evaluaciones_bp.route('/crear', methods=['POST'])
