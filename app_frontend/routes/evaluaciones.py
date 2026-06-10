@@ -10,7 +10,13 @@ evaluaciones_blueprint = Blueprint("evaluaciones", __name__)
 # Acá se muestra el listado/gestión de evaluaciones
 @evaluaciones_blueprint.route("/", methods=["GET"])
 def listar_evaluaciones():
-    response = requests.get(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/todas")
+    if session:
+        data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
+        # data = {"rol": "profesor", "user_id": 2}  --para probar--
+        # data = {"rol": "alumno", "user_id": 2}    --para probar--
+    else:
+        data = {}
+    response = requests.get(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/usuario", json=data)
     evaluaciones = []
     if response.status_code != 204:
         json_data = response.json()
@@ -23,8 +29,8 @@ def listar_evaluaciones():
                     "fecha": d.strftime("%Y-%m-%d"),
                     "curso": evento[4]
                 })
-
-    return render_template("evaluaciones.html", evaluaciones=evaluaciones)
+    rol = data.get("rol", "")
+    return render_template("evaluaciones.html", evaluaciones=evaluaciones, rol=rol)
 
 
 # 2. RUTA DEL CALENDARIO: http://127.0.0.1:8080/evaluaciones/calendario

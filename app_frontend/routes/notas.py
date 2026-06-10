@@ -7,6 +7,7 @@ notas_blueprint = Blueprint("notas", __name__)
 def ver_notas():
     resumen_promedios = []
     eventos = []
+    data = {}
     try:
         # session["rol"] = "afasd"
         # session["user_id"] = 2
@@ -29,12 +30,12 @@ def ver_notas():
         response = requests.get(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/usuario", json=data)
         if response.ok and response.status_code != 204:
             json = response.json()
-            for evento in json["body"]:
+            for evento in json.get("body", ""):
                 eventos.append({"nombre": evento[1], "id_evaluacion": evento[0]})
     except requests.exceptions.RequestException:
         flash("El servidor de datos (Backend) no responde", "danger")
-
-    return render_template("notas.html", resumen=resumen_promedios, eventos=eventos)
+    rol = data.get("rol", "")
+    return render_template("notas.html", resumen=resumen_promedios, eventos=eventos, rol=rol)
 
 @notas_blueprint.route("/", methods=["POST"])
 def cargar_nota():
