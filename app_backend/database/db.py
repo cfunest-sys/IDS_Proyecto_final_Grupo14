@@ -1,11 +1,16 @@
 import mysql.connector
+import config
+
+# usando el config.py y quieto lo que esta hardcodeado
 
 
 def get_connection():
-    connection = mysql.connector.connect(host="localhost", user="root", password="2026")
+    connection = mysql.connector.connect(host=config.DB_HOST, user=config.DB_USER, password=config.DB_PASSWORD)
     cursor = connection.cursor()
-    cursor.execute("CREATE DATABASE IF NOT EXISTS data_base;")
+    cursor.execute(f"CREATE DATABASE IF NOT EXISTS {config.DB_NAME};")
     connection.commit()
     cursor.close()
     connection.close()
-    return mysql.connector.connect(host="localhost", user="root", password="2026", database="data_base")
+    return mysql.connector.connect(
+        host=config.DB_HOST, user=config.DB_USER, password=config.DB_PASSWORD, database=config.DB_NAME
+    )

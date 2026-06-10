@@ -1,0 +1,45 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: mundiales2026
+      MYSQL_DATABASE: data_base
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./app_backend/data/db_init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+    ports:
+      - "3306:3306"
+  backend:
+    build:
+      context: .
+      dockerfile: app_backend/Dockerfile
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: mundiales2026
+      DB_NAME: data_base
+      JWT_SECRET_KEY: "#IDS@G14_26"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "5001:5001"
+    volumes:
+      - uploads_data:/app/backend/uploads
+  frontend:
+    build:
+      context: .
+      dockerfile: app_frontend/Dockerfile
+    environment:
+      BACKEND_URL: http://backend:5001
+    depends_on:
+      - backend
+    ports:
+      - "8080:8080"
+volumes:
+  mysql_data:
+  uploads_data:

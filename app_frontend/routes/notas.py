@@ -1,9 +1,7 @@
-from flask import Blueprint, render_template, flash
+from flask import Blueprint, render_template, flash, current_app
 import requests
 
 notas_blueprint = Blueprint("notas_blueprint", __name__)
-
-BACKEND_URL = "http://127.0.0.1:5001/api/notas"
 
 @notas_blueprint.route("/", methods=["GET"])
 def ver_notas():
@@ -15,7 +13,7 @@ def ver_notas():
         #     "rol": session["rol"],
         #     "user_id": session["user_id"]
         # }
-        response = requests.get(f"{BACKEND_URL}/resumen-promedios", timeout=5)
+        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/notas/resumen-promedios", timeout=5)
         if response.ok:
             resumen_promedios = response.json()
         else:
@@ -34,7 +32,7 @@ def cargar_nota():
             "id_evaluacion": request.args.get("evaluacion"),
             "calificacion": request.args.get("nota"),
             }
-        response = requests.post(f"{BACKEND_URL}/notas", json=body, timeout=5)
+        response = requests.post(f"{current_app.config['BACKEND_URL']}/api/notas/notas", json=body, timeout=5)
         if response.ok:
             resumen_promedios = response.json()
         else:

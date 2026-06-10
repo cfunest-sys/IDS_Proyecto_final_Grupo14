@@ -144,7 +144,7 @@ CREATE TABLE materiales(
     archivo_ruta VARCHAR(500) NOT NULL,
     es_externo BOOLEAN DEFAULT FALSE,
     tipo_archivo VARCHAR(50),
-    tamaño_bytes BIGINT,
+    tamano_bytes BIGINT,
     fecha_material DATE,
     es_libre BOOLEAN DEFAULT FALSE,
     activo BOOLEAN DEFAULT TRUE,

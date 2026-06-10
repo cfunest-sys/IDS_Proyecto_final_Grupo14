@@ -1,6 +1,6 @@
 from urllib import response
 
-from flask import Blueprint, jsonify, redirect, render_template, request, flash, session
+from flask import Blueprint, jsonify, redirect, render_template, request, flash, session, current_app
 import requests
 
 inicio = Blueprint("inicio", __name__)
@@ -13,30 +13,25 @@ def index():
 
 @inicio.route("/asistencia", methods=["GET", "POST"])
 def asistencia():
-    #LOGICA SOLO PARA LA GENERACION DE QR
+    # LOGICA SOLO PARA LA GENERACION DE QR
     qr_generado = None
     mensaje = None
-    rol= session.get("rol")
+    rol = session.get("rol")
     if request.method == "POST":
         if rol == "profesor":
             try:
 
-                respuesta = requests.post( "http://localhost:5001/api/asistencia/generar-qr")
+                respuesta = requests.post(f"{current_app.config['BACKEND_URL']}/api/asistencia/generar-qr")
                 data = respuesta.json()
                 if respuesta.status_code == 200:
                     codigo = data.get("qr_code")
-                    qr_generado = (f"http://localhost:8080/"f"registrar-asistencia?qr={codigo}")
+                    qr_generado = f"http://localhost:8080/" f"registrar-asistencia?qr={codigo}"
                 else:
                     mensaje = data.get("error")
             except Exception as e:
                 mensaje = str(e)
 
-    return render_template(
-        "asistencia.html",
-        rol=rol,
-        qr_generado=qr_generado,
-        mensaje=mensaje
-    )
+    return render_template("asistencia.html", rol=rol, qr_generado=qr_generado, mensaje=mensaje)
 
 
 @inicio.route("/reportes")
@@ -54,27 +49,15 @@ def register():
         password = request.form.get("password")
         departamento = request.form.get("departamento")
 
-        data = {
-            "nombre": nombre,
-            "email": email,
-            "password": password,
-            "departamento": departamento
-        }
-        
-        response = requests.post(
-            "http://127.0.0.1:5001/api/profesores/register",
-            json=data,
-            timeout=5
-        )
+        data = {"nombre": nombre, "email": email, "password": password, "departamento": departamento}
+
+        response = requests.post(f"{current_app.config['BACKEND_URL']}/api/profesores/register", json=data, timeout=5)
 
         if response.ok:
             flash("Usuario registrado correctamente", "success")
             return redirect("/")
 
-        return render_template(
-            "registro.html",
-            error="No se pudo registrar el profesor"
-        )
+        return render_template("registro.html", error="No se pudo registrar el profesor")
 
     return render_template("registro.html")
 
@@ -141,16 +124,9 @@ def login():
         email = request.form.get("email")
         password = request.form.get("password")
 
-        data = {
-            "email": email,
-            "password": password
-        }
+        data = {"email": email, "password": password}
 
-        response = requests.post(
-            "http://127.0.0.1:5001/api/login",
-            json=data,
-            timeout=5
-        )
+        response = requests.post(f"{current_app.config['BACKEND_URL']}/api/login", json=data, timeout=5)
 
         if response.ok:
 
@@ -171,10 +147,7 @@ def login():
 
             return redirect("/")
 
-        return render_template(
-            "login.html",
-            error="No se pudo iniciar sesión"
-        )
+        return render_template("login.html", error="No se pudo iniciar sesión")
 
     return render_template("login.html")
 
@@ -186,7 +159,7 @@ def ver_sesion():
         "user_id": session.get("user_id"),
         "email": session.get("email"),
         "rol": session.get("rol"),
-        "nombre": session.get("nombre")
+        "nombre": session.get("nombre"),
     }
 
 
@@ -203,6 +176,7 @@ def logout():
 
     return redirect("/")
 
+
 @inicio.route("/alumnos/cargar-csv", methods=["POST"])
 def cargar_csv():
     archivo = request.files.get("archivo")
@@ -210,7 +184,7 @@ def cargar_csv():
         flash("No se envió archivo", "danger")
         return redirect("/alumnos")
     resp = requests.post(
-        "http://127.0.0.1:5001/api/alumnos/cargar-csv",
+        f"{current_app.config['BACKEND_URL']}/api/alumnos/cargar-csv",
         files={"archivo": (archivo.filename, archivo.stream, archivo.content_type)},
         timeout=30,
     )
@@ -226,9 +200,10 @@ def cargar_csv():
         flash("Error al cargar el archivo", "danger")
     return redirect("/alumnos")
 
+
 @inicio.route("/registrar-asistencia", methods=["GET", "POST"])
 def registrar_asistencia():
-#LOGICA PARA REGISTRAR QR
+    # LOGICA PARA REGISTRAR QR
     mensaje = None
 
     qr_code = request.args.get("qr")
@@ -241,26 +216,17 @@ def registrar_asistencia():
         try:
 
             respuesta = requests.post(
-                "http://localhost:5001/api/asistencia/registrar",
-                json={
-                    "legajo": legajo,
-                    "qr_code": qr_code
-                }
+                f"{current_app.config['BACKEND_URL']}/api/asistencia/registrar",
+                json={"legajo": legajo, "qr_code": qr_code},
             )
 
             data = respuesta.json()
 
-            mensaje = (
-                data.get("message")
-                or data.get("error")
-            )
+            mensaje = data.get("message") or data.get("error")
 
         except Exception as e:
 
             mensaje = str(e)
 
-    return render_template(
-        "registrar_asistencia.html",
-        qr_code=qr_code,
-        mensaje=mensaje
-    )
+    return render_template("registrar_asistencia.html", qr_code=qr_code, mensaje=mensaje)
+

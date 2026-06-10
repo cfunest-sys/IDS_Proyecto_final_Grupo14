@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, render_template, session, redirect, url_for
+from flask import Blueprint, flash, render_template, session, redirect, url_for, current_app
 import requests
 
 dashboard_bp = Blueprint(
@@ -22,7 +22,7 @@ def dashboard_profesor():
     try:
 
         response = requests.get(
-            "http://127.0.0.1:5001/api/dashboard/resumen",
+            f"{current_app.config['BACKEND_URL']}/api/dashboard/resumen",
             timeout=5
         )
 

@@ -27,19 +27,20 @@ app.register_blueprint(profesores_bp, url_prefix="/api/profesores")
 app.register_blueprint(evaluaciones_bp, url_prefix="/api/evaluaciones")
 app.register_blueprint(auth_bp)
 app.register_blueprint(reportes_bp)
-app.register_blueprint(equipos_bp, url_prefix='/api/equipos')
-app.register_blueprint(perfil_bp, url_prefix='/api/perfil')
-app.register_blueprint(materiales_bp, url_prefix='/api/materiales')
-app.register_blueprint(notas_bp, url_prefix='/api/notas')
-app.register_blueprint(login_bp, url_prefix='/api/login')
+app.register_blueprint(equipos_bp, url_prefix="/api/equipos")
+app.register_blueprint(perfil_bp, url_prefix="/api/perfil")
+app.register_blueprint(materiales_bp, url_prefix="/api/materiales")
+app.register_blueprint(notas_bp, url_prefix="/api/notas")
+app.register_blueprint(login_bp, url_prefix="/api/login")
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(asistencia_bp, url_prefix="/api/asistencia")
 
+
 @app.route("/")
 def hello_world():
-    respuesta = {"mensaje":"Hello, World!"}
+    respuesta = {"mensaje": "Hello, World!"}
     return respuesta, 202
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=PORT)
+    app.run(debug=True, host="0.0.0.0", port=PORT)

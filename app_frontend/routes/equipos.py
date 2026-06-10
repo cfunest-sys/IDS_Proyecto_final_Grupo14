@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, request, flash, jsonify
+from flask import Blueprint, redirect, render_template, request, flash, jsonify, current_app
 import requests
 
 equipos_bp = Blueprint("equipos_bp",__name__)
@@ -24,7 +24,7 @@ def ver_equipos():
     lista_cursos = []
 
     try:
-        response_todo = requests.get("http://127.0.0.1:5001/api/equipos")
+        response_todo = requests.get(f"{current_app.config['BACKEND_URL']}/api/equipos")
         if response_todo.status_code == 200:
             equipos_todos = response_todo.json()
 
@@ -33,7 +33,7 @@ def ver_equipos():
                     lista_cursos.append(equipo.get("id_curso"))
 
         response_filtrada = requests.get(
-            "http://127.0.0.1:5001/api/equipos",
+            f"{current_app.config['BACKEND_URL']}/api/equipos",
             params=params
         ) 
 
@@ -61,7 +61,7 @@ def crear_equipo():
 
     try:
         response = requests.post(
-            "http://127.0.0.1:5001/api/equipos",
+            f"{current_app.config['BACKEND_URL']}/api/equipos",
             json=data
         )
         
@@ -91,7 +91,7 @@ def modificar_equipo():
 
     try:
         response = requests.put(
-            f"http://127.0.0.1:5001/api/equipos/{id_equipo}",
+            f"{current_app.config['BACKEND_URL']}/api/equipos/{id_equipo}",
             json=data
         )
         
@@ -114,7 +114,7 @@ def eliminar_equipo():
 
     try:
         response = requests.delete(
-            f"http://127.0.0.1:5001/api/equipos/{id_equipo}"
+            f"{current_app.config['BACKEND_URL']}/api/equipos/{id_equipo}"
         )
         
         if response.status_code == 204:
@@ -142,7 +142,7 @@ def agregar_alumno_equipo():
 
     try:
         response = requests.post(
-            "http://127.0.0.1:5001/api/equipos/miembros",
+            f"{current_app.config['BACKEND_URL']}/api/equipos/miembros",
             json=data
         )
         
@@ -164,7 +164,7 @@ def eliminar_alumno_equipo():
 
     try:
         response = requests.delete(
-            f"http://127.0.0.1:5001/api/equipos/miembros/{id_miembro}"
+            f"{current_app.config['BACKEND_URL']}/api/equipos/miembros/{id_miembro}"
         )
         
         if response.status_code == 204:
@@ -183,7 +183,7 @@ def eliminar_alumno_equipo():
 @equipos_bp.route("/equipos/datos/<id_equipo>", methods=['GET'])
 def obtener_datos_equipos(id_equipo):
     try:
-        response = requests.get(f"http://127.0.0.1:5001/api/equipos/{id_equipo}")
+        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/equipos/{id_equipo}")
         
         return jsonify(response.json()), response.status_code
     except Exception as e:

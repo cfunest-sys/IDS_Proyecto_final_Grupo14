@@ -18,6 +18,7 @@ import io
 #     cursor.close()
 #     connection.close()
 
+
 def get_usuario_by_email(email):
 
     conn = None
@@ -51,6 +52,7 @@ def get_usuario_by_email(email):
             cursor.close()
         if conn:
             conn.close()
+
 
 def get_user_profile(usuario):
 
@@ -91,6 +93,7 @@ def get_user_profile(usuario):
         cursor.close()
         conn.close()
 
+
 def crear_alumno(alumno_data):
 
     conn = None
@@ -112,14 +115,7 @@ def crear_alumno(alumno_data):
 
         password_hash = generate_password_hash(alumno_data["password"])
 
-        cur.execute(
-            query_usuario,
-            (
-                alumno_data["email"],
-                password_hash,
-                "alumno"
-            )
-        )
+        cur.execute(query_usuario, (alumno_data["email"], password_hash, "alumno"))
 
         id_usuario = cur.lastrowid
 
@@ -131,13 +127,7 @@ def crear_alumno(alumno_data):
             VALUES (%s, %s)
         """
 
-        cur.execute(
-            query_alumno,
-            (
-                alumno_data["nombre"],
-                id_usuario
-            )
-        )
+        cur.execute(query_alumno, (alumno_data["nombre"], id_usuario))
 
         conn.commit()
 
@@ -333,7 +323,7 @@ def get_all_users():
     try:
         conn = get_connection()
         cur = conn.cursor()
-        cur.execute("SELECT * FROM users")
+        cur.execute("SELECT * FROM usuarios")
         users = cur.fetchall()
     except Exception as e:
         raise Exception(f"Error obteniendo usuarios: {e}")
@@ -349,16 +339,18 @@ def get_evaluacion(id):
     try:
         connection = get_connection()
         cursor = connection.cursor()
-        cursor.execute("SELECT * FROM evaluaciones WHERE id = %s", (id))
+        cursor.execute("SELECT * FROM evaluaciones WHERE id = %s", (id,))
         evaluacion = cursor.fetchone()
+        rowcount = cursor.rowcount
         cursor.close()
         connection.close()
-        if cursor.rowcount == 0:
+        if rowcount == 0:
             return evaluacion, 204
         return evaluacion, 200
     except Exception as e:
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
+
 
 def get_evaluacion_por_curso(curso_id):
     try:
@@ -373,6 +365,7 @@ def get_evaluacion_por_curso(curso_id):
     except Exception as e:
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
+
 
 def get_evaluacion_profesor(id_profesor):
     try:
@@ -390,9 +383,11 @@ def get_evaluacion_profesor(id_profesor):
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
 
-# select evaluaciones.* from evaluaciones  
-# inner join profesor_curso pc on pc.id_curso = evaluaciones.id_curso 
+
+# select evaluaciones.* from evaluaciones
+# inner join profesor_curso pc on pc.id_curso = evaluaciones.id_curso
 # where pc.id_profesor=2;
+
 
 def get_evaluacion_todas():
     try:
@@ -415,10 +410,11 @@ def crear_evaluacion(nombre, tipo, fecha, curso_id):
         query = """INSERT INTO evaluaciones (nombre, tipo, fecha, curso_id) 
                 VALUES (%s, %s, %s, %s)"""
         cursor.execute(query, (nombre, tipo, fecha, curso_id))
-        evaluacion = cursor.fetchone()
+        connection.commit()
+        evaluacion = cursor.lastrowid
         cursor.close()
         connection.close()
-        return evaluacion
+        return jsonify({"id": evaluacion}), 201
     except Exception as e:
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
@@ -430,12 +426,12 @@ def cambiar_evaluacion(id, nombre, tipo, fecha, curso_id):
         cursor = connection.cursor()
 
         query_esta = """SELECT * FROM evaluaciones WHERE id = %s"""
-        cursor.execute(query_esta, (id))
+        cursor.execute(query_esta, (id,))
         esta = cursor.fetchall()
         if cursor.rowcount == 0:
             cursor.close()
             connection.close()
-            return jsonify({"error": "No existe ese id"})
+            return jsonify({"error": "No existe ese id"}), 404
         query_insertar = """UPDATE evaluaciones
             SET nombre = %s,
                 tipo = %s,
@@ -443,10 +439,10 @@ def cambiar_evaluacion(id, nombre, tipo, fecha, curso_id):
                 curso_id = %s
             WHERE id = %s"""
         cursor.execute(query_insertar, (nombre, tipo, fecha, curso_id, id))
-        evaluacion = cursor.fetchone()
+        connection.commit()
         cursor.close()
         connection.close()
-        return evaluacion
+        return jsonify({"message": "Evaluación actualizada"}), 200
     except Exception as e:
         if cursor:
             cursor.close()
@@ -461,17 +457,17 @@ def eliminar_evaluacion(id):
         connection = get_connection()
         cursor = connection.cursor()
         query_esta = """SELECT * FROM evaluaciones WHERE id = %s"""
-        cursor.execute(query_esta, (id))
+        cursor.execute(query_esta, (id,))
         esta = cursor.fetchall()
         if cursor.rowcount == 0:
             cursor.close()
             connection.close()
             return jsonify({"error": "No existe ese id"}), 404
         query = """DELETE FROM evaluaciones WHERE id = %s"""
-        cursor.execute(query, (id))
+        cursor.execute(query, (id,))
         connection.commit()
         query = """SELECT * FROM evaluaciones WHERE id = %s"""
-        cursor.execute(query, (id))
+        cursor.execute(query, (id,))
         resultado = cursor.fetchall()
         filas = cursor.rowcount
         cursor.close()
@@ -482,6 +478,7 @@ def eliminar_evaluacion(id):
     except Exception as e:
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
+
 
 def get_equipos_filtrados(id_equipo=None, nombre_equipo=None, id_curso=None):
     conexion = None
@@ -501,12 +498,12 @@ def get_equipos_filtrados(id_equipo=None, nombre_equipo=None, id_curso=None):
 
         if nombre_equipo:
             condiciones.append("nombre_equipo = %s")
-            parametros.append(nombre_equipo)  
+            parametros.append(nombre_equipo)
 
         if id_curso:
             condiciones.append("id_curso = %s")
             parametros.append(id_curso)
-            
+
         if condiciones:
             query += " WHERE " + " AND ".join(condiciones)
 
@@ -514,11 +511,11 @@ def get_equipos_filtrados(id_equipo=None, nombre_equipo=None, id_curso=None):
         equipos = cursor.fetchall()
 
         return equipos
-    
+
     except Exception as e:
         print(f"Error en la obtención del equipo: {e}")
         raise e
-    
+
     finally:
         if cursor:
             cursor.close()
@@ -557,10 +554,10 @@ def insertar_equipo(nombre_equipo, id_curso):
     try:
         conexion = get_connection()
         cursor = conexion.cursor(dictionary=True)
-        
+
         cursor.execute("INSERT INTO equipos (nombre_equipo, id_curso) VALUES (%s, %s)", (nombre_equipo, id_curso))
         conexion.commit()
-    
+
     except Exception as e:
         print(f"Error en la creación del equipo {e}")
         raise e
@@ -642,14 +639,7 @@ def crear_profesor(profesor):
 
         password_hash = generate_password_hash(profesor["password"])
 
-        cur.execute(
-            query_usuario,
-            (
-                profesor["email"],
-                password_hash,
-                "profesor"
-            )
-        )
+        cur.execute(query_usuario, (profesor["email"], password_hash, "profesor"))
 
         id_usuario = cur.lastrowid
 
@@ -662,14 +652,7 @@ def crear_profesor(profesor):
             VALUES (%s, %s, %s)
         """
 
-        cur.execute(
-            query_profesor,
-            (
-                profesor["nombre"],
-                profesor["departamento"],
-                id_usuario
-            )
-        )
+        cur.execute(query_profesor, (profesor["nombre"], profesor["departamento"], id_usuario))
 
         conn.commit()
 
@@ -683,7 +666,7 @@ def crear_profesor(profesor):
         if conn:
             conn.close()
 
-            
+
 def get_miembros_equipo(id_miembro=None, id_equipo=None, legajo_alumno=None):
     conexion = None
     cursor = None
@@ -702,7 +685,7 @@ def get_miembros_equipo(id_miembro=None, id_equipo=None, legajo_alumno=None):
 
         if id_equipo:
             condiciones.append("id_equipo = %s")
-            parametros.append(id_equipo)  
+            parametros.append(id_equipo)
 
         if legajo_alumno:
             condiciones.append("legajo_alumno = %s")
@@ -715,17 +698,17 @@ def get_miembros_equipo(id_miembro=None, id_equipo=None, legajo_alumno=None):
         equipo = cursor.fetchall()
 
         return equipo
-    
+
     except Exception as e:
         print(f"Error en la obtención del equipo: {e}")
         raise e
-    
+
     finally:
         if cursor:
             cursor.close()
         if conexion:
             conexion.close()
-        
+
 
 def insertar_miembro(id_equipo, legajo_alumno):
     conexion = None
@@ -734,10 +717,12 @@ def insertar_miembro(id_equipo, legajo_alumno):
     try:
         conexion = get_connection()
         cursor = conexion.cursor(dictionary=True)
-        
-        cursor.execute("INSERT INTO miembros_equipo (id_equipo, legajo_alumno) VALUES (%s, %s)", (id_equipo, legajo_alumno))
+
+        cursor.execute(
+            "INSERT INTO miembros_equipo (id_equipo, legajo_alumno) VALUES (%s, %s)", (id_equipo, legajo_alumno)
+        )
         conexion.commit()
-    
+
     except Exception as e:
         print(f"Error al agregar un alumno al equipo {e}")
         raise e
@@ -775,10 +760,17 @@ def delete_miembro(id_miembro):
 
 # <------------------- MATERIALES  ----------------------------->
 CAMPOS_PERMITIDOS_UPDATE = {
-    'titulo', 'descripcion', 'tema', 'fecha_material',
-    'estado', 'orden_material', 'es_libre', 'tipo_material'
+    "titulo",
+    "descripcion",
+    "tema",
+    "fecha_material",
+    "estado",
+    "orden_material",
+    "es_libre",
+    "tipo_material",
 }
-ESTADOS_VALIDOS = {'borrador', 'publicado', 'archivado'}
+ESTADOS_VALIDOS = {"borrador", "publicado", "archivado"}
+
 
 def insertar_material(
     id_curso,
@@ -794,7 +786,7 @@ def insertar_material(
     tamano_bytes=None,
     fecha_material=None,
     es_libre=False,
-    estado='publicado'
+    estado="publicado",
 ):
     if estado not in ESTADOS_VALIDOS:
         raise ValueError(f"Estado inválido: {estado}")
@@ -810,11 +802,25 @@ def insertar_material(
              tamano_bytes, fecha_material, es_libre, estado)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(query, (
-            id_curso, id_profesor, titulo, descripcion, tipo_material,
-            tema, orden_material, archivo_ruta, es_externo, tipo_archivo,
-            tamano_bytes, fecha_material, es_libre, estado
-        ))
+        cursor.execute(
+            query,
+            (
+                id_curso,
+                id_profesor,
+                titulo,
+                descripcion,
+                tipo_material,
+                tema,
+                orden_material,
+                archivo_ruta,
+                es_externo,
+                tipo_archivo,
+                tamano_bytes,
+                fecha_material,
+                es_libre,
+                estado,
+            ),
+        )
         conn.commit()
         return cursor.lastrowid
     except Exception as e:
@@ -823,6 +829,7 @@ def insertar_material(
         return None
     finally:
         conn.close()
+
 
 def get_materiales(
     id_curso=None,
@@ -833,7 +840,7 @@ def get_materiales(
     es_libre=None,
     activo=True,
     pagina=1,
-    limite=20
+    limite=20,
 ):
     conn = get_connection()
     try:
@@ -863,7 +870,7 @@ def get_materiales(
             params.append(es_libre)
         where_sql = " AND ".join(where_clauses) if where_clauses else "1=1"
         cursor.execute(f"SELECT COUNT(*) as total FROM materiales WHERE {where_sql}", params)
-        total = cursor.fetchone()['total']
+        total = cursor.fetchone()["total"]
         offset = (pagina - 1) * limite
         query = f"""
             SELECT * FROM materiales
@@ -881,14 +888,12 @@ def get_materiales(
     finally:
         conn.close()
 
+
 def get_material(id_material):
     conn = get_connection()
     try:
         cursor = conn.cursor(dictionary=True)
-        cursor.execute(
-            "SELECT * FROM materiales WHERE id_material = %s AND activo = TRUE",
-            (id_material,)
-        )
+        cursor.execute("SELECT * FROM materiales WHERE id_material = %s AND activo = TRUE", (id_material,))
         return cursor.fetchone()
     except Exception as e:
         print(f"Error getting material: {e}")
@@ -896,11 +901,12 @@ def get_material(id_material):
     finally:
         conn.close()
 
+
 def actualizar_material(id_material, **kwargs):
     updates = {k: v for k, v in kwargs.items() if k in CAMPOS_PERMITIDOS_UPDATE}
     if not updates:
         return False
-    if 'estado' in updates and updates['estado'] not in ESTADOS_VALIDOS:
+    if "estado" in updates and updates["estado"] not in ESTADOS_VALIDOS:
         raise ValueError(f"Estado inválido: {updates['estado']}")
     conn = get_connection()
     try:
@@ -924,14 +930,12 @@ def actualizar_material(id_material, **kwargs):
     finally:
         conn.close()
 
+
 def eliminar_material(id_material):
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute(
-            "UPDATE materiales SET activo = FALSE WHERE id_material = %s AND activo = TRUE",
-            (id_material,)
-        )
+        cursor.execute("UPDATE materiales SET activo = FALSE WHERE id_material = %s AND activo = TRUE", (id_material,))
         conn.commit()
         return cursor.rowcount > 0
     except Exception as e:
@@ -940,6 +944,7 @@ def eliminar_material(id_material):
         return False
     finally:
         conn.close()
+
 
 def get_notas_filtradas(rol, usuario_id, legajo_alumno=None, id_evaluacion=None, id_curso=None, limit=10, offset=0):
     """Obtiene el listado de notas aplicando paginación y seguridad estricta por rol."""
@@ -999,8 +1004,10 @@ def get_notas_filtradas(rol, usuario_id, legajo_alumno=None, id_evaluacion=None,
         print(f"Error en queries.get_notas_filtradas: {e}")
         raise e
     finally:
-        if cur: cur.close()
-        if conn: conn.close()
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 
 
 def get_promedio_notas(rol, usuario_id, legajo_alumno=None, id_evaluacion=None, id_curso=None):
@@ -1023,7 +1030,7 @@ def get_promedio_notas(rol, usuario_id, legajo_alumno=None, id_evaluacion=None, 
         if rol == "alumno":
             condiciones.append("a.id_usuario = %s")
             parametros.append(usuario_id)
-            
+
         elif rol == "profesor":
             query += """
                 INNER JOIN profesor_curso pc ON c.id_curso = pc.id_curso
@@ -1049,17 +1056,19 @@ def get_promedio_notas(rol, usuario_id, legajo_alumno=None, id_evaluacion=None, 
 
         cur.execute(query, parametros)
         resultado = cur.fetchone()
-        
-        if resultado and resultado['promedio'] is not None:
-            return round(float(resultado['promedio']), 2)
+
+        if resultado and resultado["promedio"] is not None:
+            return round(float(resultado["promedio"]), 2)
         return 0.0
 
     except Exception as e:
         print(f"Error en queries.get_promedio_notas: {e}")
         raise e
     finally:
-        if cur: cur.close()
-        if conn: conn.close()
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 
 
 def verificar_alumno_evaluacion(legajo_alumno, id_evaluacion):
@@ -1069,20 +1078,22 @@ def verificar_alumno_evaluacion(legajo_alumno, id_evaluacion):
     try:
         conn = get_connection()
         cur = conn.cursor(dictionary=True)
-        
+
         cur.execute("SELECT legajo FROM alumnos WHERE legajo = %s", (legajo_alumno,))
         alumno = cur.fetchone()
-        
+
         cur.execute("SELECT id_evaluacion FROM evaluaciones WHERE id_evaluacion = %s", (id_evaluacion,))
         evaluacion = cur.fetchone()
-        
+
         return (alumno is not None) and (evaluacion is not None)
     except Exception as e:
         print(f"Error en verificar_alumno_evaluacion: {e}")
         return False
     finally:
-        if cur: cur.close()
-        if conn: conn.close()
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 
 
 def guardar_actualizar_nota(legajo_alumno, id_evaluacion, calificacion):
@@ -1102,22 +1113,29 @@ def guardar_actualizar_nota(legajo_alumno, id_evaluacion, calificacion):
         cur.execute(query, (legajo_alumno, id_evaluacion, calificacion))
         conn.commit()
 
-        cur.execute("""
+        cur.execute(
+            """
             SELECT legajo_alumno, id_evaluacion, calificacion, fecha
             FROM notas
             WHERE legajo_alumno = %s AND id_evaluacion = %s
-        """, (legajo_alumno, id_evaluacion))
+        """,
+            (legajo_alumno, id_evaluacion),
+        )
 
         return cur.fetchone()
 
     except Exception as e:
-        if conn: conn.rollback()
+        if conn:
+            conn.rollback()
         print(f"Error guardar/actualizar nota: {e}")
         raise e
     finally:
-        if cur: cur.close()
-        if conn: conn.close()
-        
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+
 def registrar_login(id_usuario, email, resultado, ip):
     conn = get_connection()
     cur = conn.cursor()
@@ -1128,14 +1146,16 @@ def registrar_login(id_usuario, email, resultado, ip):
         (id_usuario, email, resultado, ip)
         VALUES (%s, %s, %s, %s)
         """,
-        (id_usuario, email, resultado, ip)
+        (id_usuario, email, resultado, ip),
     )
 
     conn.commit()
     cur.close()
     conn.close()
 
+
 # <===================== CARGAR ALUMNOS COMO USUARIOS =========================>
+
 
 def cargar_alumnos_csv(archivo_csv):
     """
@@ -1144,39 +1164,26 @@ def cargar_alumnos_csv(archivo_csv):
 
     """
     from utils.auth import hash_password
+
     exitosos = 0
     errores = []
 
     def agregar_error(fila, motivo):
-        errores.append({
-            "fila": fila,
-            "motivo": motivo
-        })
+        errores.append({"fila": fila, "motivo": motivo})
 
     conn = get_connection()
     cur = None
     try:
         cur = conn.cursor()
         lector = csv.DictReader(io.StringIO(archivo_csv))
-        columnas_requeridas = {
-            "legajo",
-            "nombre",
-            "apellido",
-            "dni",
-            "email",
-            "curso",
-            "anio",
-            "cuatrimestre"
-        }
+        columnas_requeridas = {"legajo", "nombre", "apellido", "dni", "email", "curso", "anio", "cuatrimestre"}
 
         if not lector.fieldnames:
             raise ValueError("El archivo CSV está vacío")
         faltantes = columnas_requeridas - set(lector.fieldnames)
 
         if faltantes:
-            raise ValueError(
-                f"Faltan columnas: {', '.join(sorted(faltantes))}"
-            )
+            raise ValueError(f"Faltan columnas: {', '.join(sorted(faltantes))}")
 
         for numero_fila, fila in enumerate(lector, start=2):
             try:
@@ -1193,41 +1200,23 @@ def cargar_alumnos_csv(archivo_csv):
 
                 # Verificar legajo existente
 
-                cur.execute(
-                    "SELECT 1 FROM alumnos WHERE legajo = %s",
-                    (legajo,)
-                )
+                cur.execute("SELECT 1 FROM alumnos WHERE legajo = %s", (legajo,))
 
                 if cur.fetchone():
-                    agregar_error(
-                        numero_fila,
-                        f"Legajo {legajo} ya existe"
-                    )
+                    agregar_error(numero_fila, f"Legajo {legajo} ya existe")
                     continue
 
                 # Verificar DNI existente
-                cur.execute(
-                    "SELECT 1 FROM alumnos WHERE dni = %s",
-                    (dni,)
-                )
+                cur.execute("SELECT 1 FROM alumnos WHERE dni = %s", (dni,))
 
                 if cur.fetchone():
-                    agregar_error(
-                        numero_fila,
-                        f"DNI {dni} ya registrado"
-                    )
+                    agregar_error(numero_fila, f"DNI {dni} ya registrado")
                     continue
                 # Verificar email existente
-                cur.execute(
-                    "SELECT 1 FROM usuarios WHERE email = %s",
-                    (email,)
-                )
+                cur.execute("SELECT 1 FROM usuarios WHERE email = %s", (email,))
 
                 if cur.fetchone():
-                    agregar_error(
-                        numero_fila,
-                        f"Email {email} ya registrado"
-                    )
+                    agregar_error(numero_fila, f"Email {email} ya registrado")
                     continue
                 # Crear usuario
 
@@ -1237,10 +1226,7 @@ def cargar_alumnos_csv(archivo_csv):
                     (email, contrasenia, rol)
                     VALUES (%s, %s, 'alumno')
                     """,
-                    (
-                        email,
-                        hash_password(dni)
-                    )
+                    (email, hash_password(dni)),
                 )
 
                 id_usuario = cur.lastrowid
@@ -1267,39 +1253,20 @@ def cargar_alumnos_csv(archivo_csv):
                         %s
                     )
                     """,
-                    (
-                        legajo,
-                        nombre,
-                        apellido,
-                        dni,
-                        email,
-                        curso,
-                        anio,
-                        cuatrimestre,
-                        id_usuario
-                    )
+                    (legajo, nombre, apellido, dni, email, curso, anio, cuatrimestre, id_usuario),
                 )
 
                 exitosos += 1
 
             except ValueError:
-                agregar_error(
-                    numero_fila,
-                    "Error de formato en campos numéricos"
-                )
+                agregar_error(numero_fila, "Error de formato en campos numéricos")
 
             except Exception as e:
-                agregar_error(
-                    numero_fila,
-                    str(e)
-                )
+                agregar_error(numero_fila, str(e))
 
         conn.commit()
 
-        return {
-            "exitosos": exitosos,
-            "errores": errores
-        }
+        return {"exitosos": exitosos, "errores": errores}
 
     except Exception as e:
 
@@ -1312,7 +1279,9 @@ def cargar_alumnos_csv(archivo_csv):
         if conn:
             conn.close()
 
-#-------------------Perfil-------------------------#
+
+# -------------------Perfil-------------------------#
+
 
 def obtener_usuario_por_id(id_usuario):
     conn = None
@@ -1327,8 +1296,10 @@ def obtener_usuario_por_id(id_usuario):
         print(f"Error: {e}")
         return None
     finally:
-        if cur: cur.close()
-        if conn: conn.close()
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 
 
 def obtener_detalles_alumno(id_usuario):
@@ -1337,7 +1308,7 @@ def obtener_detalles_alumno(id_usuario):
     try:
         conn = get_connection()
         cur = conn.cursor(dictionary=True)
-        
+
         query_alumno = """
             SELECT legajo, nombre, apellido, dni, curso, anio, cuatrimestre, estado 
             FROM alumnos 
@@ -1345,7 +1316,7 @@ def obtener_detalles_alumno(id_usuario):
         """
         cur.execute(query_alumno, (id_usuario,))
         alumno = cur.fetchone()
-        
+
         if alumno:
             query_notas = """
                 SELECT notas.calificacion, evaluaciones.nombre AS evaluacion_nombre, evaluaciones.tipo AS evaluacion_tipo
@@ -1353,8 +1324,8 @@ def obtener_detalles_alumno(id_usuario):
                 INNER JOIN evaluaciones ON notas.id_evaluacion = evaluaciones.id_evaluacion
                 WHERE notas.legajo_alumno = %s
             """
-            cur.execute(query_notas, (alumno['legajo'],))
-            alumno['evaluaciones'] = cur.fetchall()
+            cur.execute(query_notas, (alumno["legajo"],))
+            alumno["evaluaciones"] = cur.fetchall()
 
             query_equipos = """
                 SELECT eq.nombre_equipo, c.nombre AS curso_nombre, c.anio, c.semestre
@@ -1363,16 +1334,18 @@ def obtener_detalles_alumno(id_usuario):
                 INNER JOIN cursos c ON eq.id_curso = c.id_curso
                 WHERE me.legajo_alumno = %s
             """
-        cur.execute(query_equipos, (alumno['legajo'],))
-        alumno['equipos'] = cur.fetchall()
-            
+        cur.execute(query_equipos, (alumno["legajo"],))
+        alumno["equipos"] = cur.fetchall()
+
         return alumno
     except Exception as e:
         print(f"Error en alumno: {e}")
         return None
     finally:
-        if cur: cur.close()
-        if conn: conn.close()
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 
 
 def obtener_detalles_profesor(id_usuario):
@@ -1381,21 +1354,21 @@ def obtener_detalles_profesor(id_usuario):
     try:
         conn = get_connection()
         cur = conn.cursor(dictionary=True)
-        
+
         query_prof = "SELECT id_profesor, nombre, departamento FROM profesores WHERE id_usuario = %s"
         cur.execute(query_prof, (id_usuario,))
         profesor = cur.fetchone()
-        
+
         if profesor:
-            
+
             query_cursos = """
                 SELECT cursos.nombre AS curso_nombre, cursos.anio, cursos.semestre
                 FROM profesor_curso
                 INNER JOIN cursos ON profesor_curso.id_curso = cursos.id_curso
                 WHERE profesor_curso.id_profesor = %s
             """
-            cur.execute(query_cursos, (profesor['id_profesor'],))
-            profesor['cursos_asignados'] = cur.fetchall()
+            cur.execute(query_cursos, (profesor["id_profesor"],))
+            profesor["cursos_asignados"] = cur.fetchall()
             query_evaluaciones = """
                 SELECT 
                     e.nombre AS evaluacion_nombre,
@@ -1412,21 +1385,23 @@ def obtener_detalles_profesor(id_usuario):
                 WHERE pc.id_profesor = %s
                 GROUP BY e.id_evaluacion
             """
-            cur.execute(query_evaluaciones, (profesor['id_profesor'],))
-            profesor['evaluaciones'] = cur.fetchall()
-            
+            cur.execute(query_evaluaciones, (profesor["id_profesor"],))
+            profesor["evaluaciones"] = cur.fetchall()
+
         return profesor
     except Exception as e:
         print(f"Error en profesor: {e}")
         return None
     finally:
-        if cur: cur.close()
-        if conn: conn.close()
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
 
 def registrar_login(id_usuario, email, resultado, ip):
     conn = None
     cur = None
-
 
     try:
         conn = get_connection()
@@ -1437,7 +1412,7 @@ def registrar_login(id_usuario, email, resultado, ip):
             (id_usuario, email, resultado, ip)
             VALUES (%s, %s, %s, %s)
             """,
-            (id_usuario, email, resultado, ip)
+            (id_usuario, email, resultado, ip),
         )
         conn.commit()
     except Exception as e:
