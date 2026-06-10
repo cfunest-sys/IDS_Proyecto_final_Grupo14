@@ -1,5 +1,6 @@
 from werkzeug.security import generate_password_hash
 
+from utils.mail_service import enviar_mail_bienvenida
 from database.db import get_connection
 from flask import jsonify
 import csv
@@ -655,6 +656,11 @@ def crear_profesor(profesor):
         cur.execute(query_profesor, (profesor["nombre"], profesor["departamento"], id_usuario))
 
         conn.commit()
+        print(profesor)
+        enviar_mail_bienvenida(
+            profesor["email"],
+            profesor["nombre"]
+        )
 
         return cur.lastrowid
 
