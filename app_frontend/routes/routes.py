@@ -53,11 +53,24 @@ def register():
 
         response = requests.post(f"{current_app.config['BACKEND_URL']}/api/profesores/register", json=data, timeout=5)
 
-        if response.ok:
-            flash("Usuario registrado correctamente", "success")
+        if response.status_code == 201:
+            flash(
+                "Usuario registrado correctamente",
+                "success"
+            )
             return redirect("/")
 
-        return render_template("registro.html", error="No se pudo registrar el profesor")
+        elif response.status_code == 409:
+
+            return render_template(
+                "registro.html",
+                error="Ya existe una cuenta con ese email"
+            )
+
+        return render_template(
+            "registro.html",
+            error="No se pudo registrar el profesor"
+        )
 
     return render_template("registro.html")
 

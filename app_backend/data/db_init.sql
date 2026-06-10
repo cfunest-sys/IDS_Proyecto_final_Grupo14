@@ -20,19 +20,19 @@ DROP TABLE IF EXISTS asistencia;
 
 CREATE TABLE usuarios (
     id_usuario INTEGER PRIMARY KEY AUTO_INCREMENT,
-    email TEXT NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
     contrasenia TEXT NOT NULL,
     rol TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-CREATE TABLE logs_login (
-    id_log INT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario INT,
-    email VARCHAR(255),
-    fecha_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
-    resultado ENUM('exitoso', 'fallido'),
-    ip VARCHAR(45),
+CREATE TABLE logs_login(
+    id_log INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id_usuario INTEGER,
+    email TEXT NOT NULL,
+    resultado TEXT NOT NULL,
+    ip TEXT,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );
 CREATE TABLE password_reset_tokens (
@@ -185,15 +185,7 @@ CREATE TABLE asistencia (
     FOREIGN KEY (qr_id) REFERENCES qr_asistencia(id_qr)
 );
 
-CREATE TABLE logs_login(
-    id_log INTEGER PRIMARY KEY AUTO_INCREMENT,
-    id_usuario INTEGER,
-    email TEXT NOT NULL,
-    resultado TEXT NOT NULL,
-    ip TEXT,
-    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
-);
+
 
 INSERT INTO usuarios (email, contrasenia, rol)
 VALUES

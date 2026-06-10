@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from data.queries import crear_profesor, registrar_login
+from data.queries import crear_profesor, existe_usuario_por_email, registrar_login
 
 profesores_bp = Blueprint("profesores", __name__)
 
@@ -84,6 +84,11 @@ def register():
             "password": password,
             "departamento": departamento
         }
+        
+        if existe_usuario_por_email(email):
+            return jsonify({
+                "error": "Ya existe una cuenta con ese email"
+            }), 409
 
         id_profesor = crear_profesor(profesor)
 
