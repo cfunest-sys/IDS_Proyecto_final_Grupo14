@@ -14,7 +14,7 @@
             <div class="page-header">
 
                 <h1 class="page-title">
-                    Gestión de Notas
+                    Gestión de Notas {{mensaje}}
                 </h1>
 
                 <p class="page-subtitle">
@@ -286,9 +286,6 @@
                             {% for alumno in resumen %}
                             <option value="{{ alumno.padron }}">{{ alumno.nombre }}</option>   
                             {% endfor %}
-                            <option value="Nicolás Pattini">Nicolás Pattini</option>
-                            <option value="Julieta Fernández">Julieta Fernández</option>
-                            <option value="Celeste Funes Taya">Celeste Funes Taya</option>
                         </select>
                     </div>
 
@@ -296,10 +293,9 @@
                         <label for="evaluacion" class="form-label">Evaluación</label>
                         <select id="evaluacion" name="evaluacion" class="form-select" required>
                             <option value="">Seleccionar evaluación</option>
-                            <option value="Parcial 1">Parcial 1</option>
-                            <option value="Parcial 2">Parcial 2</option>
-                            <option value="Trabajo Práctico">Trabajo Práctico</option>
-                            <option value="Recuperatorio">Recuperatorio</option>
+                            <option value="1">Primer Parcial Teórico-Práctico</option>
+                            <option value="2">Trabajo Práctico Integrador Final</option>
+                            <option value="3">Control de Lectura - Parcialito 1</option>
                         </select>
                     </div>
 
@@ -310,11 +306,6 @@
 
                     <div class="mb-4">
                         <label for="estado" class="form-label">Estado</label>
-                        <select id="estado" name="estado" class="form-select" required>
-                            <option value="">Seleccionar estado</option>
-                            <option value="Aprobado">Aprobado</option>
-                            <option value="Desaprobado">Desaprobado</option>
-                            <option value="Ausente">Ausente</option>
                         </select>
                     </div>
 

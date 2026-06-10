@@ -104,7 +104,6 @@ def resumen_promedios(current_user):
     # if not data:
     #     return jsonify({"error": "No se enviaron datos"}), 400
     # current_user = data
-
     if current_user.get('rol') not in ['profesor', 'admin']:
         return jsonify({"error": "Acceso denegado. Solo para personal docente o administración."}), 403
 

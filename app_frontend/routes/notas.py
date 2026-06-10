@@ -1,7 +1,7 @@
-from flask import Blueprint, render_template, flash, current_app
+from flask import Blueprint, render_template, flash, request, session, redirect, url_for, current_app
 import requests
 
-notas_blueprint = Blueprint("notas_blueprint", __name__)
+notas_blueprint = Blueprint("notas", __name__)
 
 @notas_blueprint.route("/", methods=["GET"])
 def ver_notas():
@@ -13,11 +13,17 @@ def ver_notas():
         #     "rol": session["rol"],
         #     "user_id": session["user_id"]
         # }
-        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/notas/resumen-promedios", timeout=5)
+        token = session.get("token", "")
+        response = requests.get(
+            f"{current_app.config['BACKEND_URL']}/api/notas/resumen-promedios",
+            headers={'Authorization': 'Bearer ' + token},
+            timeout=5
+        )
         if response.ok:
             resumen_promedios = response.json()
         else:
             flash("No se pudieron procesar las actas académicas", "warning")
+
     except requests.exceptions.RequestException:
         flash("El servidor de datos (Backend) no responde", "danger")
 
@@ -28,16 +34,22 @@ def cargar_nota():
     resumen_promedios = []
     try:
         body = {
-            "legajo_alumno":request.args.get("alumno"),
-            "id_evaluacion": request.args.get("evaluacion"),
-            "calificacion": request.args.get("nota"),
+            "legajo_alumno":request.form.get("alumno"),
+            "id_evaluacion": request.form.get("evaluacion"),
+            "calificacion": request.form.get("nota"),
             }
-        response = requests.post(f"{current_app.config['BACKEND_URL']}/api/notas/notas", json=body, timeout=5)
+        token = session.get("token", "")
+        response = requests.post(
+            f"{current_app.config['BACKEND_URL']}/api/notas/notas",
+            headers={'Authorization': 'Bearer ' + token},
+            json=body,
+            timeout=5
+        )
         if response.ok:
             resumen_promedios = response.json()
         else:
-            flash("No se pudieron procesar las actas académicas", "warning")
+            flash(response.json().get("error"), "warning")
     except requests.exceptions.RequestException:
         flash("El servidor de datos (Backend) no responde", "danger")
-
-    return render_template("notas.html", resumen=resumen_promedios)
+    return redirect(url_for('notas.ver_notas'))
+    # return render_template("notas.html", resumen=resumen_promedios)
