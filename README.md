@@ -37,7 +37,12 @@ El proyecto se ejecuta completamente containerizado. No es necesario instalar Py
 
 ## Cómo ejecutar el proyecto
 
-1. Clonar el repositorio y acceder al directorio raíz del proyecto.
+1. Clonar el repositorio y acceder al directorio raíz del proyecto:
+
+   ```bash
+   git clone git@github.com:cfunest-sys/IDS_Proyecto_final_Grupo14.git
+   ```
+
 
 2. (Opcional) Revisar las variables de entorno en `app_backend/.env.example` y, si es necesario, crear `app_backend/.env` con los valores deseados.  
    Los valores por defecto del `docker-compose.yml` son suficientes para desarrollo.
@@ -56,7 +61,7 @@ El proyecto se ejecuta completamente containerizado. No es necesario instalar Py
    | `backend` | `5001`  | API RESTful del backend        |
    | `frontend`| `8080`  | Interfaz web de administración |
 
-4. Una vez que los servicios estén saludables, acceder a:
+4. Una vez que los servicios estén levantados, acceder a:
 
    - **Frontend:** [http://localhost:8080](http://localhost:8080)
    - **Backend (API):** [http://localhost:5001](http://localhost:5001)
@@ -78,7 +83,7 @@ El proyecto se ejecuta completamente containerizado. No es necesario instalar Py
 
 ## Estructura de Carpetas del Repositorio
 
-La arquitectura del sistema mantiene una separación estricta entre la API lógica de backend y la interfaz de gestión de frontend:
+La arquitectura del sistema mantiene una separación entre la API lógica de backend y la interfaz de frontend:
 
 ```text
 ├── app_backend/
@@ -104,7 +109,7 @@ La arquitectura del sistema mantiene una separación estricta entre la API lógi
 │   │   └── auth.py               # Utilidades JWT
 │   ├── uploads/
 │   │   └── materiales/           # Archivos subidos por los profesores
-│   ├── .env                      # Variables de entorno (no versionar configurarlo antes de levantar el proyecto con el .example)
+│   ├── .env                      # Variables de entorno (no versionar configurarlo antes con el .example)
 │   ├── .env.example              # Ejemplo de variables de entorno
 │   ├── app.py                    # Inicialización del backend Flask
 │   ├── config.py                 # Configuración (DB, JWT)
@@ -147,6 +152,6 @@ La arquitectura del sistema mantiene una separación estricta entre la API lógi
 │   ├── app.py                    # Inicialización del frontend Flask
 │   └── Dockerfile                # Imagen Docker del frontend
 ├── .gitignore                    # Exclusión de archivos del entorno virtual y temporales
-├── docker-compose.yml            # Orquestación de servicios (DB, backend, frontend)
+├── docker-compose.yml            # configuracion para levantar los servicios (DB, backend, frontend)
 ├── README.md                     # Documentación técnica del sistema (este archivo)
 └── requirements.txt              # Dependencias del proyecto de Python
