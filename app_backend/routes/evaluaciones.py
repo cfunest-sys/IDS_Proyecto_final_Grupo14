@@ -50,7 +50,7 @@ def obtener_evas_todas():
     evaluacion = get_evaluacion_todas()
     if (len(evaluacion) <= 0 or evaluacion == None):
         return jsonify({"body":{"error":"No se encontraron evaluaciones"}, "status":204})
-    return evaluacion
+    return jsonify({"body":evaluacion, "status":200})
 
 
 @evaluaciones_bp.route('/crear', methods=['POST'])
