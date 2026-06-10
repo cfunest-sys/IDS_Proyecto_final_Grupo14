@@ -153,7 +153,4 @@ La arquitectura del sistema mantiene una separación estricta entre la API lógi
 ├── .gitignore                    # Exclusión de archivos del entorno virtual y temporales
 ├── docker-compose.yml            # Orquestación de servicios (DB, backend, frontend)
 ├── README.md                     # Documentación técnica del sistema (este archivo)
-├── DEFENSA_ORAL.md               # Material de defensa oral
-├── errores.md                    # Registro de errores conocidos
 └── requirements.txt              # Dependencias del proyecto de Python
-```
