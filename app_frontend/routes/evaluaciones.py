@@ -1,7 +1,7 @@
-from urllib import response
 from datetime import datetime
 from flask import Blueprint, redirect, render_template, request, flash, session, current_app
 import requests
+import calendar
 
 evaluaciones_blueprint = Blueprint("evaluaciones", __name__)
 
@@ -17,7 +17,7 @@ def listar_evaluaciones():
         json_data = response.json()
         for eva in json_data["body"]:
             # Parseamos la fecha que viene del backend
-            d = datetime.strptime(eva[3][5:-4], "%d %b %Y %H:%M:%S")
+            d = datetime.strptime(eva[3], "%Y-%m-%d")
             evaluaciones.append({"id": eva[0], "nombre": eva[1], "tipo": eva[2], "fecha": d, "curso": eva[4]})
 
     return render_template("evaluaciones.html", evaluaciones=evaluaciones)
@@ -42,13 +42,10 @@ def calendario_evaluaciones():
         json = response.json()
         if json["body"].get("error", "") == "":
             for evento in json["body"]:
-                d = datetime.strptime(evento[3][5:-4], "%d %b %Y %H:%M:%S")
-                eventos.append({
-                    "nombre": evento[1],
-                    "tipo": evento[2],
-                    "fecha": d.strftime("%Y-%m-%d"),
-                    "curso": evento[4]
-                })
+                d = datetime.strptime(evento[3], "%Y-%m-%d")
+                eventos.append(
+                    {"nombre": evento[1], "tipo": evento[2], "fecha": d.strftime("%Y-%m-%d"), "curso": evento[4]}
+                )
     mes_nombre = (
         "enero",
         "febrero",
@@ -66,7 +63,7 @@ def calendario_evaluaciones():
     año_actual = 2026
     mes_actual = 5
 
-    dias = (31, 28 + año_actual % 4, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+    dias = tuple(calendar.monthrange(año_actual, mes)[1] for mes in range(1, 13))
 
     # return render_template("prueba.html", eventos=eventos)
 

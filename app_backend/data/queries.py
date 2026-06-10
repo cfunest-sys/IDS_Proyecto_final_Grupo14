@@ -657,10 +657,7 @@ def crear_profesor(profesor):
 
         conn.commit()
         print(profesor)
-        enviar_mail_bienvenida(
-            profesor["email"],
-            profesor["nombre"]
-        )
+        enviar_mail_bienvenida(profesor["email"], profesor["nombre"])
 
         return cur.lastrowid
 
@@ -1140,24 +1137,6 @@ def guardar_actualizar_nota(legajo_alumno, id_evaluacion, calificacion):
             cur.close()
         if conn:
             conn.close()
-
-
-def registrar_login(id_usuario, email, resultado, ip):
-    conn = get_connection()
-    cur = conn.cursor()
-
-    cur.execute(
-        """
-        INSERT INTO logs_login
-        (id_usuario, email, resultado, ip)
-        VALUES (%s, %s, %s, %s)
-        """,
-        (id_usuario, email, resultado, ip),
-    )
-
-    conn.commit()
-    cur.close()
-    conn.close()
 
 
 # <===================== CARGAR ALUMNOS COMO USUARIOS =========================>

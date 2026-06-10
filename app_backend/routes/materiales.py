@@ -132,7 +132,10 @@ def descargar_material(current_user, id_material):
     if not material:
         return jsonify({"error": "Material no encontrado"}), 404
     if material["es_externo"]:
-        return redirect(material["archivo_ruta"])
+        url = material["archivo_ruta"]
+        if not (url.startswith("http://") or url.startswith("https://")):
+            return jsonify({"error": "URL externa inválida"}), 400
+        return redirect(url)
     ruta_completa = os.path.join(UPLOAD_FOLDER, material["archivo_ruta"].replace("materiales/", ""))
     if not os.path.exists(ruta_completa):
         return jsonify({"error": "Archivo no encontrado en servidor"}), 404

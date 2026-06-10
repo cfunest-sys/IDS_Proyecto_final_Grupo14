@@ -1,5 +1,3 @@
-from urllib import response
-
 from flask import Blueprint, jsonify, redirect, render_template, request, flash, session, current_app
 import requests
 
