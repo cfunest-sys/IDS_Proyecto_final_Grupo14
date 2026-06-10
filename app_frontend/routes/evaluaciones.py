@@ -12,14 +12,21 @@ evaluaciones_blueprint = Blueprint("evaluaciones", __name__)
 def listar_evaluaciones():
     response = requests.get(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/todas")
     evaluaciones = []
-
     if response.status_code != 204:
         json_data = response.json()
         for eva in json_data["body"]:
-            # Parseamos la fecha que viene del backend
             d = datetime.strptime(eva[3], "%Y-%m-%d")
             evaluaciones.append({"id": eva[0], "nombre": eva[1], "tipo": eva[2], "fecha": d, "curso": eva[4]})
-
+    # --- FILTROS ---
+    tipo_filtro = request.args.get("tipo")
+    fecha_desde = request.args.get("fecha_desde")
+    fecha_hasta = request.args.get("fecha_hasta")
+    if tipo_filtro:
+        evaluaciones = [e for e in evaluaciones if e["tipo"] == tipo_filtro]
+    if fecha_desde:
+        evaluaciones = [e for e in evaluaciones if e["fecha"] >= datetime.strptime(fecha_desde, "%Y-%m-%d")]
+    if fecha_hasta:
+        evaluaciones = [e for e in evaluaciones if e["fecha"] <= datetime.strptime(fecha_hasta, "%Y-%m-%d")]
     return render_template("evaluaciones.html", evaluaciones=evaluaciones)
 
 
