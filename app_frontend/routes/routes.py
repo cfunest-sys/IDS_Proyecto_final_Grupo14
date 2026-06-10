@@ -20,8 +20,7 @@ def asistencia():
     if request.method == "POST":
         if rol == "profesor":
             try:
-
-                respuesta = requests.post(f"{current_app.config['BACKEND_URL']}/api/asistencia/generar-qr")
+                respuesta = requests.post("http://192.168.0.232:5001/api/asistencia/generar-qr", timeout=15)
                 data = respuesta.json()
                 if respuesta.status_code == 200:
                     codigo = data.get("qr_code")
@@ -228,11 +227,7 @@ def registrar_asistencia():
         qr_code = request.form.get("qr_code")
 
         try:
-
-            respuesta = requests.post(
-                f"{current_app.config['BACKEND_URL']}/api/asistencia/registrar",
-                json={"legajo": legajo, "qr_code": qr_code},
-            )
+            respuesta = requests.post( "http://192.168.0.232:5001/api/asistencia/registrar", json={"legajo": legajo, "qr_code": qr_code}, timeout=15)
 
             data = respuesta.json()
 
