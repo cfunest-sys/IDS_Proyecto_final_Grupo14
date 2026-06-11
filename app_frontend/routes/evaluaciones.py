@@ -10,8 +10,12 @@ evaluaciones_blueprint = Blueprint("evaluaciones", __name__)
 # Acá se muestra el listado/gestión de evaluaciones
 @evaluaciones_blueprint.route("/", methods=["GET"])
 def listar_evaluaciones():
-    response = requests.get(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/todas")
     evaluaciones = []
+    try:
+        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/todas")
+    except requests.exceptions.RequestException:
+        flash("Error de conexión con el servidor", "danger")
+        return render_template("evaluaciones.html", evaluaciones=evaluaciones)
     if response.status_code != 204:
         json_data = response.json()
         for eva in json_data["body"]:
@@ -43,8 +47,12 @@ def calendario_evaluaciones():
         data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
     else:
         data = {}
-    response = requests.get(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/usuario", json=data)
     eventos = []
+    try:
+        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/usuario", json=data)
+    except requests.exceptions.RequestException:
+        flash("Error de conexión con el servidor", "danger")
+        return render_template("calendario.html", mes_actual=5, año_actual=2026, dias=(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31), mes_nombre=("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"), eventos=[])
     if response.ok and response.status_code != 204:
         json = response.json()
         if json["body"].get("error", "") == "":

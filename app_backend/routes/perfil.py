@@ -1,15 +1,14 @@
-from flask import Blueprint, jsonify, session
+from flask import Blueprint, jsonify
+from utils.auth import token_required
 from data.queries import obtener_usuario_por_id, obtener_detalles_alumno, obtener_detalles_profesor
 
 perfil_bp = Blueprint('perfil', __name__)
 
 @perfil_bp.route('/', methods=['GET'])
-def get_perfil():
+@token_required
+def get_perfil(current_user):
     try:
-        user_id = session.get('user_id')
-
-        if not user_id:
-            return jsonify({'error': 'No autorizado. Por favor, inicia sesión.'}), 401
+        user_id = current_user["id"]
 
         user_data = obtener_usuario_por_id(user_id)
 

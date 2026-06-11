@@ -37,6 +37,17 @@ def reportes():
     return render_template("reportes.html")
 
 
+@inicio.route("/reportes/<tipo>")
+def descargar_reporte(tipo):
+    try:
+        url = f"{current_app.config['BACKEND_URL']}/api/reportes/{tipo}"
+        resp = requests.get(url, timeout=30)
+        return resp.content, resp.status_code, {"Content-Type": resp.headers.get("Content-Type", "application/pdf")}
+    except requests.exceptions.RequestException:
+        flash("Error al descargar el reporte", "danger")
+        return redirect("/reportes")
+
+
 @inicio.route("/register", methods=["GET", "POST"])
 def register():
 
@@ -49,7 +60,10 @@ def register():
 
         data = {"nombre": nombre, "email": email, "password": password, "departamento": departamento}
 
-        response = requests.post(f"{current_app.config['BACKEND_URL']}/api/profesores/register", json=data, timeout=5)
+        try:
+            response = requests.post(f"{current_app.config['BACKEND_URL']}/api/profesores/register", json=data, timeout=5)
+        except requests.exceptions.RequestException:
+            return render_template("registro.html", error="Error de conexión con el servidor")
 
         if response.status_code == 201:
             flash(
@@ -75,56 +89,178 @@ def register():
 
 @inicio.route("/material")
 def material():
+    token = session.get("token", "")
+    headers = {"Authorization": f"Bearer {token}"}
+    pagina = request.args.get("pagina", 1, type=int)
+    limite = request.args.get("limite", 12, type=int)
+    order_by = request.args.get("order_by", "fecha_subida")
+    order_dir = request.args.get("order_dir", "DESC")
+    id_curso = request.args.get("id_curso", type=int)
     materiales = []
-    token = ""
-    return render_template("materiales_profesor.html", materiales=materiales, token=token)
+    total = 0
+    paginas_totales = 1
+    try:
+        params = {"pagina": pagina, "limite": limite, "order_by": order_by, "order_dir": order_dir}
+        if id_curso:
+            params["id_curso"] = id_curso
+        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/materiales", headers=headers, params=params, timeout=5)
+        if response.ok:
+            data = response.json()
+            materiales = data.get("materiales", [])
+            total = data.get("total", 0)
+            paginas_totales = data.get("paginas_totales", 1)
+    except requests.exceptions.RequestException:
+        flash("Error al cargar materiales", "danger")
+    cursos = []
+    try:
+        resp_curso = requests.get(f"{current_app.config['BACKEND_URL']}/api/perfil/", headers=headers, timeout=5)
+        if resp_curso.ok:
+            data = resp_curso.json()
+            detalle = data.get("detalles", {})
+            if detalle:
+                cursos = detalle.get("cursos_asignados", [])
+    except requests.exceptions.RequestException:
+        pass
+    stats = {}
+    try:
+        resp_stats = requests.get(f"{current_app.config['BACKEND_URL']}/api/materiales/estadisticas", headers=headers, timeout=5)
+        if resp_stats.ok:
+            stats = resp_stats.json()
+    except requests.exceptions.RequestException:
+        pass
+    return render_template("materiales_profesor.html", materiales=materiales, token=token, cursos=cursos, stats=stats, pagina=pagina, limite=limite, total=total, paginas_totales=paginas_totales, order_by=order_by, order_dir=order_dir, id_curso=id_curso)
+
+
+@inicio.route("/material/subir", methods=["POST"])
+def subir_material():
+    token = session.get("token", "")
+    if not token:
+        flash("Debe iniciar sesión", "danger")
+        return redirect("/material")
+    headers = {"Authorization": f"Bearer {token}"}
+    try:
+        files = {}
+        for key in request.files:
+            f = request.files[key]
+            if f.filename:
+                files[key] = (f.filename, f.stream, f.content_type)
+        resp = requests.post(
+            f"{current_app.config['BACKEND_URL']}/api/materiales/subir",
+            headers=headers,
+            data=request.form,
+            files=files,
+            timeout=30,
+        )
+        if resp.ok:
+            flash("Material subido correctamente", "success")
+        else:
+            error_msg = resp.json().get("error", "Error al subir material")
+            flash(error_msg, "danger")
+    except requests.exceptions.RequestException:
+        flash("Error de conexión con el servidor", "danger")
+    return redirect("/material")
+
+
+@inicio.route("/material/<int:id_material>/descargar")
+def descargar_material(id_material):
+    token = session.get("token", "")
+    if not token:
+        flash("Debe iniciar sesión", "danger")
+        return redirect("/material")
+    headers = {"Authorization": f"Bearer {token}"}
+    try:
+        resp = requests.get(
+            f"{current_app.config['BACKEND_URL']}/api/materiales/{id_material}/descargar",
+            headers=headers,
+            timeout=30,
+            stream=True,
+        )
+        if resp.ok:
+            return resp.content, resp.status_code, {"Content-Type": resp.headers.get("Content-Type", "application/octet-stream")}
+        flash("Error al descargar el material", "danger")
+    except requests.exceptions.RequestException:
+        flash("Error de conexión con el servidor", "danger")
+    return redirect("/material")
+
+
+@inicio.route("/material/<int:id_material>/editar", methods=["POST"])
+def editar_material(id_material):
+    token = session.get("token", "")
+    if not token:
+        flash("Debe iniciar sesión", "danger")
+        return redirect("/material")
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    es_libre = request.form.get("es_libre", "false").lower() in ("true", "on", "1")
+    payload = {
+        "titulo": request.form.get("titulo", "").strip(),
+        "descripcion": request.form.get("descripcion", "").strip(),
+        "tipo_material": request.form.get("tipo_material", "").strip(),
+        "tema": request.form.get("tema", "").strip(),
+        "estado": request.form.get("estado", "publicado").strip(),
+        "es_libre": es_libre,
+    }
+    try:
+        resp = requests.put(
+            f"{current_app.config['BACKEND_URL']}/api/materiales/{id_material}",
+            headers=headers,
+            json=payload,
+            timeout=30,
+        )
+        if resp.ok:
+            flash("Material actualizado correctamente", "success")
+        else:
+            error_msg = resp.json().get("error", "Error al actualizar material")
+            flash(error_msg, "danger")
+    except requests.exceptions.RequestException:
+        flash("Error de conexión con el servidor", "danger")
+    return redirect("/material")
+
+
+@inicio.route("/material/<int:id_material>/eliminar")
+def eliminar_material(id_material):
+    token = session.get("token", "")
+    if not token:
+        flash("Debe iniciar sesión", "danger")
+        return redirect("/material")
+    headers = {"Authorization": f"Bearer {token}"}
+    try:
+        resp = requests.delete(
+            f"{current_app.config['BACKEND_URL']}/api/materiales/{id_material}",
+            headers=headers,
+            timeout=30,
+        )
+        if resp.ok:
+            flash("Material eliminado correctamente", "success")
+        else:
+            error_msg = resp.json().get("error", "Error al eliminar material")
+            flash(error_msg, "danger")
+    except requests.exceptions.RequestException:
+        flash("Error de conexión con el servidor", "danger")
+    return redirect("/material")
 
 
 @inicio.route("/material/alumno")
 def material_alumno():
-    materiales = [
-        {
-            "id_material": 1,
-            "titulo": "Apunte Clase 1 - Introducción",
-            "descripcion": "Primer apunte del curso con conceptos básicos",
-            "tipo_material": "apunte",
-            "tema": "Introducción",
-            "fecha_material": "2026-05-20",
-            "estado": "publicado",
-            "es_libre": False,
-        },
-        {
-            "id_material": 2,
-            "titulo": "Guía de Ejercicios N°1",
-            "descripcion": "Ejercicios resueltos de la primera semana",
-            "tipo_material": "guia",
-            "tema": "Ejercicios",
-            "fecha_material": "2026-05-22",
-            "estado": "publicado",
-            "es_libre": False,
-        },
-        {
-            "id_material": 3,
-            "titulo": "Video - Clase Grabada 1",
-            "descripcion": "Grabación de la primera clase del curso",
-            "tipo_material": "video",
-            "tema": "Introducción",
-            "fecha_material": "2026-05-20",
-            "estado": "publicado",
-            "es_libre": False,
-        },
-        {
-            "id_material": 4,
-            "titulo": "Guía de Python Básico",
-            "descripcion": "Recopilación de conceptos de Python para principiantes",
-            "tipo_material": "bibliografia",
-            "tema": "Python",
-            "fecha_material": "2026-05-25",
-            "estado": "publicado",
-            "es_libre": True,
-        },
-    ]
-    return render_template("materiales_alumno.html", materiales=materiales, token="")
+    token = session.get("token", "")
+    headers = {"Authorization": f"Bearer {token}"}
+    pagina = request.args.get("pagina", 1, type=int)
+    limite = request.args.get("limite", 12, type=int)
+    order_by = request.args.get("order_by", "fecha_subida")
+    order_dir = request.args.get("order_dir", "DESC")
+    materiales = []
+    total = 0
+    paginas_totales = 1
+    try:
+        params = {"pagina": pagina, "limite": limite, "order_by": order_by, "order_dir": order_dir}
+        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/materiales", headers=headers, params=params, timeout=5)
+        if response.ok:
+            data = response.json()
+            materiales = data.get("materiales", [])
+            total = data.get("total", 0)
+            paginas_totales = data.get("paginas_totales", 1)
+    except requests.exceptions.RequestException:
+        flash("Error al cargar materiales", "danger")
+    return render_template("materiales_alumno.html", materiales=materiales, token=token, pagina=pagina, limite=limite, total=total, paginas_totales=paginas_totales, order_by=order_by, order_dir=order_dir)
 
 
 @inicio.route("/login", methods=["GET", "POST"])
@@ -137,7 +273,10 @@ def login():
 
         data = {"email": email, "password": password}
 
-        response = requests.post(f"{current_app.config['BACKEND_URL']}/api/login", json=data, timeout=5)
+        try:
+            response = requests.post(f"{current_app.config['BACKEND_URL']}/api/login", json=data, timeout=5)
+        except requests.exceptions.RequestException:
+            return render_template("login.html", error="Error de conexión con el servidor")
 
         if response.ok:
 
@@ -195,11 +334,15 @@ def cargar_csv():
     if not archivo:
         flash("No se envió archivo", "danger")
         return redirect("/alumnos")
-    resp = requests.post(
-        f"{current_app.config['BACKEND_URL']}/api/alumnos/cargar-csv",
-        files={"archivo": (archivo.filename, archivo.stream, archivo.content_type)},
-        timeout=30,
-    )
+    try:
+        resp = requests.post(
+            f"{current_app.config['BACKEND_URL']}/api/alumnos/cargar-csv",
+            files={"archivo": (archivo.filename, archivo.stream, archivo.content_type)},
+            timeout=30,
+        )
+    except requests.exceptions.RequestException:
+        flash("Error de conexión con el servidor", "danger")
+        return redirect("/alumnos")
     if resp.ok:
         data = resp.json()
         exitosos = data.get("exitosos", 0)

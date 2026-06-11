@@ -151,7 +151,8 @@ CREATE TABLE materiales(
     estado ENUM(
         'borrador',
         'publicado',
-        'archivado'
+        'archivado',
+        'programado'
     ) DEFAULT 'publicado',
     fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -167,6 +168,14 @@ CREATE TABLE materiales(
     INDEX idx_tema (tema),
     INDEX idx_tipo (tipo_material),
     INDEX idx_curso_tipo (id_curso, tipo_material)
+);
+CREATE TABLE temas (
+    id_tema INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    id_curso INT NOT NULL,
+    orden INT DEFAULT 0,
+    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso) ON DELETE CASCADE,
+    UNIQUE KEY unique_tema_curso (nombre, id_curso)
 );
 CREATE TABLE qr_asistencia (
     id_qr INT AUTO_INCREMENT PRIMARY KEY,

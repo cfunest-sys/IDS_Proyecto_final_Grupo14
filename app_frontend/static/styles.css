@@ -569,3 +569,171 @@ h2, h3 {
     font-weight: bold;
     text-align: center;
 }
+
+/* Materiales - Drag & Drop */
+.drop-zone.dragover {
+    background: #e8f4fd !important;
+    border-color: #0d6efd !important;
+}
+
+/* Materiales - Grupo por tema */
+.card-tema {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.card-tema:last-child {
+    border-bottom: none;
+}
+
+/* Materiales - Tabla sortable */
+.sortable:hover {
+    background-color: rgba(0,0,0,0.03);
+}
+
+.sortable i {
+    font-size: 0.7rem;
+    opacity: 0.5;
+}
+
+.sortable:hover i {
+    opacity: 1;
+}
+
+/* Materiales - Upload progress */
+#uploadProgress {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+#uploadProgress .progress {
+    background: #e9ecef;
+    border-radius: 4px;
+}
+
+#uploadProgress .progress-bar {
+    background: #1f0f9b;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+/* Materiales - Vistas previas */
+#previewContenido iframe,
+#previewContenido video,
+#previewContenido img {
+    border-radius: 0 0 0.375rem 0.375rem;
+}
+
+/* Materiales - Paginación */
+.pagination .page-link {
+    color: #1f0f9b;
+    border-color: #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+    background: #1f0f9b;
+    border-color: #1f0f9b;
+    color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #adb5bd;
+}
+
+/* Cards alumno - hover */
+.card-material .card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-material .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1) !important;
+}
+
+/* Estadísticas */
+#statsSection .card {
+    border-radius: 0.5rem;
+}
+
+/* Botones con iconos - tooltips */
+.btn-outline-primary,
+.btn-outline-success,
+.btn-outline-danger {
+    border-width: 1px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.flash-success {
+    position: fixed;
+    top: 70px;
+    right: 1rem;
+    z-index: 9999;
+}
+
+.flash-success .alert {
+    display: inline-block;
+    padding: 0.25rem 1rem;
+    font-size: 0.875rem;
+    margin-bottom: 0;
+    border-radius: 50px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Materiales - Drop zone base */
+.drop-zone {
+    border-style: dashed !important;
+    cursor: pointer;
+    background: #fff;
+    transition: all 0.2s ease;
+}
+
+.drop-zone-icon {
+    font-size: 3rem;
+    color: #6c757d;
+}
+
+/* Materiales - Iconos compartidos */
+.icon-empty {
+    font-size: 2rem;
+    color: #ccc;
+}
+
+.icon-trash-modal {
+    font-size: 3rem;
+    color: #dc3545;
+}
+
+.icon-folder {
+    font-size: 1.3rem;
+}
+
+/* Materiales - Tabla sortable cursor */
+.sortable {
+    cursor: pointer;
+}
+
+/* Materiales - Detalles modal */
+.detalles-preview {
+    min-height: 300px;
+    background: #f8f9fa;
+    border-radius: 0 0 0.375rem 0.375rem;
+}
+
+#previewContenido,
+#detallesPreview {
+    min-height: 300px;
+    background: #f8f9fa;
+    border-radius: 0 0 0.375rem 0.375rem;
+}
+
+#detallesPreview iframe,
+#detallesPreview video,
+#detallesPreview img {
+    border-radius: 0 0 0.375rem 0.375rem;
+}
+
+.detalles-label {
+    width: 120px;
+}
