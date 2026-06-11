@@ -26,7 +26,8 @@ def ver_notas():
         else:
             flash("No se pudieron procesar las actas académicas", "warning")
         if session:
-            data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
+            data = {"rol": "profesor", "user_id": 2}
+            # data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
         response = requests.get(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/usuario", json=data)
         if response.ok and response.status_code != 204:
             json = response.json()

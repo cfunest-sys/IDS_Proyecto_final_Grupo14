@@ -178,7 +178,7 @@ Dashboard Profesor
 
         <div class="col-md-4">
 
-            <a href="/notas" class="text-decoration-none">
+            <a href="{{ url_for('notas.ver_notas') }}" class="text-decoration-none">
 
                 <div class="card dashboard-card shadow-sm h-100">
 
@@ -256,10 +256,6 @@ Dashboard Profesor
 
         </div>
 
-        
-
-        
-
         <div class="col-md-4">
 
             <a href="/perfil/profesor" class="text-decoration-none">
@@ -276,6 +272,32 @@ Dashboard Profesor
 
                         <p class="text-muted">
                             Datos del profesor
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <a href="{{ url_for('evaluaciones.calendario_evaluaciones') }}" class="text-decoration-none">
+
+                <div class="card dashboard-card shadow-sm h-100">
+
+                    <div class="card-body text-center">
+
+                        <i class="bi bi-qr-code dashboard-icon"></i>
+
+                        <h4 class="mt-3">
+                            Calendario
+                        </h4>
+
+                        <p class="text-muted">
+                            Calendario de evaluaciones
                         </p>
 
                     </div>

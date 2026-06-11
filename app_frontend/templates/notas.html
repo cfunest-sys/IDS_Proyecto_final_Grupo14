@@ -69,10 +69,11 @@
                         class="form-select">
 
                     <option value="">Todas</option>
-                    <option value="Parcial 1">Parcial 1</option>
-                    <option value="Parcial 2">Parcial 2</option>
-                    <option value="Trabajo Práctico">Trabajo Práctico</option>
-                    <option value="Recuperatorio">Recuperatorio</option>
+                    {% for evento in eventos %}
+                        <option value="{{ evento.id_evaluacion }}">
+                        {{ evento.nombre }}
+                        </option>   
+                    {% endfor %}
 
                 </select>
 
@@ -295,7 +296,7 @@
                             <option value="">Seleccionar evaluación</option>
                             {% for evento in eventos %}
                                 <option value="{{ evento.id_evaluacion }}">
-                                {{ evento.nombre }} {{ evento.id_evaluacion }}
+                                {{ evento.nombre }}
                                 </option>   
                             {% endfor %}
                         </select>

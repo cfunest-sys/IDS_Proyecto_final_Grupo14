@@ -63,9 +63,9 @@ Gestión de Evaluaciones | UBA
                         class="form-select">
 
                     <option value="">Todos</option>
-                    <option value="Parcial">Parcial</option>
-                    <option value="TP">Trabajo Práctico</option>
-                    <option value="Parcialito">Parcialito</option>
+                    {% for evaluacion in evaluaciones %}
+                        <option value="{{ evaluacion.tipo }}">{{ evaluacion.tipo }}</option>   
+                    {% endfor %}
 
                 </select>
             </div>

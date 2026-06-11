@@ -45,7 +45,7 @@ def obtener_eva_usuario():
     evaluacion_formateada = []
     for eva in evaluacion:
         lista = list(eva)
-        lista[3] = eva[3].strftime("%Y-%m-%d")
+        lista[3] = datetime.strptime(eva[3], "%Y-%m-%d")
         evaluacion_formateada.append(lista)
     return jsonify({"body":evaluacion_formateada, "status":200})
 

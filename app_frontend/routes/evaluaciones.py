@@ -11,16 +11,20 @@ evaluaciones_blueprint = Blueprint("evaluaciones", __name__)
 @evaluaciones_blueprint.route("/", methods=["GET"])
 def listar_evaluaciones():
     evaluaciones = []
+    data = {}
     try:
-        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/todas")
+        if session:
+            # data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
+            data = {"rol": "profesor", "user_id": 2}  #--para probar--
+            # data = {"rol": "alumno", "user_id": 2}  #--para probar--
+        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/usuario", json=data)
     except requests.exceptions.RequestException:
         flash("Error de conexión con el servidor", "danger")
         return render_template("evaluaciones.html", evaluaciones=evaluaciones)
     if response.status_code != 204:
         json_data = response.json()
         for eva in json_data["body"]:
-            d = datetime.strptime(eva[3], "%Y-%m-%d")
-            evaluaciones.append({"id": eva[0], "nombre": eva[1], "tipo": eva[2], "fecha": d, "curso": eva[4]})
+            evaluaciones.append({"id": eva[0], "nombre": eva[1], "tipo": eva[2], "fecha": eva[3], "curso": eva[4]})
     # --- FILTROS ---
     tipo_filtro = request.args.get("tipo")
     fecha_desde = request.args.get("fecha_desde")
@@ -28,10 +32,10 @@ def listar_evaluaciones():
     if tipo_filtro:
         evaluaciones = [e for e in evaluaciones if e["tipo"] == tipo_filtro]
     if fecha_desde:
-        evaluaciones = [e for e in evaluaciones if e["fecha"] >= datetime.strptime(fecha_desde, "%Y-%m-%d")]
+        evaluaciones = [e for e in evaluaciones if datetime.strptime(e["fecha"], "%Y-%m-%d") >= datetime.strptime(fecha_desde, "%Y-%m-%d")]
     if fecha_hasta:
-        evaluaciones = [e for e in evaluaciones if e["fecha"] <= datetime.strptime(fecha_hasta, "%Y-%m-%d")]
-    rol = session.get("rol", "")
+        evaluaciones = [e for e in evaluaciones if datetime.strptime(e["fecha"], "%Y-%m-%d") <= datetime.strptime(fecha_hasta, "%Y-%m-%d")]
+    rol = data.get("rol", "")
     return render_template("evaluaciones.html", evaluaciones=evaluaciones, rol=rol)
 
 
