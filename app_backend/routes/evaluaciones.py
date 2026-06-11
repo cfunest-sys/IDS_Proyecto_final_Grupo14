@@ -26,8 +26,7 @@ def obtener_evas_curso(id_curso):
         return evaluacion
     return evaluacion
 
-#Cambio principal: GET>POST para que el body llegue correctamente
-@evaluaciones_bp.route('/usuario', methods=['POST'])
+@evaluaciones_bp.route('/usuario', methods=['GET'])
 def obtener_eva_usuario():
     data = request.get_json()
     if not data:
