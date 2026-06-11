@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from datetime import datetime
 from data.queries import get_connection
 from data.queries import (
     get_user_profile,
@@ -45,19 +46,21 @@ def obtener_eva_usuario():
         lista = list(eva)
         lista[3] = eva[3].strftime("%Y-%m-%d")
         evaluacion_formateada.append(lista)
-    return jsonify({"body": evaluacion_formateada, "status": 200})
+    return jsonify({"body":evaluacion_formateada, "status":200})
+
 
 @evaluaciones_bp.route('/todas', methods=['GET'])
 def obtener_evas_todas():
     evaluacion = get_evaluacion_todas()
-    if not evaluacion or len(evaluacion) <= 0:
-        return jsonify({"body": [], "status": 204})
+    if (len(evaluacion) <= 0 or evaluacion == None):
+        return jsonify({"body":[], "status":204})
     evaluacion_formateada = []
     for eva in evaluacion:
         lista = list(eva)
         lista[3] = eva[3].strftime("%Y-%m-%d")
         evaluacion_formateada.append(lista)
     return jsonify({"body": evaluacion_formateada, "status": 200})
+
 
 @evaluaciones_bp.route('/crear', methods=['POST'])
 def crear_eva():
@@ -68,7 +71,7 @@ def crear_eva():
     for c in campos:
         if c not in data or data.get(c) is None:
             return jsonify({"error": "Body incompleto"}), 400
-    resultado = crear_evaluacion(data["nombre"], data["tipo"], data["fecha"], data["curso_id"])
+    resultado = crear_evaluacion(data.get("nombre"),data.get("tipo"),data.get("fecha"),data.get("curso_id"))
     return resultado
 
 @evaluaciones_bp.route('/actualizar/', methods=['PUT'])

@@ -409,7 +409,7 @@ def crear_evaluacion(nombre, tipo, fecha, curso_id):
     try:
         connection = get_connection()
         cursor = connection.cursor()
-        query = """INSERT INTO evaluaciones (nombre, tipo, fecha, curso_id) 
+        query = """INSERT INTO evaluaciones (nombre, tipo, fecha, id_curso) 
                 VALUES (%s, %s, %s, %s)"""
         cursor.execute(query, (nombre, tipo, fecha, curso_id))
         connection.commit()
