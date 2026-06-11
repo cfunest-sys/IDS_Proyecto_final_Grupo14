@@ -50,22 +50,27 @@
                         </a>
 
                     </li>
-                    {% endif %}
+                    
                     <li class="nav-item">
                         <a class="nav-link" href="/asistencia">
                             Asistencia
                         </a>
                     </li>
+                    
                     <li class="nav-item">
                         <a class="nav-link" href="/material">
                             Materiales
                         </a>
                     </li>
+                    
                     <li class="nav-item">
                         <a class="nav-link" href="/reportes">
                             Reportes
                         </a>
                     </li>
+                    {% endif %}
+
+
                     {% if session.get("rol") == "profesor" %}
                     <li class="nav-item">
                         <a class="nav-link" href="/dashboard/profesor">

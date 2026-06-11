@@ -6,6 +6,8 @@ notas_blueprint = Blueprint("notas", __name__)
 @notas_blueprint.route("/", methods=["GET"])
 def ver_notas():
     resumen_promedios = []
+    eventos = []
+    data = {}
     try:
         # session["rol"] = "afasd"
         # session["user_id"] = 2
@@ -23,11 +25,17 @@ def ver_notas():
             resumen_promedios = response.json()
         else:
             flash("No se pudieron procesar las actas académicas", "warning")
-
+        if session:
+            data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
+        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/usuario", json=data)
+        if response.ok and response.status_code != 204:
+            json = response.json()
+            for evento in json.get("body", ""):
+                eventos.append({"nombre": evento[1], "id_evaluacion": evento[0]})
     except requests.exceptions.RequestException:
         flash("El servidor de datos (Backend) no responde", "danger")
-
-    return render_template("notas.html", resumen=resumen_promedios)
+    rol = data.get("rol", "")
+    return render_template("notas.html", resumen=resumen_promedios, eventos=eventos, rol=rol)
 
 @notas_blueprint.route("/", methods=["POST"])
 def cargar_nota():
@@ -38,7 +46,9 @@ def cargar_nota():
             "id_evaluacion": request.form.get("evaluacion"),
             "calificacion": request.form.get("nota"),
             }
-        token = session.get("token", "")
+        token = ""
+        if (session):
+            token = session.get("token", "")
         response = requests.post(
             f"{current_app.config['BACKEND_URL']}/api/notas/notas",
             headers={'Authorization': 'Bearer ' + token},

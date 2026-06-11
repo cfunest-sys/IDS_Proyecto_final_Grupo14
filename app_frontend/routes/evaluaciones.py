@@ -31,7 +31,8 @@ def listar_evaluaciones():
         evaluaciones = [e for e in evaluaciones if e["fecha"] >= datetime.strptime(fecha_desde, "%Y-%m-%d")]
     if fecha_hasta:
         evaluaciones = [e for e in evaluaciones if e["fecha"] <= datetime.strptime(fecha_hasta, "%Y-%m-%d")]
-    return render_template("evaluaciones.html", evaluaciones=evaluaciones)
+    rol = session.get("rol", "")
+    return render_template("evaluaciones.html", evaluaciones=evaluaciones, rol=rol)
 
 
 # 2. RUTA DEL CALENDARIO: http://127.0.0.1:8080/evaluaciones/calendario
@@ -55,7 +56,7 @@ def calendario_evaluaciones():
         return render_template("calendario.html", mes_actual=5, año_actual=2026, dias=(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31), mes_nombre=("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"), eventos=[])
     if response.ok and response.status_code != 204:
         json = response.json()
-        if json["body"].get("error", "") == "":
+        if json.get("error", "") == "":
             for evento in json["body"]:
                 d = datetime.strptime(evento[3], "%Y-%m-%d")
                 eventos.append(
