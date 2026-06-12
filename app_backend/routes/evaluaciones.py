@@ -88,4 +88,6 @@ def actualizar_eva():                              # ← typo corregido: "actual
 @evaluaciones_bp.route('/destruir/<int:id>', methods=['DELETE'])
 def destruir_eva(id):
     resultado = eliminar_evaluacion(id)
-    return resultado
+    if (resultado == False):
+        return jsonify({"body": {"estado": resultado}, "status": 400})
+    return jsonify({"body": {"estado": resultado}, "status": 200})

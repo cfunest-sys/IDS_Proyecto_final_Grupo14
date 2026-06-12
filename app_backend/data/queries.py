@@ -458,25 +458,25 @@ def eliminar_evaluacion(id):
     try:
         connection = get_connection()
         cursor = connection.cursor()
-        query_esta = """SELECT * FROM evaluaciones WHERE id = %s"""
+        query_esta = """SELECT * FROM evaluaciones WHERE id_evaluacion = %s"""
         cursor.execute(query_esta, (id,))
         esta = cursor.fetchall()
         if cursor.rowcount == 0:
             cursor.close()
             connection.close()
             return jsonify({"error": "No existe ese id"}), 404
-        query = """DELETE FROM evaluaciones WHERE id = %s"""
+        query = """DELETE FROM evaluaciones WHERE id_evaluacion = %s"""
         cursor.execute(query, (id,))
         connection.commit()
-        query = """SELECT * FROM evaluaciones WHERE id = %s"""
+        query = """SELECT * FROM evaluaciones WHERE id_evaluacion = %s"""
         cursor.execute(query, (id,))
         resultado = cursor.fetchall()
         filas = cursor.rowcount
         cursor.close()
         connection.close()
         if filas != 0:
-            return False, 400
-        return True, 200
+            return False
+        return True
     except Exception as e:
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
