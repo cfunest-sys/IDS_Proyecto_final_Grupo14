@@ -105,7 +105,7 @@
             <td class="small">{{ eva.fecha }}</td>
             <td class="small text-muted">
               {% for c in cursos %}
-                {% if c.id_curso == eva.curso %}{{ c.nombre }}{% endif %}
+                {% if c.id_curso == eva.curso %}{{ c.nombre_curso }}{% endif %}
               {% endfor %}
             </td>
             <td class="text-center">
