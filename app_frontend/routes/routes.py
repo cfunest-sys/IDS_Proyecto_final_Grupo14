@@ -335,3 +335,65 @@ def cargar_csv():
     else:
         flash("Error al cargar el archivo", "danger")
     return redirect("/alumnos")
+
+
+@inicio.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form.get("email")
+        data = {"email": email}
+
+        try:
+            
+            response = requests.post(
+                f"{current_app.config['BACKEND_URL']}/api/auth/forgot-credentials", 
+                json=data, 
+                timeout=5
+            )
+        except requests.exceptions.RequestException:
+            return render_template("olvido_contraseña.html", error="Error de conexión con el servidor")
+
+        if response.status_code == 200:
+            flash("Token generado. Revise la consola del backend.", "success")
+            # Redirigimos al formulario donde pondra el token y la nueva contraseña
+            return redirect("/reset-password")
+        
+        elif response.status_code == 404:
+            return render_template("olvido_contraseña.html", error="No existe un usuario con ese email")
+
+        return render_template("olvido_contraseña.html", error="Ocurrió un error inesperado")
+
+    return render_template("olvido_contraseña.html")
+
+
+@inicio.route("/reset-password", methods=["GET", "POST"])
+def reset_password():
+    if request.method == "POST":
+        token = request.form.get("token")
+        nueva_password = request.form.get("nueva_password")
+        
+        data = {
+            "token": token,
+            "nueva_password": nueva_password
+        }
+
+        try:
+            
+            response = requests.patch(
+                f"{current_app.config['BACKEND_URL']}/api/auth/reset-password-with-token", 
+                json=data, 
+                timeout=5
+            )
+        except requests.exceptions.RequestException:
+            return render_template("reset_contraseña.html", error="Error de conexión con el servidor")
+
+        if response.status_code == 200:
+            flash("Contraseña actualizada correctamente. Ya puede iniciar sesión.", "success")
+            return redirect("/login")
+        
+        elif response.status_code == 404:
+            return render_template("reset_contraseña.html", error="Token inválido o ya utilizado")
+
+        return render_template("reset_contraseña.html", error="No se pudo actualizar la contraseña")
+
+    return render_template("reset_contraseña.html")

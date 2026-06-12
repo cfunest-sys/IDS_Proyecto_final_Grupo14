@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Restablecer Contraseña{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="row bg-white p-4 p-md-5 rounded-3 shadow-sm border" style="max-width: 450px; width: 100%;">
+        <div class="col-12">
+            <div class="text-center mb-4">
+                <h4>Nueva Contraseña</h4>
+                <p class="text-secondary small">Pega el token que se imprimió en la consola del backend y escribe tu nueva contraseña.</p>
+            </div>
+
+            {% if error %}
+                <div class="alert alert-danger small" role="alert">{{ error }}</div>
+            {% endif %}
+
+            <form action="{{ url_for('inicio.reset_password') }}" method="POST">
+                <div class="mb-3">
+                    <input type="text" class="form-control bg-light border-0 rounded-3 py-2" 
+                    name="token" 
+                    placeholder="Token de recuperación" 
+                    required>
+                </div>
+                <div class="mb-3">
+                    <input type="password" class="form-control bg-light border-0 rounded-3 py-2" 
+                    name="nueva_password" 
+                    placeholder="Nueva Contraseña" 
+                    required>
+                </div>
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-success btn-lg rounded-3 py-2" style="font-size: 1.1rem;">
+                        Actualizar Contraseña
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
