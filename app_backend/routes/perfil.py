@@ -1,15 +1,16 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
+from werkzeug.security import check_password_hash
 from utils.auth import token_required
-from data.queries import obtener_usuario_por_id, obtener_detalles_alumno, obtener_detalles_profesor
+from data.queries import obtener_usuario_por_id, obtener_detalles_alumno, obtener_detalles_profesor, cambiar_contrasena, editar_perfil_alumno, editar_perfil_profesor, obtener_historial_alumno
 
 perfil_bp = Blueprint('perfil', __name__)
+
 
 @perfil_bp.route('/', methods=['GET'])
 @token_required
 def get_perfil(current_user):
     try:
         user_id = current_user["id"]
-
         user_data = obtener_usuario_por_id(user_id)
 
         if not user_data:
@@ -26,13 +27,91 @@ def get_perfil(current_user):
             alumno_data = obtener_detalles_alumno(user_id)
             if alumno_data:
                 response_data["detalles"] = alumno_data
-        
+
         elif user_data['rol'] == 'profesor':
             profesor_data = obtener_detalles_profesor(user_id)
             if profesor_data:
                 response_data["detalles"] = profesor_data
 
         return jsonify(response_data), 200
+
+    except Exception as e:
+        return jsonify({"error": "Error interno", "detalles": str(e)}), 500
+
+
+@perfil_bp.route('/contrasena', methods=['PUT'])
+@token_required
+def put_contrasena(current_user):
+    try:
+        user_id = current_user["id"]
+
+        data = request.get_json()
+        contrasena_actual = data.get('contrasena_actual')
+        contrasena_nueva = data.get('contrasena_nueva')
+
+        if not contrasena_actual or not contrasena_nueva:
+            return jsonify({'error': 'Faltan datos'}), 400
+
+        user_data = obtener_usuario_por_id(user_id)
+        if not check_password_hash(user_data['contrasenia'], contrasena_actual):
+            return jsonify({'error': 'Contraseña actual incorrecta'}), 401
+
+        resultado = cambiar_contrasena(user_id, contrasena_nueva)
+        if resultado:
+            return jsonify({'message': 'Contraseña actualizada correctamente'}), 200
+
+        return jsonify({'error': 'No se pudo actualizar la contraseña'}), 500
+
+    except Exception as e:
+        return jsonify({"error": "Error interno", "detalles": str(e)}), 500
+
+
+@perfil_bp.route('/editar', methods=['PUT'])
+@token_required
+def put_editar_perfil(current_user):
+    try:
+        user_id = current_user["id"]
+        rol = current_user["rol"]
+
+        data = request.get_json()
+
+        if rol == 'alumno':
+            resultado = editar_perfil_alumno(
+                user_id,
+                data.get('nombre'),
+                data.get('apellido'),
+                data.get('email')
+            )
+        elif rol == 'profesor':
+            resultado = editar_perfil_profesor(
+                user_id,
+                data.get('nombre'),
+                data.get('departamento'),
+                data.get('email')
+            )
+        else:
+            return jsonify({'error': 'Rol no reconocido'}), 403
+
+        if resultado:
+            return jsonify({'message': 'Perfil actualizado correctamente'}), 200
+
+        return jsonify({'error': 'No se pudo actualizar el perfil'}), 500
+
+    except Exception as e:
+        return jsonify({"error": "Error interno", "detalles": str(e)}), 500
+
+
+@perfil_bp.route('/historial', methods=['GET'])
+@token_required
+def get_historial(current_user):
+    try:
+        user_id = current_user["id"]
+
+        historial = obtener_historial_alumno(user_id)
+        if historial is None:
+            return jsonify({'error': 'No se encontró el alumno'}), 404
+
+        return jsonify(historial), 200
 
     except Exception as e:
         return jsonify({"error": "Error interno", "detalles": str(e)}), 500

@@ -1,12 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}
-Perfil Alumno
-{% endblock %}
+{% block title %}Perfil Alumno{% endblock %}
 
 {% block content %}
 <div class="contenedor-principal">
-    
+
     <header class="header-plataforma">
         <div>
             <h1 class="logo-texto">Mi Perfil</h1>
@@ -15,9 +13,9 @@ Perfil Alumno
     </header>
 
     <div class="grid-layout">
-        
+
         <div class="columna-izquierda">
-            
+
             <div class="tarjeta-foto">
                 <div class="avatar-iniciales">
                     {{ detalle.nombre[0] | upper }}{{ detalle.apellido[0] | upper }}
@@ -27,10 +25,10 @@ Perfil Alumno
             </div>
 
             <div class="tarjeta-datos">
-                <h3 class="titulo-seccion-lateral">Datos Personales: </h3>
-                
+                <h3 class="titulo-seccion-lateral">Datos Personales:</h3>
+
                 <div class="item-dato">
-                    <span class="etiqueta-dato">Correo Institucional</span>
+                    <span class="etiqueta-dato">Correo</span>
                     <p class="valor-dato">{{ usuario.email }}</p>
                 </div>
 
@@ -44,16 +42,33 @@ Perfil Alumno
                         <p class="valor-badge-dato">{{ detalle.dni }}</p>
                     </div>
                 </div>
+            </div>
 
+            <div class="tarjeta-datos">
+                <h3 class="titulo-seccion-lateral">Opciones:</h3>
+
+                <button type="button" class="btn btn-outline-primary w-100 mb-2"
+                    data-bs-toggle="modal" data-bs-target="#modalContrasena">
+                    <i class="bi bi-lock"></i> Cambiar Contraseña
+                </button>
+
+                <button type="button" class="btn btn-outline-secondary w-100 mb-2"
+                    data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">
+                    <i class="bi bi-pencil"></i> Editar Información Personal
+                </button>
+
+                <a href="/perfil/historial" class="btn btn-outline-success w-100">
+                    <i class="bi bi-download"></i> Descargar Historial
+                </a>
             </div>
 
         </div>
 
         <div class="columna-derecha">
-            
+
             <div class="tarjeta-academica">
-                <h3 class="titulo-seccion-principal">Equipos Asignados: </h3>
-                
+                <h3 class="titulo-seccion-principal">Equipos Asignados:</h3>
+
                 <div class="contenedor-equipo">
                     {% for equipo in detalle.equipos %}
                         <div>
@@ -67,28 +82,27 @@ Perfil Alumno
                         {% if not loop.last %}<hr>{% endif %}
                     {% else %}
                         <p class="valor-dato">No te encuentras asignado a ningún equipo actualmente.</p>
-                    {% endfor %}    
+                    {% endfor %}
                 </div>
             </div>
 
             <div class="tarjeta-academica">
-                <h3 class="titulo-seccion-principal">Mis Calificaciones y Evaluaciones: </h3>
-                
+                <h3 class="titulo-seccion-principal">Mis Calificaciones y Evaluaciones:</h3>
+
                 <div class="lista-evaluaciones">
                     {% for ev in detalle.evaluaciones %}
-                        <div class="tarjeta-evaluacion 
+                        <div class="tarjeta-evaluacion
                             {% if ev.evaluacion_tipo == 'TP' %}borde-Tp
                             {% elif ev.evaluacion_tipo == 'parcial' %}borde-parcial
-                            {% else %}borde-parcialito
-                            {% endif %}">
+                            {% else %}borde-parcialito{% endif %}">
                             <div class="info-evaluacion">
                                 <h4 class="nombre-evaluacion">{{ ev.evaluacion_nombre }}</h4>
                                 <span class="tipo-evaluacion">{{ ev.evaluacion_tipo | upper }}</span>
                             </div>
                             <div class="fecha-evaluacion">
                                 <span class="texto-fecha-label">Calificación:</span>
-                                <span class="texto-fecha-valor 
-                                    {% if ev.calificacion != '-' and ev.calificacion < 4.0 %}calificacion-baja 
+                                <span class="texto-fecha-valor
+                                    {% if ev.calificacion != '-' and ev.calificacion < 4.0 %}calificacion-baja
                                     {% elif ev.calificacion != '-' and ev.calificacion >= 7.0 %}calificacion-alta
                                     {% elif ev.calificacion == '-' %}calificacion-pendiente
                                     {% endif %}">
@@ -100,10 +114,56 @@ Perfil Alumno
                         <p class="valor-dato">No registras calificaciones cargadas en el sistema.</p>
                     {% endfor %}
                 </div>
-                
             </div>
 
         </div>
     </div>
 </div>
+
+<!-- Modal Cambiar Contraseña -->
+<div class="modal fade" id="modalContrasena" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cambiar Contraseña</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/perfil/contrasena" method="POST">
+                <div class="modal-body">
+                    <input type="password" name="contrasena_actual" class="form-control mb-2" placeholder="Contraseña actual">
+                    <input type="password" name="contrasena_nueva" class="form-control mb-2" placeholder="Nueva contraseña">
+                    <input type="password" name="contrasena_repetir" class="form-control" placeholder="Repetir nueva contraseña">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Perfil -->
+<div class="modal fade" id="modalEditarPerfil" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Información Personal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/perfil/editar" method="POST">
+                <div class="modal-body">
+                    <input type="text" name="nombre" class="form-control mb-2" placeholder="Nombre" value="{{ detalle.nombre }}">
+                    <input type="text" name="apellido" class="form-control mb-2" placeholder="Apellido" value="{{ detalle.apellido }}">
+                    <input type="email" name="email" class="form-control" placeholder="Email" value="{{ usuario.email }}">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

@@ -619,3 +619,4 @@ function initEliminarButtons() {
     new bootstrap.Modal(document.getElementById('modalEliminarMaterial')).show();
   });
 }
+
