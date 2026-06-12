@@ -24,3 +24,25 @@ Saludos.
     except Exception as e:
         print(f"Error enviando mail: {e}")
         return False
+
+def enviar_mail_recuperacion(destinatario, token):
+    try:
+        msg = Message(
+            subject="Recuperación de contraseña",
+            recipients=[destinatario]
+        )
+
+        msg.body = f"""
+Hola,
+
+Para restablecer tu contraseña, por favor ingrese el siguiente token con su nueva contarseña: {token}
+
+Saludos.
+"""
+
+        mail.send(msg)
+        return True
+
+    except Exception as e:
+        print(f"Error enviando mail: {e}")
+        return False

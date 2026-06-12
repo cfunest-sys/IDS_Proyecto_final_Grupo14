@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, session
+from utils.mail_service import enviar_mail_recuperacion
 from database.db import get_connection
 from utils.auth import hash_password
 import random
@@ -14,13 +15,6 @@ def generar_token(longitud=32):
         token += random.choice(caracteres)
     return token
 
-def simular_envio_email(destinatario, token):
-    print("=" * 60)
-    print("SIMULACIÓN DE ENVÍO DE EMAIL")
-    print("Para:", destinatario)
-    print("Asunto: Recuperación de contraseña")
-    print("Token:", token)
-    print("=" * 60)
 
 @auth_bp.route("/api/auth/forgot-credentials", methods=["POST"])
 def forgot_credentials():
@@ -62,7 +56,7 @@ def forgot_credentials():
 
         conn.commit()
 
-        simular_envio_email(email, token)
+        enviar_mail_recuperacion(email, token)
 
         return jsonify({
             "mensaje": "Token generado correctamente."
