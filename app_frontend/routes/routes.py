@@ -6,7 +6,8 @@ inicio = Blueprint("inicio", __name__)
 
 @inicio.route("/")
 def index():
-    return render_template("inicio.html")
+    rol = session.get("rol")
+    return render_template("inicio.html", rol=rol)
 
 
 @inicio.route("/asistencia", methods=["GET", "POST"])

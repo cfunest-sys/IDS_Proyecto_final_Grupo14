@@ -14,7 +14,7 @@ def listar_evaluaciones():
     data = {}
     try:
         if session:
-            data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
+            data = {"rol": session["rol"], "user_id": session["user_id"]}
             # data = {"rol": "profesor", "user_id": 2}  #--para probar--
             # data = {"rol": "alumno", "user_id": 2}  #--para probar--
         response = requests.post(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/usuario", json=data)
@@ -49,8 +49,12 @@ def calendario_evaluaciones():
     # session["rol"] = "profesor"
     # session["user_id"] = 2
     if session:
+<<<<<<< Updated upstream
         data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
         # data = {"rol": "profesor", "user_id": 2}  #--para probar--
+=======
+        data = {"rol": session["rol"], "user_id": session["user_id"]}
+>>>>>>> Stashed changes
     else:
         data = {}
     eventos = []

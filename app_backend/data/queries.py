@@ -658,7 +658,7 @@ def crear_profesor(profesor):
 
         conn.commit()
         print(profesor)
-        enviar_mail_bienvenida(profesor["email"], profesor["nombre"])
+        enviar_mail_bienvenida(profesor["email"], profesor["nombre"], profesor["password"])
 
         return cur.lastrowid
 
