@@ -96,6 +96,9 @@ def listar_cursos_filtrados(current_user):
             except (ValueError, TypeError):
                 return jsonify({"error": "El cuatrimestre debe ser un número entero válido"}), 400
             
+        profesor = {"rol": current_user.get("rol", ""), "id_usuario": id_profesor}
+        profesor_encontrado = get_user_profile(profesor)
+        id_profesor = profesor_encontrado.get("id_profesor","")
 
         lista_cursos = get_cursos_filtrados(id_curso_int, filtro_nombre_curso, anio_int, cuatrimestre_int, id_profesor, pag, por_pag)
 
