@@ -23,6 +23,10 @@ def listar_cursos(current_user):
         if pag <= 0:
             return jsonify({"error": "La página debe ser un número positivo"}), 400
         
+        profesor = {"rol": current_user.get("rol", ""), "id_usuario": id_profesor}
+        profesor_encontrado = get_user_profile(profesor)
+        id_profesor = profesor_encontrado.get("id_profesor","")
+
         cursos = get_curso_profesor(id_profesor, pag, por_pag)
 
         if not cursos:
