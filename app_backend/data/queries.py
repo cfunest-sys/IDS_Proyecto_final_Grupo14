@@ -1448,7 +1448,7 @@ def obtener_detalles_profesor(id_usuario):
         if profesor:
 
             query_cursos = """
-                SELECT cursos.id_curso, cursos.nombre, cursos.anio, cursos.semestre
+                SELECT cursos.id_curso, cursos.nombre_curso, cursos.anio, cursos.cuatrimestre
                 FROM profesor_curso
                 INNER JOIN cursos ON profesor_curso.id_curso = cursos.id_curso
                 WHERE profesor_curso.id_profesor = %s

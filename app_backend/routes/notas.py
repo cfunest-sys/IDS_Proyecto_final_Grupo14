@@ -105,7 +105,7 @@ def resumen_promedios(current_user):
         return jsonify({"error": "Acceso denegado"}), 403
 
     anio     = request.args.get('anio',     type=int)
-    semestre = request.args.get('semestre', type=int)
+    cuatrimestre = request.args.get('cuatrimestre', type=int)
     id_curso = request.args.get('id_curso', type=int)
 
     conn = None
@@ -121,7 +121,7 @@ def resumen_promedios(current_user):
                 LOWER(e.tipo) AS tipo_evaluacion,
                 n.calificacion AS nota,
                 c.id_curso,
-                c.nombre AS nombre_curso
+                c.nombre_curso AS nombre_curso
             FROM notas n
             INNER JOIN alumnos a      ON n.legajo_alumno  = a.legajo
             INNER JOIN evaluaciones e ON n.id_evaluacion  = e.id_evaluacion
@@ -134,9 +134,9 @@ def resumen_promedios(current_user):
             condiciones.append("c.anio = %s")
             parametros.append(anio)
 
-        if semestre:
-            condiciones.append("c.semestre = %s")
-            parametros.append(semestre)
+        if cuatrimestre:
+            condiciones.append("c.cuatrimestre = %s")
+            parametros.append(cuatrimestre)
 
         if id_curso:
             condiciones.append("c.id_curso = %s")
@@ -237,7 +237,7 @@ def resumen_promedios(current_user):
 @token_required
 def listar_periodos(current_user):
     """
-    Devuelve los pares (anio, semestre) de cursos que tienen
+    Devuelve los pares (anio, cuatrimestre) de cursos que tienen
     al menos una evaluación con notas cargadas.
     Sirve para poblar el filtro de cuatrimestre en el front.
     """
@@ -250,11 +250,11 @@ def listar_periodos(current_user):
         conn = get_connection()
         cur  = conn.cursor(dictionary=True)
         cur.execute("""
-            SELECT DISTINCT c.anio, c.semestre
+            SELECT DISTINCT c.anio, c.cuatrimestre
             FROM cursos c
             INNER JOIN evaluaciones e ON e.id_curso = c.id_curso
             INNER JOIN notas n ON n.id_evaluacion = e.id_evaluacion
-            ORDER BY c.anio DESC, c.semestre ASC
+            ORDER BY c.anio DESC, c.cuatrimestre ASC
         """)
         return jsonify(cur.fetchall()), 200
     except Exception as e:
