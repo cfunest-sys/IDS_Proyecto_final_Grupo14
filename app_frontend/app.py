@@ -7,6 +7,7 @@ from routes.dashboard_profesor import dashboard_bp
 from routes.perfil import perfil_bp
 from routes.cursos import cursos_bp
 from routes.asistencia import asistencia_bp
+from routes.dashboard_alumno import dashboard_alumno_bp
 import os
 
 PORT = 8080
@@ -24,6 +25,7 @@ app.register_blueprint(equipos_bp)
 app.register_blueprint(perfil_bp)
 app.register_blueprint(cursos_bp)
 app.register_blueprint(asistencia_bp)
+app.register_blueprint(dashboard_alumno_bp)
 
 
 

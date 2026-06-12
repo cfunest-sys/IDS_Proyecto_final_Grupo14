@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard Alumno
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+
+<h1 class="mb-4">
+    Hola {{ nombre }}
+</h1>
+
+<p class="text-muted">
+    Panel del Alumno
+</p>
+
+
+<div class="row mb-5">
+
+    <div class="col-md-3">
+
+        <div class="card shadow text-center">
+
+            <div class="card-body">
+
+                <h5>Legajo</h5>
+
+                <h2>
+                    {{ resumen.legajo }}
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-3">
+
+        <div class="card shadow text-center">
+
+            <div class="card-body">
+
+                <h5>Notas</h5>
+
+                <h2>
+                    {{ resumen.notas }}
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-3">
+
+        <div class="card shadow text-center">
+
+            <div class="card-body">
+
+                <h5>Asistencias</h5>
+
+                <h2>
+                    {{ resumen.asistencias }}
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-3">
+
+        <div class="card shadow text-center">
+
+            <div class="card-body">
+
+                <h5>Equipos</h5>
+
+                <h2>
+                    {{ resumen.equipos }}
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="row mb-5">
+
+    <div class="col-md-12">
+
+        <div class="card shadow">
+
+            <div class="card-body">
+
+                <h4>
+                    Información Personal
+                </h4>
+
+                <hr>
+
+                <p>
+                    <strong>Nombre:</strong>
+                    {{ resumen.nombre }}
+                    {{ resumen.apellido }}
+                </p>
+
+                <p>
+                    <strong>Email:</strong>
+                    {{ resumen.email }}
+                </p>
+
+                <p>
+                    <strong>Próximas evaluaciones:</strong>
+                    {{ resumen.proximas_evaluaciones }}
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<div class="row g-4">
+
+    <div class="col-md-4">
+
+        <a href="{{ url_for('notas.ver_notas') }}"
+           class="text-decoration-none">
+
+            <div class="card dashboard-card shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-pencil-square dashboard-icon"></i>
+
+                    <h4 class="mt-3">
+                        Mis Notas
+                    </h4>
+
+                    <p class="text-muted">
+
+                        Consultar evaluaciones
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+
+    <div class="col-md-4">
+
+        <a href="/asistencia"
+           class="text-decoration-none">
+
+            <div class="card dashboard-card shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-check-circle dashboard-icon"></i>
+
+                    <h4 class="mt-3">
+
+                        Asistencia
+
+                    </h4>
+
+                    <p class="text-muted">
+
+                        Historial de asistencia
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+
+    <div class="col-md-4">
+
+        <a href="/perfil/alumno"
+           class="text-decoration-none">
+
+            <div class="card dashboard-card shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-person-circle dashboard-icon"></i>
+
+                    <h4 class="mt-3">
+
+                        Perfil
+
+                    </h4>
+
+                    <p class="text-muted">
+
+                        Ver datos personales
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+</div>
+
+</div>
+
+{% endblock %}
