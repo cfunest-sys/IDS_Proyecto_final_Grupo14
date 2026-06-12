@@ -14,8 +14,8 @@ def listar_evaluaciones():
     data = {}
     try:
         if session:
-            # data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
-            data = {"rol": "profesor", "user_id": 2}  #--para probar--
+            data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
+            # data = {"rol": "profesor", "user_id": 2}  #--para probar--
             # data = {"rol": "alumno", "user_id": 2}  #--para probar--
         response = requests.post(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/usuario", json=data)
     except requests.exceptions.RequestException:
@@ -49,8 +49,8 @@ def calendario_evaluaciones():
     # session["rol"] = "profesor"
     # session["user_id"] = 2
     if session:
-        # data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
-        data = {"rol": "profesor", "user_id": 2}  #--para probar--
+        data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
+        # data = {"rol": "profesor", "user_id": 2}  #--para probar--
     else:
         data = {}
     eventos = []
@@ -104,8 +104,8 @@ def crear_evaluacion():
     data = {}
     try:
         if session:
-            # data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
-            data = {"rol": "profesor", "user_id": 2}  #--para probar--
+            data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
+            # data = {"rol": "profesor", "user_id": 2}  #--para probar--
             # data = {"rol": "alumno", "user_id": 2}  #--para probar--
         data["nombre"] = request.form.get("nombre")
         data["tipo"] = request.form.get("tipo")
@@ -127,8 +127,8 @@ def eliminar_evaluacion():
         return redirect(url_for('evaluaciones.listar_evaluaciones'))
     try:
         if session:
-            # data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
-            data = {"rol": "profesor", "user_id": 2}  #--para probar--
+            data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
+            # data = {"rol": "profesor", "user_id": 2}  #--para probar--
             # data = {"rol": "alumno", "user_id": 2}  #--para probar--
         data["id"] = request.form.get("id_evaluacion", "")
         response = requests.delete(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/destruir/{str(data["id"])}")
