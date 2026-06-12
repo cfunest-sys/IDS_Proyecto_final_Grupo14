@@ -1,291 +1,196 @@
 {% extends "base.html" %}
-
 {% block title %}Gestión de Notas | UBA{% endblock %}
-
 {% block content %}
 
 <main class="container-fluid py-4 px-lg-5">
 
-    <!-- HEADER -->
     <section class="row mb-4 align-items-center">
-
         <div class="col-lg-7">
-
             <div class="page-header">
-
-                <h1 class="page-title">
-                    Gestión de Notas {{mensaje}}
-                </h1>
-
-                <p class="page-subtitle">
-                    Administración institucional de calificaciones y actas académicas del curso.
-                </p>
-
+                <h1 class="page-title">Gestión de Notas</h1>
+                <p class="page-subtitle">Administración institucional de calificaciones y actas académicas del curso.</p>
             </div>
-
         </div>
         {% if rol == "profesor" %}
         <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
-
             <button class="btn btn-uba-primary btn-lg"
                     data-bs-toggle="modal"
                     data-bs-target="#modalNota">
-
-                <i class="bi bi-journal-check me-2"></i>
-                Cargar Notas
-
+                <i class="bi bi-journal-check me-2"></i>Cargar Notas
             </button>
-
         </div>
         {% endif %}
     </section>
 
-    <!-- PANEL FILTROS -->
+    <!-- PANEL DE FILTROS UNIFICADO -->
     <section class="filter-panel mb-4">
-
         <div class="filter-panel-header">
-
-            <h2 class="filter-title">
-                Filtros de Búsqueda
-            </h2>
-
+            <h2 class="filter-title">Filtros de Búsqueda y Período</h2>
         </div>
 
-        <form action="#"
-              method="GET"
-              class="row g-3 align-items-end">
-
-            <!-- Evaluación -->
-            <div class="col-lg-4">
-
-                <label for="filtroEvaluacion"
-                       class="form-label">
-
-                    Instancia de Evaluación
-
-                </label>
-
-                <select id="filtroEvaluacion"
-                        class="form-select">
-
-                    <option value="">Todas</option>
-                    {% for evento in eventos %}
-                        <option value="{{ evento.id_evaluacion }}">
-                        {{ evento.nombre }}
-                        </option>   
+        <!-- 1. Filtro por Período Académico (Server-side GET) -->
+        <form action="/notas" method="GET" class="row g-3 align-items-end mb-3">
+            
+            <!-- Año -->
+            <div class="col-lg-3">
+                <label for="filtroAnio" class="form-label">Año</label>
+                <select id="filtroAnio" name="anio" class="form-select">
+                    <option value="">Todos los años</option>
+                    {% for anio in años_disponibles %}
+                    <option value="{{ anio }}"
+                            {{ 'selected' if anio | string == anio_activo }}>
+                        {{ anio }}
+                    </option>
                     {% endfor %}
-
                 </select>
-
             </div>
 
-            <!-- Condición -->
+            <!-- Semestre / Cuatrimestre -->
             <div class="col-lg-3">
-
-                <label for="filtroEstado"
-                       class="form-label">
-
-                    Condición
-
-                </label>
-
-                <select id="filtroEstado" class="form-select">
-                    <option value="">Todas</option>
-                    <option value="Aprobado">Aprobado</option>
-                    <option value="Insuficiente">Insuficiente</option>
+                <label for="filtroSemestre" class="form-label">Cuatrimestre</label>
+                <select id="filtroSemestre" name="semestre" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="1" {{ 'selected' if semestre_activo == '1' }}>1° Cuatrimestre</option>
+                    <option value="2" {{ 'selected' if semestre_activo == '2' }}>2° Cuatrimestre</option>
                 </select>
-
             </div>
 
-            <!-- Búsqueda -->
-            <div class="col-lg-3">
-
-                <label for="busquedaAlumno"
-                       class="form-label">
-
-                    Buscar Alumno
-
-                </label>
-
-                <input type="text"
-                       id="busquedaAlumno"
-                       class="form-control"
-                       placeholder="Padrón o Nombre">
-
-            </div>
-
-            <!-- Botón -->
-            <div class="col-lg-2 d-grid">
-
-                <button type="button"
-                        class="btn btn-uba-secondary"
-                        id="btnLimpiarFiltros">
-
-                    <i class="bi bi-arrow-clockwise me-1"></i>
-                    Limpiar
-
+            <!-- Botón aplicar -->
+            <div class="col-lg-3 d-grid">
+                <button type="submit" class="btn btn-uba-primary">
+                    <i class="bi bi-funnel me-1"></i>Filtrar Período
                 </button>
-
             </div>
 
+            <!-- Botón limpiar período -->
+            <div class="col-lg-3 d-grid">
+                <a href="/notas" class="btn btn-uba-secondary">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Limpiar Período
+                </a>
+            </div>
         </form>
 
-    </section>
+        <!-- Línea divisoria estética -->
+        <hr class="my-4 opacity-25">
 
-    <!-- TABLA -->
-    <section class="table-panel">
-
-        <div class="table-panel-header">
-
-            <div>
-
-                <h2 class="table-title">
-                    Actas de Calificaciones
-                </h2>
-
-                <span class="table-subtitle">
-                    Registro académico actualizado del curso.
-                </span>
-
+        <!-- 2. Filtros de Búsqueda en Tabla (Client-side JS) -->
+        <form action="#" method="GET" class="row g-3 align-items-end">
+            <div class="col-lg-4">
+                <label for="filtroEvaluacion" class="form-label">Instancia de Evaluación</label>
+                <select id="filtroEvaluacion" class="form-select">
+                    <option value="">Todas</option>
+                    <option value="tp">Trabajos Prácticos</option>
+                    <option value="parcialito">Parcialitos</option>
+                    <option value="parcial">Parciales</option>
+                </select>
             </div>
 
+            <div class="col-lg-3">
+                <label for="filtroEstado" class="form-label">Condición</label>
+                <select id="filtroEstado" class="form-select">
+                    <option value="">Todas</option>
+                    <option value="aprobado">Aprobado</option>
+                    <option value="incompleto">Incompleto</option>
+                    <option value="insuficiente">Insuficiente</option>
+                </select>
+            </div>
+
+            <div class="col-lg-3">
+                <label for="busquedaAlumno" class="form-label">Buscar Alumno</label>
+                <input type="text" id="busquedaAlumno" class="form-control" placeholder="Padrón o Nombre">
+            </div>
+
+            <div class="col-lg-2 d-grid">
+                <button type="button" class="btn btn-uba-secondary" id="btnLimpiarFiltros">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Limpiar Filtros
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <!-- TABLA DE CALIFICACIONES -->
+    <section class="table-panel">
+        <div class="table-panel-header">
+            <div>
+                <h2 class="table-title">Actas de Calificaciones</h2>
+                <span class="table-subtitle">Registro académico actualizado del curso.</span>
+            </div>
         </div>
-
         <div class="table-responsive">
-
-            <table class="table align-middle uba-table"
-                   id="tablaNotas">
-
+            <table class="table align-middle uba-table" id="tablaNotas">
                 <thead>
-
                     <tr>
-
                         <th>Padrón / LU</th>
                         <th>Alumno</th>
+                        <th>Curso</th>
                         <th>Prom. TPs</th>
                         <th>Prom. Parciales</th>
                         <th>Prom. Parcialitos</th>
                         <th>Prom. Final</th>
                         <th>Condición</th>
-
                     </tr>
-
                 </thead>
-
                 <tbody>
                 {% for alumno in resumen %}
-                    <tr>
+                    <tr data-tiene-tp="{{ 'true' if alumno.prom_tp != '-' else 'false' }}"
+                        data-tiene-parcial="{{ 'true' if alumno.prom_parcial != '-' else 'false' }}"
+                        data-tiene-parcialito="{{ 'true' if alumno.prom_parcialito != '-' else 'false' }}">
 
-                        <td>{{ alumno.padron }}</td>
-
-                        <td class="fw-semibold alumno-columna">
-                            {{ alumno.nombre }}
-                        </td>
-
+                        <td>{{ alumno.legajo }}</td>
+                        <td class="fw-semibold alumno-columna">{{ alumno.nombre }}</td>
+                        <td class="text-muted small">{{ alumno.curso }}</td>
+                        <td><span class="nota-box">{{ alumno.prom_tp }}</span></td>
+                        <td><span class="nota-box">{{ alumno.prom_parcial }}</span></td>
+                        <td><span class="nota-box">{{ alumno.prom_parcialito }}</span></td>
                         <td>
-                            <span class="nota-box">
-                                {{ alumno.prom_tp }}
-                            </span>
-                        </td>
-
-                        <td>
-                            <span class="nota-box">
-                                {{ alumno.prom_parcial }}
-                            </span>
-                        </td>
-
-                        <td>
-                            <span class="nota-box">
-                                {{ alumno.prom_parcialito }}
-                            </span>
-                        </td>
-
-                        <td>
-                            <span class="nota-box {% if alumno.prom_final < 4 %}nota-danger{% endif %}">
+                            <span class="nota-box {% if alumno.prom_final != '-' and alumno.prom_final < 4 %}nota-danger{% endif %}">
                                 {{ alumno.prom_final }}
                             </span>
                         </td>
-
                         <td class="estado-columna">
                             {% if alumno.condicion == 'Aprobado' %}
-                                <span class="badge uba-badge-success bg-success">
-                                    Aprobado
-                                </span>
+                                <span class="badge bg-success">Aprobado</span>
+                            {% elif alumno.condicion == 'Incompleto' %}
+                                <span class="badge bg-secondary">Incompleto</span>
                             {% else %}
-                                <span class="badge uba-badge-danger bg-danger">
-                                    Insuficiente
-                                </span>
+                                <span class="badge bg-danger">Insuficiente</span>
                             {% endif %}
                         </td>
-
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="7" class="text-center py-5 empty-state">
-                            No hay actas ni promedios registrados en el sistema.
+                        <td colspan="8" class="text-center py-5 empty-state">
+                            No hay actas ni promedios registrados 
+                            {% if anio_activo or semestre_activo %}para el período seleccionado.{% else %}en el sistema.{% endif %}
                         </td>
                     </tr>
                 {% endfor %}
                 </tbody>
-
             </table>
-
         </div>
-
     </section>
-
 </main>
 
-<!-- MODAL -->
-<div class="modal fade"
-     id="modalNota"
-     tabindex="-1"
-     aria-labelledby="modalNotaLabel"
-     aria-hidden="true">
-
+<!-- MODAL DE CARGA -->
+<div class="modal fade" id="modalNota" tabindex="-1" aria-labelledby="modalNotaLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-
         <div class="modal-content uba-modal">
-
-            <!-- HEADER -->
             <div class="modal-header uba-modal-header">
-
                 <div>
-
-                    <h5 class="modal-title"
-                        id="modalNotaLabel">
-
-                        Cargar / Editar Nota
-
-                    </h5>
-
-                    <p class="modal-subtitle mb-0">
-                        Registro académico institucional.
-                    </p>
-
+                    <h5 class="modal-title" id="modalNotaLabel">Cargar / Editar Nota</h5>
+                    <p class="modal-subtitle mb-0">Registro académico institucional.</p>
                 </div>
-
-                <button type="button"
-                        class="btn-close btn-close-white"
-                        data-bs-dismiss="modal"
-                        aria-label="Close">
-                </button>
-
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <!-- FORM -->
-            <form action="/notas"
-                  method="POST">
-
+            <form action="/notas" method="POST">
                 <div class="modal-body">
-
-                    <!-- Alumno -->
                     <div class="mb-4">
                         <label for="alumno" class="form-label">Alumno</label>
                         <select id="alumno" name="alumno" class="form-select" required>
                             <option value="">Seleccionar alumno</option>
-                            {% for alumno in resumen %}
-                            <option value="{{ alumno.padron }}">{{ alumno.nombre }}</option>   
+                            {% for a in alumnos %}
+                            <option value="{{ a.legajo }}">{{ a.nombre_completo }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -295,89 +200,76 @@
                         <select id="evaluacion" name="evaluacion" class="form-select" required>
                             <option value="">Seleccionar evaluación</option>
                             {% for evento in eventos %}
-                                <option value="{{ evento.id_evaluacion }}">
-                                {{ evento.nombre }}
-                                </option>   
+                            <option value="{{ evento.id_evaluacion }}">{{ evento.nombre }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
                     <div class="mb-4">
                         <label for="nota" class="form-label">Nota Numérica</label>
-                        <input type="number" id="nota" name="nota" class="form-control" min="0" max="10" placeholder="Ingrese una nota" required>
+                        <input type="number" id="nota" name="nota" class="form-control"
+                               min="0" max="10" step="0.01"
+                               placeholder="Ej: 7.50" required>
                     </div>
-
-                <!-- FOOTER -->
-                <div class="modal-footer border-0 pt-0">
-
-                    <button type="button"
-                            class="btn btn-light border"
-                            data-bs-dismiss="modal">
-
-                        Cancelar
-
-                    </button>
-
-                    <button type="submit"
-                            class="btn btn-uba-primary">
-
-                        Guardar Nota
-
-                    </button>
-
                 </div>
-
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-uba-primary">Guardar Nota</button>
+                </div>
             </form>
-
         </div>
-
     </div>
-
 </div>
 
-<!-- SCRIPT -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    // Como el select de evaluación ya no aplica a promedios consolidados, 
-    // controlamos si existe para evitar errores en la carga de la página
+    const filtroEvaluacion = document.getElementById("filtroEvaluacion");
     const filtroEstado = document.getElementById("filtroEstado");
     const busquedaAlumno = document.getElementById("busquedaAlumno");
     const btnLimpiar = document.getElementById("btnLimpiarFiltros");
     const filas = document.querySelectorAll("#tablaNotas tbody tr");
-    //claro en el front
+
+    const CATEGORIA_A_DATASET = {
+        "tp":          "tieneTp",
+        "parcial":     "tieneParcial",
+        "parcialito":  "tieneParcialito"
+    };
+
     function aplicarFiltros() {
-        const estado = filtroEstado ? filtroEstado.value.toLowerCase() : "";
-        const busqueda = busquedaAlumno ? busquedaAlumno.value.toLowerCase() : "";
+        const tipoEval = filtroEvaluacion ? filtroEvaluacion.value : "";
+        const estado   = filtroEstado     ? filtroEstado.value.toLowerCase() : "";
+        const busqueda = busquedaAlumno   ? busquedaAlumno.value.toLowerCase() : "";
 
         filas.forEach(fila => {
-            // Validamos que no sea la fila de "No hay actas"
             const alumnoCol = fila.querySelector(".alumno-columna");
-            if (!alumnoCol) return; 
+            if (!alumnoCol) return;
 
-            const alumno = alumnoCol.innerText.toLowerCase();
-            const padron = fila.children[0].innerText.toLowerCase(); // Primer TD: Padrón
+            const alumno     = alumnoCol.innerText.toLowerCase();
+            const padron     = fila.children[0].innerText.toLowerCase();
             const estadoFila = fila.querySelector(".estado-columna").innerText.toLowerCase();
 
-            const coincideEstado = estado === "" || estadoFila.includes(estado);
-            const coincideBusqueda = alumno.includes(busqueda) || padron.includes(busqueda);
+            const coincideEstado   = estado   === "" || estadoFila.includes(estado);
+            const coincideBusqueda = busqueda === "" || alumno.includes(busqueda) || padron.includes(busqueda);
 
-            if (coincideEstado && coincideBusqueda) {
-                fila.style.display = "";
-            } else {
-                fila.style.display = "none";
+            let coincideEval = true;
+            if (tipoEval !== "") {
+                const claveDataset = CATEGORIA_A_DATASET[tipoEval];
+                coincideEval = claveDataset !== undefined && fila.dataset[claveDataset] === "true";
             }
+
+            fila.style.display = (coincideEstado && coincideBusqueda && coincideEval) ? "" : "none";
         });
     }
 
-    if (filtroEstado) filtroEstado.addEventListener("change", aplicarFiltros);
-    if (busquedaAlumno) busquedaAlumno.addEventListener("keyup", aplicarFiltros);
+    if (filtroEvaluacion) filtroEvaluacion.addEventListener("change", aplicarFiltros);
+    if (filtroEstado)     filtroEstado.addEventListener("change", aplicarFiltros);
+    if (busquedaAlumno)   busquedaAlumno.addEventListener("keyup", aplicarFiltros);
 
     if (btnLimpiar) {
         btnLimpiar.addEventListener("click", () => {
-            if (filtroEstado) filtroEstado.value = "";
-            if (busquedaAlumno) busquedaAlumno.value = "";
-            const filtroEvaluacion = document.getElementById("filtroEvaluacion");
             if (filtroEvaluacion) filtroEvaluacion.value = "";
+            if (filtroEstado)     filtroEstado.value = "";
+            if (busquedaAlumno)   busquedaAlumno.value = "";
             aplicarFiltros();
         });
     }
