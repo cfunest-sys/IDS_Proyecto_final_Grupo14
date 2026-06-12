@@ -222,7 +222,7 @@ Gestión de Evaluaciones | UBA
             </div>
 
             <form method="POST"
-                  action="#">
+                  action="/evaluaciones">
 
                 <div class="modal-body">
 
@@ -283,6 +283,21 @@ Gestión de Evaluaciones | UBA
                                class="form-control"
                                id="fecha"
                                name="fecha"
+                               required>
+                    </div>
+
+                    <div class="mb-2">
+
+                        <label for="curso"
+                               class="form-label">
+                            Curso
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               id="curso"
+                               name="curso"
+                               placeholder="Ej: 1"
                                required>
                     </div>
 
