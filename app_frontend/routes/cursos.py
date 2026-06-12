@@ -28,25 +28,24 @@ def ver_cursos():
 
         params = {"pag": pag}
 
-        if id_curso:
+        if id_curso and str(id_curso).strip():
             params["id_curso"] = int(id_curso)
             
-        if nombre_curso:
+        if nombre_curso and str(nombre_curso).strip():
             params["nombre_curso"] = nombre_curso
             
-        if anio:
+        if anio and str(anio).strip():
             params["anio"] = int(anio)
 
-        if cuatrimestre:
+        if cuatrimestre and str(cuatrimestre).strip():
             params["cuatrimestre"] = int(cuatrimestre)
 
-        if id_curso or nombre_curso or anio or cuatrimestre:
+        if len(params) > 1: 
             response_filtrada = requests.get(
                 f"{current_app.config['BACKEND_URL']}/api/cursos/filtros/",
                 params=params,
                 headers=headers
             ) 
-
         else:
             response_filtrada = requests.get(
                 f"{current_app.config['BACKEND_URL']}/api/cursos/",
@@ -55,9 +54,15 @@ def ver_cursos():
             )
 
         if response_filtrada.status_code == 200:
-            lista_cursos = response_filtrada.json()
-            if isinstance(lista_cursos, dict):
-                lista_cursos = []
+            datos_recibidos = response_filtrada.json()
+            
+            if isinstance(datos_recibidos, dict):
+                if "error" in datos_recibidos:
+                    lista_cursos = []
+                else:
+                    lista_cursos = [datos_recibidos]
+            else:
+                lista_cursos = datos_recibidos
                 
     except Exception as e:
         print(f"Error al traer los cursos: {e}")

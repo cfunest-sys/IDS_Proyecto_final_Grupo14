@@ -569,3 +569,33 @@ h2, h3 {
     font-weight: bold;
     text-align: center;
 }
+
+
+/*Paginado*/
+.pagination .page-item.active .page-link {
+    background-color: #1d2554;
+    border-color: #1d2554;
+    color: white;
+}
+
+.pagination .page-link {
+    color: #1d2554;
+    background-color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #1d2554;
+    background-color: white;
+}
+
+.pagination .page-link:hover {
+    color: white;
+    background-color: #2b356e;
+    border-color: #2b356e;
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: #1d2554;
+    border-color: #1d2554;
+    color: white;
+}
