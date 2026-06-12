@@ -53,12 +53,6 @@ def mostrar_calendario():
     bisiesto = False
     return render_template("calendario.html", mes=mes, dias=dias, año=año, bisiesto=bisiesto, eventos=eventos)
 
-
-@app.route("/notas")
-def notas():
-    return render_template("notas.html")
-
-
 if __name__ == "__main__":
     debug_mode = os.environ.get("FLASK_DEBUG", "False").lower() in ("true", "1", "t")
     app.run(debug=debug_mode, host="0.0.0.0", port=PORT)
