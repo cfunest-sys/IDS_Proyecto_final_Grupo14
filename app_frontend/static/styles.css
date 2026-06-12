@@ -620,6 +620,37 @@ h3 {
   font-weight: bold;
   text-align: center;
 }
+.btn-perfil-contrasena {
+    background-color: transparent !important;
+    border: 1px solid #dc3545 !important;
+    color: #dc3545 !important;
+}
+
+.btn-perfil-contrasena:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.btn-perfil-editar {
+    background-color: transparent !important;
+    border: 1px solid #1d4ed8 !important;
+    color: #1d4ed8 !important;
+}
+
+.btn-perfil-editar:hover {
+    background-color: #1d4ed8 !important;
+    color: white !important;
+}
+.btn-perfil-historial {
+    background-color: transparent !important;
+    border: 1px solid #6c757d !important;
+    color: #6c757d !important;
+}
+
+.btn-perfil-historial:hover {
+    background-color: #6c757d !important;
+    color: white !important;
+}
 
 /* Materiales - Drag & Drop */
 .drop-zone.dragover {

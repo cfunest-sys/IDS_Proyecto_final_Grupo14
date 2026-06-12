@@ -1536,7 +1536,6 @@ def cambiar_contrasena(id_usuario, contrasena_nueva):
         if conn: conn.close()
 
 
-
 def editar_perfil_alumno(id_usuario, nombre, apellido, email):
     conn = None
     cur = None
@@ -1553,7 +1552,7 @@ def editar_perfil_alumno(id_usuario, nombre, apellido, email):
             (email, id_usuario)
         )
         conn.commit()
-        return cur.rowcount > 0
+        return True
 
     except Exception as e:
         print(f"Error editando perfil alumno: {e}")
@@ -1579,7 +1578,7 @@ def editar_perfil_profesor(id_usuario, nombre, departamento, email):
             (email, id_usuario)
         )
         conn.commit()
-        return cur.rowcount > 0
+        return True
 
     except Exception as e:
         print(f"Error editando perfil profesor: {e}")
