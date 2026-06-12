@@ -6,7 +6,8 @@ inicio = Blueprint("inicio", __name__)
 
 @inicio.route("/")
 def index():
-    return render_template("inicio.html")
+    rol = session.get("rol")
+    return render_template("inicio.html", rol=rol)
 
 
 @inicio.route("/asistencia", methods=["GET", "POST"])
@@ -334,8 +335,11 @@ def cargar_csv():
         flash("No se envió archivo", "danger")
         return redirect("/alumnos")
     try:
+        token = session.get("token", "")
+        headers = {"Authorization": f"Bearer {token}"}
         resp = requests.post(
             f"{current_app.config['BACKEND_URL']}/api/alumnos/cargar-csv",
+            headers=headers,
             files={"archivo": (archivo.filename, archivo.stream, archivo.content_type)},
             timeout=30,
         )

@@ -1,3 +1,5 @@
+import traceback
+
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from data.queries import crear_profesor, existe_usuario_por_email, registrar_login
@@ -82,7 +84,8 @@ def register():
             "nombre": nombre,
             "email": email,
             "password": password,
-            "departamento": departamento
+            "departamento": departamento,
+            "rol": "profesor"
         }
         
         if existe_usuario_por_email(email):
@@ -92,16 +95,20 @@ def register():
 
         id_profesor = crear_profesor(profesor)
 
+        access_token = create_access_token(
+            identity=str(id_profesor),
+            additional_claims={
+                "rol": profesor["rol"]
+            }
+        )
+
         return jsonify({
             "mensaje": "Profesor registrado correctamente",
-            "id": id_profesor
+            "id": id_profesor,
+            "access_token": access_token
         }), 201
 
     except Exception as e:
-        
-        print(e)
-
-        return jsonify({
-            "error": str(e)
-        }), 500
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
     

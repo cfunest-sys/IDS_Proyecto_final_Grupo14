@@ -8,3 +8,4 @@ PyJWT
 werkzeug
 python-dotenv
 Flask-Mail
+Flask-Session

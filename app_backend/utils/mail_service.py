@@ -1,7 +1,7 @@
 from flask_mail import Message
 from utils.extensions import mail
 
-def enviar_mail_bienvenida(destinatario, nombre):
+def enviar_mail_bienvenida(destinatario, nombre, contrasenia):
     try:
         msg = Message(
             subject="Registro exitoso",
@@ -11,9 +11,9 @@ def enviar_mail_bienvenida(destinatario, nombre):
         msg.body = f"""
 Hola {nombre},
 
-Tu cuenta fue creada correctamente en Campus FIUBA de Introducción al Desarrollo de Software.
+Se le ha registrado correctamente en el Campus FIUBA de Introducción al Desarrollo de Software.
 
-Ya puedes iniciar sesión utilizando tu correo electrónico.
+Ya puedes iniciar sesión utilizando tu correo electrónico y la contraseña: {contrasenia}
 
 Saludos.
 """

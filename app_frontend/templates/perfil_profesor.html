@@ -18,9 +18,9 @@
 
             <div class="tarjeta-foto">
                 <div class="avatar-iniciales avatar-profesor">
-                    {{ detalle.nombre[0] | upper }}{{ detalle.apellido[0] | upper }}
+                    {{ detalle.nombre[0] | upper }}
                 </div>
-                <h2 class="nombre-profesor">{{ detalle.nombre }} {{ detalle.apellido }}</h2>
+                <h2 class="nombre-profesor">{{ detalle.nombre }}</h2>
                 <span class="badge-estado badge-activo-prof">Docente Activo</span>
             </div>
 
@@ -69,8 +69,8 @@
                 <div class="contenedor-equipo">
                     {% for curso in detalle.cursos_asignados %}
                         <div>
-                            <span class="subetiqueta-equipo text-profesor">Cátedra activa:</span>
-                            <h4 class="nombre-equipo">{{ curso.curso_nombre }}</h4>
+                            <span class="subetiqueta-equipo text-profesor">Cátedra activa: </span>
+                            <h4 class="nombre-equipo">{{ curso.nombre }}</h4>
                         </div>
                         <div class="footer-equipo">
                             <p>Período: <span class="destaque-texto">{{ curso.semestre }}° Semestre</span></p>
@@ -117,7 +117,7 @@
     </div>
 </div>
 
-<!-- Modal Cambiar Contraseña -->
+
 <div class="modal fade" id="modalContrasena" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">

@@ -19,7 +19,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">
-                Campus FIUBA - Introducción al Desarrollo de Software
+                <i class="bi bi-mortarboard-fill me-2"></i>Campus FIUBA - Introducción al Desarrollo de Software
             </a>
 
             <button
@@ -39,33 +39,41 @@
                 <ul class="navbar-nav ms-auto">
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/">
-                            Inicio
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">
+                            <i class="bi bi-house-fill"></i> Inicio
                         </a>
                     </li>
                     {% if session.get("user_id") %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/perfil/profesor">
-                            Perfil
+                        <a class="nav-link {% if '/perfil/' in request.path %}active{% endif %}" href="{% if session.get('rol') == 'alumno' %}/perfil/alumno{% else %}/perfil/profesor{% endif %}">
+                            <i class="bi bi-person-fill"></i> Perfil
                         </a>
-
                     </li>
-                    
                     <li class="nav-item">
-                        <a class="nav-link" href="/asistencia">
-                            Asistencia
+                      <a class="nav-link {% if '/asistencia' in request.path %}active{% endif %}" href="/asistencia">
+                            <i class="bi bi-qr-code"></i> Asistencia
                         </a>
                     </li>
                     
                     <li class="nav-item">
-                        <a class="nav-link" href="/material">
-                            Materiales
+                        <a class="nav-link {% if '/material' in request.path %}active{% endif %}" href="/material">
+                            <i class="bi bi-folder-fill"></i> Materiales
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/evaluaciones' in request.path %}active{% endif %}" href="/evaluaciones">
+                            <i class="bi bi-journal-check"></i> Evaluaciones
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/notas' in request.path %}active{% endif %}" href="/notas">
+                            <i class="bi bi-pencil-square"></i> Notas
                         </a>
                     </li>
                     
                     <li class="nav-item">
-                        <a class="nav-link" href="/reportes">
-                            Reportes
+                      <a class="nav-link {% if '/reportes' in request.path %}active{% endif %}" href="/reportes">
+                            <i class="bi bi-file-earmark-bar-graph-fill"></i> Reportes
                         </a>
                     </li>
                     {% endif %}
@@ -73,8 +81,8 @@
 
                     {% if session.get("rol") == "profesor" %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/dashboard/profesor">
-                            Dashboard Profesor
+                        <a class="nav-link {% if '/dashboard/profesor' in request.path %}active{% endif %}" href="/dashboard/profesor">
+                            <i class="bi bi-speedometer2"></i> Dashboard
                         </a>
                     </li>
                     {% endif %}
@@ -82,16 +90,29 @@
 
                     <li class="nav-item">
                         <a class="nav-link" href="/login">
-                            Iniciar sesión
+                             <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
                         </a>
                     </li>
 
                     {% endif %}
                     {% if session.get("user_id") %}
+                    <li class="nav-item">
+                        <a class="nav-user-pill" 
+                          href="{% if session.get('rol') == 'alumno' %}/perfil/alumno{% else %}/perfil/profesor{% endif %}">
+                            <span class="avatar-mini">
+                                {% if session.get("nombre") %}
+                                    {{ session["nombre"][0] | upper }}
+                                {% else %}
+                                    <i class="bi bi-person"></i>
+                                {% endif %}
+                            </span>
+                            {{ session.get("nombre", "Usuario") }}
+                        </a>
+                    </li>
 
                     <li class="nav-item">
                         <a class="nav-link" href="/logout">
-                            Cerrar sesión
+                            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
                         </a>
                     </li>
                     {% endif %}
@@ -102,19 +123,21 @@
         </div>
 
     </nav>
-    <main>
+    <main class="{% block main_class %}app-container{% endblock %}">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
                 {% if category == 'success' %}
                 <div class="flash-success" id="flash-success">
                     <div class="alert alert-success">
+                      <i class="bi bi-check-circle-fill me-1"></i>
                         {{ message }}
                     </div>
                 </div>
                 {% else %}
                 <div class="container mt-3">
                     <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        <i class="bi bi-info-circle-fill me-1"></i>
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -134,13 +157,14 @@
     <footer class="footer-custom">
 
         <p>
+          <i class="bi bi-mortarboard-fill me-1"></i>
             Proyecto Final IDS - Grupo 14
         </p>
 
     </footer>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
