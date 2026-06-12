@@ -12,7 +12,6 @@ evaluaciones_blueprint = Blueprint("evaluaciones", __name__)
 def listar_evaluaciones():
     evaluaciones = []
     rol          = ""
-
     try:
         if not session:
             flash("Sesión no iniciada", "warning")

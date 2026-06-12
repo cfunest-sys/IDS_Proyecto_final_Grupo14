@@ -1247,7 +1247,7 @@ def cargar_alumnos_csv(archivo_csv):
     """
     CSV ejemplo:
     legajo,nombre,apellido,dni,email,curso,anio,cuatrimestre
-
+    112111,pepe,gonzlez,50100200,pGonza@gmail.com,analisis I,2026,1
     """
     from utils.auth import hash_password
 
