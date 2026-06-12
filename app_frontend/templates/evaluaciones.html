@@ -1,365 +1,274 @@
 {% extends "base.html" %}
-
-{% block title %}
-Gestión de Evaluaciones | UBA
-{% endblock %}
-
+{% block title %}Gestión de Evaluaciones | Campus FIUBA{% endblock %}
 {% block content %}
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
 <main class="container-fluid py-4 px-lg-5">
 
-    <!-- HEADER -->
-    <section class="row mb-4 align-items-center">
+  <!-- HEADER -->
+  <section class="row mb-4 align-items-center">
+    <div class="col-lg-7">
+      <h1 class="page-title">Gestión de Evaluaciones</h1>
+      <p>Administrar parciales, trabajos prácticos y parcialitos del curso.</p>
+    </div>
+    {% if rol == "profesor" %}
+    <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
+      <button class="btn btn-campus" data-bs-toggle="modal" data-bs-target="#modalNuevaEvaluacion">
+        <i class="bi bi-plus-lg"></i> Nueva Evaluación
+      </button>
+    </div>
+    {% endif %}
+  </section>
 
-        <div class="col-lg-7">
-            <div class="page-header">
-                <h1 class="page-title">
-                    Gestión de Evaluaciones {{ fecha }}
-                </h1>
+  <!-- ESTADISTICAS -->
+  <section class="row g-3 mb-4" id="statsSection">
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center p-3 bg-light">
+        <h3 class="mb-0 text-primary">{{ stats.total }}</h3>
+        <small class="text-muted">Totales</small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center p-3 bg-light">
+        <h3 class="mb-0 text-info">{{ stats.parcial }}</h3>
+        <small class="text-muted">Parciales</small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center p-3 bg-light">
+        <h3 class="mb-0 text-warning">{{ stats.tp }}</h3>
+        <small class="text-muted">Trabajos Prácticos</small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center p-3 bg-light">
+        <h3 class="mb-0 text-success">{{ stats.parcialito }}</h3>
+        <small class="text-muted">Parcialitos</small>
+      </div>
+    </div>
+  </section>
 
-                <p class="page-subtitle">
-                    Administración institucional de parciales, trabajos prácticos y parcialitos.
-                </p>
-            </div>
-        </div>
-        {% if rol == "profesor" %}
-        <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
+  <!-- FILTROS -->
+  <section class="mb-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label for="filtroTipo" class="form-label">Tipo</label>
+        <select id="filtroTipo" class="form-select">
+          <option value="">Todos</option>
+          <option value="Parcial">Parcial</option>
+          <option value="TP">Trabajo Práctico</option>
+          <option value="Parcialito">Parcialito</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label for="filtroCurso" class="form-label">Curso</label>
+        <select id="filtroCurso" class="form-select">
+          <option value="">Todos</option>
+          {% for curso in cursos %}
+          <option value="{{ curso.id_curso }}">{{ curso.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <span class="form-label d-block">&nbsp;</span>
+        <span class="badge bg-light text-dark p-2"><i class="bi bi-files"></i> Total: <span id="totalEvaluaciones">{{ evas|length }}</span></span>
+      </div>
+    </div>
+  </section>
 
-            <button class="btn btn-uba-primary btn-lg"
-                    data-bs-toggle="modal"
-                    data-bs-target="#modalNuevaEvaluacion">
-
-                <i class="bi bi-plus-circle me-2"></i>
-                Nueva Evaluación
-            </button>
-
-        </div>
-        {% endif %}
-    </section>
-
-    <!-- FILTROS -->
-    <section class="filter-panel mb-4">
-
-        <div class="filter-panel-header">
-            <h2 class="filter-title">
-                Filtros de Búsqueda
-            </h2>
-        </div>
-
-        <form method="GET"
-              action="/evaluaciones"
-              class="row g-3 align-items-end">
-
-            <div class="col-md-4">
-                <label for="tipo" class="form-label">
-                    Tipo de Evaluación
-                </label>
-
-                <select name="tipo"
-                        id="tipo"
-                        class="form-select">
-
-                    <option value="">Todos</option>
-                    {% for evaluacion in evas %}
-                        <option value="{{ evaluacion.tipo }}">{{ evaluacion.tipo }}</option>   
-                    {% endfor %}
-
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <label for="fecha_desde" class="form-label">
-                    Fecha Desde
-                </label>
-
-                <input type="date"
-                       name="fecha_desde"
-                       id="fecha_desde"
-                       class="form-control">
-            </div>
-
-            <div class="col-md-3">
-                <label for="fecha_hasta" class="form-label">
-                    Fecha Hasta
-                </label>
-
-                <input type="date"
-                       name="fecha_hasta"
-                       id="fecha_hasta"
-                       class="form-control">
-            </div>
-
-            <div class="col-md-2 d-grid">
-                <button type="submit"
-                        class="btn btn-uba-secondary">
-
-                    <i class="bi bi-funnel-fill me-1"></i>
-                    Filtrar
+  <!-- TABLA DE EVALUACIONES -->
+  <section>
+    <div class="table-responsive">
+      <table class="table align-middle" id="tablaEvaluaciones">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Fecha</th>
+            <th>Curso</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpoTabla">
+          {% for eva in evas %}
+          <tr data-id="{{ eva.id }}" data-nombre="{{ eva.nombre }}" data-tipo="{{ eva.tipo }}" data-fecha="{{ eva.fecha }}" data-curso="{{ eva.curso }}">
+            <td class="fw-semibold">{{ eva.nombre }}</td>
+            <td>
+              {% if eva.tipo == "Parcial" %}
+              <span class="badge bg-info">{{ eva.tipo }}</span>
+              {% elif eva.tipo == "TP" %}
+              <span class="badge bg-warning text-dark">{{ eva.tipo }}</span>
+              {% elif eva.tipo == "Parcialito" %}
+              <span class="badge bg-success">{{ eva.tipo }}</span>
+              {% else %}
+              <span class="badge bg-secondary">{{ eva.tipo }}</span>
+              {% endif %}
+            </td>
+            <td class="small">{{ eva.fecha }}</td>
+            <td class="small text-muted">
+              {% for c in cursos %}
+                {% if c.id_curso == eva.curso %}{{ c.nombre }}{% endif %}
+              {% endfor %}
+            </td>
+            <td class="text-center">
+              <div class="d-flex justify-content-center gap-1">
+                <button type="button" class="btn btn-sm btn-outline-primary btn-editar-eva" data-bs-toggle="tooltip" title="Editar evaluación">
+                  <i class="bi bi-pencil"></i>
                 </button>
-            </div>
-
-        </form>
-    </section>
-
-    <!-- TABLA -->
-    <section class="table-panel">
-
-        <div class="table-panel-header">
-
-            <div>
-                <h2 class="table-title">
-                    Evaluaciones del Curso
-                </h2>
-
-                <span class="table-subtitle">
-                    Total registradas: {{ evas|length }}
-                </span>
-            </div>
-
-        </div>
-
-        <div class="table-responsive">
-
-            <table class="table align-middle uba-table">
-
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Tipo</th>
-                        <th>Fecha</th>
-                        <!-- <th>Estado</th> -->
-                        <th class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for evaluacion in evas %}
-                    <tr>
-                        <td>
-                            {{ evaluacion.nombre }}
-                        </td>
-                        <td>
-                            <span class="badge bg-secondary">
-                                {{ evaluacion.tipo }}
-                            </span>
-                        </td>
-                        <td>
-                            {{ evaluacion.fecha }}
-                        </td>
-<!--                         <td>
-                            {% if evaluacion.estado == 'Activa' %}
-                                <span class="status-pill status-active">
-                                    Activa
-                                </span>
-                            {% elif evaluacion.estado == 'Pendiente' %}
-                                <span class="status-pill status-pending">
-                                    Pendiente
-                                </span>
-                            {% else %}
-                                <span class="status-pill status-closed">
-                                    Finalizada
-                                </span>
-                            {% endif %}
-                        </td> -->
-                        <td class="text-center">
-                            <div class="d-flex justify-content-center gap-2">
-                                <form href="#"
-                                   class="btn btn-sm btn-light border">
-                                    <i class="bi bi-pencil-square"></i>
-                                </form>
-                                <form action="/evaluaciones/eliminar" method="POST" 
-                                    class="btn btn-sm btn-light border btn-delete">
-                                    <input name="method" value="delete" type="hidden"></input>
-                                    <input value="{{ evaluacion.id }}" type="hidden" name="id_evaluacion"></input>
-                                    <input type="submit" value="submit">
-                                    <i class="bi bi-trash" ></i>
-                                    </input>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="5" class="text-center py-5 empty-state">
-                            No hay evaluaciones registradas.
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-    </section>
+                <form action="/evaluaciones/eliminar" method="POST" class="d-inline">
+                  <input name="method" value="delete" type="hidden">
+                  <input value="{{ eva.id }}" type="hidden" name="id_evaluacion">
+                  <button type="submit" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Eliminar evaluación">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr id="filaVacia">
+            <td colspan="5" class="text-center py-5">
+              <i class="bi bi-inbox icon-empty"></i>
+              <p class="text-muted mt-2">No hay evaluaciones registradas.</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
 
 </main>
 
-<!-- MODAL NUEVA EVALUACIÓN -->
-<div class="modal fade"
-     id="modalNuevaEvaluacion"
-     tabindex="-1"
-     aria-labelledby="modalNuevaEvaluacionLabel"
-     aria-hidden="true">
-
-    <div class="modal-dialog modal-dialog-centered">
-
-        <div class="modal-content uba-modal">
-
-            <div class="modal-header uba-modal-header">
-
-                <div>
-                    <h5 class="modal-title"
-                        id="modalNuevaEvaluacionLabel">
-
-                        Nueva Evaluación
-                    </h5>
-
-                    <p class="modal-subtitle mb-0">
-                        Registrar una nueva instancia evaluativa.
-                    </p>
-                </div>
-
-                <button type="button"
-                        class="btn-close btn-close-white"
-                        data-bs-dismiss="modal"
-                        aria-label="Close">
-                </button>
-
-            </div>
-
-            <form method="POST"
-                  action="/evaluaciones">
-
-                <div class="modal-body">
-
-                    <div class="mb-4">
-
-                        <label for="nombre"
-                               class="form-label">
-                            Nombre de la Evaluación
-                        </label>
-
-                        <input type="text"
-                               class="form-control"
-                               id="nombre"
-                               name="nombre"
-                               placeholder="Ej: Parcial 1"
-                               required>
-                    </div>
-
-                    <div class="mb-4">
-
-                        <label for="tipo_evaluacion"
-                               class="form-label">
-                            Tipo
-                        </label>
-
-                        <select class="form-select"
-                                id="tipo_evaluacion"
-                                name="tipo"
-                                required>
-
-                            <option selected disabled value="">
-                                Seleccionar tipo
-                            </option>
-
-                            <option value="Parcial">
-                                Parcial
-                            </option>
-
-                            <option value="TP">
-                                Trabajo Práctico
-                            </option>
-
-                            <option value="Parcialito">
-                                Parcialito
-                            </option>
-
-                        </select>
-                    </div>
-
-                    <div class="mb-2">
-
-                        <label for="fecha"
-                               class="form-label">
-                            Fecha
-                        </label>
-
-                        <input type="date"
-                               class="form-control"
-                               id="fecha"
-                               name="fecha"
-                               required>
-                    </div>
-
-                    <div class="mb-2">
-
-                        <label for="curso"
-                               class="form-label">
-                            Curso
-                        </label>
-
-                        <input type="text"
-                               class="form-control"
-                               id="curso"
-                               name="curso"
-                               placeholder="Ej: 1"
-                               required>
-                    </div>
-
-                </div>
-
-                <div class="modal-footer border-0 pt-0">
-
-                    <button type="button"
-                            class="btn btn-light border"
-                            data-bs-dismiss="modal">
-
-                        Cancelar
-                    </button>
-
-                    <button type="submit"
-                            class="btn btn-uba-primary">
-
-                        Guardar Evaluación
-                    </button>
-
-                </div>
-
-            </form>
-
+<!-- MODAL NUEVA EVALUACION -->
+<div class="modal fade" id="modalNuevaEvaluacion" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Nueva Evaluación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="/evaluaciones" method="POST">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre *</label>
+            <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Ej: Parcial 1" required>
+          </div>
+          <div class="mb-3">
+            <label for="tipo" class="form-label">Tipo *</label>
+            <select id="tipo" name="tipo" class="form-select" required>
+              <option value="">Seleccionar</option>
+              <option value="Parcial">Parcial</option>
+              <option value="TP">Trabajo Práctico</option>
+              <option value="Parcialito">Parcialito</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="fecha" class="form-label">Fecha *</label>
+            <input type="date" id="fecha" name="fecha" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="curso" class="form-label">Curso *</label>
+            <select id="curso" name="curso" class="form-select" required>
+              <option value="">Seleccionar curso</option>
+              {% for c in cursos %}
+              <option value="{{ c.id_curso }}">{{ c.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
-
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-campus"><i class="bi bi-check-lg"></i> Guardar</button>
+        </div>
+      </form>
     </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR EVALUACION -->
+<div class="modal fade" id="modalEditarEvaluacion" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-pencil"></i> Editar Evaluación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="/evaluaciones/actualizar" method="POST">
+        <input type="hidden" id="edit_id" name="id" value="">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="edit_nombre" class="form-label">Nombre *</label>
+            <input type="text" id="edit_nombre" name="nombre" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit_tipo" class="form-label">Tipo *</label>
+            <select id="edit_tipo" name="tipo" class="form-select" required>
+              <option value="Parcial">Parcial</option>
+              <option value="TP">Trabajo Práctico</option>
+              <option value="Parcialito">Parcialito</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="edit_fecha" class="form-label">Fecha *</label>
+            <input type="date" id="edit_fecha" name="fecha" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit_curso" class="form-label">Curso *</label>
+            <select id="edit_curso" name="curso" class="form-select" required>
+              {% for c in cursos %}
+              <option value="{{ c.id_curso }}">{{ c.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-campus"><i class="bi bi-check-lg"></i> Actualizar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+  const filtroTipo = document.getElementById('filtroTipo');
+  const filtroCurso = document.getElementById('filtroCurso');
+  const filas = document.querySelectorAll('#cuerpoTabla tr:not(#filaVacia)');
+  const totalSpan = document.getElementById('totalEvaluaciones');
 
-document.addEventListener("DOMContentLoaded", () => {
-
-    const rows = document.querySelectorAll(".uba-table tbody tr");
-
-    document.getElementById("tipo").addEventListener("change", filtrarTabla);
-    // Elimine el filtrado del lado del cliente para evitar confusión con el filtrado del lado del servidor.
-    document.querySelectorAll(".btn-delete").forEach(btn => {
-
-        btn.addEventListener("click", () => {
-
-            const id = btn.dataset.id;
-
-            const confirmacion = confirm(
-                "¿Desea eliminar esta evaluación?"
-            );
-
-            if (confirmacion) {
-                window.location.href =
-                    `/evaluaciones/eliminar/${id}`;
-            }
-
-        });
-
+  function filtrar() {
+    const tipo = filtroTipo.value;
+    const curso = filtroCurso.value;
+    let visibles = 0;
+    filas.forEach(function(fila) {
+      const celdas = fila.querySelectorAll('td');
+      const tipoCelda = celdas[1] ? celdas[1].textContent.trim() : '';
+      const cursoCelda = celdas[3] ? celdas[3].textContent.trim() : '';
+      let coincide = true;
+      if (tipo && tipoCelda !== tipo) coincide = false;
+      if (curso && !cursoCelda.includes(curso)) coincide = false;
+      fila.style.display = coincide ? '' : 'none';
+      if (coincide) visibles++;
     });
+    totalSpan.textContent = visibles;
+  }
 
+  filtroTipo.addEventListener('change', filtrar);
+  filtroCurso.addEventListener('change', filtrar);
+
+  // Editar evaluacion - abrir modal con datos
+  document.querySelectorAll('.btn-editar-eva').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const tr = btn.closest('tr');
+      document.getElementById('edit_id').value = tr.dataset.id;
+      document.getElementById('edit_nombre').value = tr.dataset.nombre;
+      document.getElementById('edit_tipo').value = tr.dataset.tipo;
+      document.getElementById('edit_fecha').value = tr.dataset.fecha;
+      document.getElementById('edit_curso').value = tr.dataset.curso;
+      new bootstrap.Modal(document.getElementById('modalEditarEvaluacion')).show();
+    });
+  });
 });
-
 </script>
 
 {% endblock %}

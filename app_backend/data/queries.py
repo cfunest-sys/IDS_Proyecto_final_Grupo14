@@ -446,7 +446,7 @@ def crear_evaluacion(nombre, tipo, fecha, curso_id):
         connection.close()
         return jsonify({"id": evaluacion}), 201
     except Exception as e:
-        print(e)
+        traceback.print_exc()
         return jsonify({"error": "Error interno del servidor"}), 500
 
 
