@@ -5,6 +5,7 @@ from routes.evaluaciones import evaluaciones_blueprint
 from routes.notas import notas_blueprint
 from routes.dashboard_profesor import dashboard_bp
 from routes.perfil import perfil_bp
+from routes.cursos import cursos_bp
 import os
 
 PORT = 8080
@@ -20,6 +21,7 @@ app.register_blueprint(notas_blueprint, url_prefix="/notas")
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(equipos_bp)
 app.register_blueprint(perfil_bp)
+app.register_blueprint(cursos_bp)
 
 
 @app.route("/alumnos")
@@ -50,12 +52,6 @@ def mostrar_calendario():
     año = 2026
     bisiesto = False
     return render_template("calendario.html", mes=mes, dias=dias, año=año, bisiesto=bisiesto, eventos=eventos)
-
-
-@app.route("/notas")
-def notas():
-    return render_template("notas.html")
-
 
 if __name__ == "__main__":
     debug_mode = os.environ.get("FLASK_DEBUG", "False").lower() in ("true", "1", "t")

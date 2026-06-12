@@ -181,7 +181,7 @@ main {
   margin-bottom: 30px;
 }
 
-/*CSS de equipos*/
+/*CSS de equipos y cursos*/
 
 .btn.btn-filtrar {
   background-color: #1f0f9b;
@@ -191,8 +191,8 @@ main {
 }
 
 .btn.btn-filtrar:hover {
-  background-color: #1d2554;
-  color: white;
+    background-color: #1d2554; 
+    color: white;
 }
 
 .btn.btn-alumnos {
@@ -205,15 +205,15 @@ main {
   color: white;
 }
 
-.btn.btn-crear-equipo {
-  border-color: #0f9621;
-  border-width: 2px;
-  padding: 7px 70px;
+.btn.btn-crear {
+    border-color: #0f9621;
+    border-width: 2px;
+    padding: 7px 70px;
 }
 
-.btn.btn-crear-equipo:hover {
-  background-color: #0f9621;
-  color: white;
+.btn.btn-crear:hover {
+    background-color: #0f9621;
+    color: white;
 }
 
 .btn.btn-modificar-equipo {
@@ -227,15 +227,15 @@ main {
   color: white;
 }
 
-.btn.btn-eliminar-equipo {
-  border-color: #b31b1b;
-  border-width: 2px;
-  padding: 7px 70px;
+.btn.btn-eliminar {
+    border-color: #b31b1b;
+    border-width: 2px;
+    padding: 7px 70px;
 }
 
-.btn.btn-eliminar-equipo:hover {
-  background-color: #b31b1b;
-  color: white;
+.btn.btn-eliminar:hover {
+    background-color: #b31b1b;
+    color: white;
 }
 
 .btn.btn-eliminar-alumno {
@@ -284,9 +284,9 @@ main {
 }
 
 .input-group-text {
-  background-color: #1d2554;
-  color: white;
-  border-color: #1d2554;
+    background-color: #1d2554 !important;
+    color: white !important;
+    border-color: #1d2554 !important;
 }
 
 h2,
@@ -299,11 +299,11 @@ h3 {
   font-weight: 700;
 }
 
-.tabla-equipos-vacia {
-  text-align: center;
-  font-weight: bold;
-  color: #1e293b;
-  font-size: medium;
+.tabla-vacia {
+    text-align: center;
+    font-weight: bold;
+    color:#1e293b;
+    font-size: medium;
 }
 
 .listado-alumnos-equipos {
@@ -1329,4 +1329,34 @@ h3 {
   .quick-actions {
     grid-template-columns: 1fr;
   }
+}
+
+
+/*Paginado*/
+.pagination .page-item.active .page-link {
+    background-color: #1d2554;
+    border-color: #1d2554;
+    color: white;
+}
+
+.pagination .page-link {
+    color: #1d2554;
+    background-color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #1d2554;
+    background-color: white;
+}
+
+.pagination .page-link:hover {
+    color: white;
+    background-color: #2b356e;
+    border-color: #2b356e;
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: #1d2554;
+    border-color: #1d2554;
+    color: white;
 }

@@ -5,7 +5,8 @@ from data.queries import (
     get_promedio_notas, 
     verificar_alumno_evaluacion, 
     guardar_actualizar_nota,
-    get_connection
+    get_connection,
+    get_categorias_evaluacion_por_curso
 )
 
 notas_bp = Blueprint('notas', __name__)
@@ -100,85 +101,165 @@ def cargar_nota(current_user):
 @notas_bp.route('/resumen-promedios', methods=['GET'])
 @token_required
 def resumen_promedios(current_user):
-    # Solo profesores o administradores
-    # if not data:
-    #     return jsonify({"error": "No se enviaron datos"}), 400
-    # current_user = data
     if current_user.get('rol') not in ['profesor', 'admin']:
-        return jsonify({"error": "Acceso denegado. Solo para personal docente o administración."}), 403
+        return jsonify({"error": "Acceso denegado"}), 403
+
+    anio     = request.args.get('anio',     type=int)
+    semestre = request.args.get('semestre', type=int)
+    id_curso = request.args.get('id_curso', type=int)
 
     conn = None
-    cur = None
+    cur  = None
     try:
         conn = get_connection()
-        cur = conn.cursor(dictionary=True)
-        
-        # Consulta que trae todas las notas junto con el nombre del alumno y el tipo de evaluación
-        cur.execute("""
+        cur  = conn.cursor(dictionary=True)
+
+        query = """
             SELECT 
-                a.legajo AS padron, 
-                a.nombre AS alumno, 
-                e.tipo AS tipo_evaluacion, 
-                n.calificacion AS nota
+                a.legajo AS legajo,
+                CONCAT(a.nombre, ' ', a.apellido) AS alumno,
+                LOWER(e.tipo) AS tipo_evaluacion,
+                n.calificacion AS nota,
+                c.id_curso,
+                c.nombre AS nombre_curso
             FROM notas n
-            INNER JOIN alumnos a ON n.legajo_alumno = a.legajo
-            INNER JOIN evaluaciones e ON n.id_evaluacion = e.id_evaluacion
-        """)
+            INNER JOIN alumnos a      ON n.legajo_alumno  = a.legajo
+            INNER JOIN evaluaciones e ON n.id_evaluacion  = e.id_evaluacion
+            INNER JOIN cursos c       ON e.id_curso       = c.id_curso
+        """
+        condiciones = []
+        parametros  = []
+
+        if anio:
+            condiciones.append("c.anio = %s")
+            parametros.append(anio)
+
+        if semestre:
+            condiciones.append("c.semestre = %s")
+            parametros.append(semestre)
+
+        if id_curso:
+            condiciones.append("c.id_curso = %s")
+            parametros.append(id_curso)
+
+        if condiciones:
+            query += " WHERE " + " AND ".join(condiciones)
+
+        cur.execute(query, parametros)
         notas_crudas = cur.fetchall()
-        
-        # Procesamos las notas para calcular promedios por alumno y categoría
+
+        # Diccionario para agrupar por (legajo, id_curso)
         alumnos_dict = {}
+        cursos_visto = set()  # Para saber qué cursos hay
+
         for fila in notas_crudas:
-            padron = fila["padron"]
-            alumno = fila["alumno"]
-            tipo = fila["tipo_evaluacion"]
+            legajo        = fila["legajo"]
+            id_curso_fila = fila["id_curso"]
+            clave         = (legajo, id_curso_fila)
+            cursos_visto.add(id_curso_fila)
+
+            if clave not in alumnos_dict:
+                alumnos_dict[clave] = {
+                    "legajo":       legajo,
+                    "nombre":       fila["alumno"],
+                    "curso":        fila["nombre_curso"],
+                    "id_curso":     id_curso_fila,
+                    "categorias":   {}  # ← dinámico: {categoria: [notas]}
+                }
+
+            tipo_eval = fila["tipo_evaluacion"].lower() if fila["tipo_evaluacion"] else "otro"
             nota = fila["nota"]
-            
+
             if nota is None:
                 continue
-                
-            if padron not in alumnos_dict:
-                alumnos_dict[padron] = {
-                    "padron": padron,
-                    "nombre": alumno,
-                    "tps": [],
-                    "parciales": [],
-                    "parcialitos": []
-                }
-            
-            tipo_lower = tipo.lower() if tipo else ""
-            if "tp" in tipo_lower or "trabajo" in tipo_lower:
-                alumnos_dict[padron]["tps"].append(float(nota))
-            elif "parcialito" in tipo_lower:
-                alumnos_dict[padron]["parcialitos"].append(float(nota))
-            elif "parcial" in tipo_lower:
-                alumnos_dict[padron]["parciales"].append(float(nota))
-                
-        # Calculamos promedios y condición final para cada alumno        
-        resultado = []
-        for padron, datos in alumnos_dict.items():
-            prom_tp = sum(datos["tps"]) / len(datos["tps"]) if datos["tps"] else None
-            prom_parcial = sum(datos["parciales"]) / len(datos["parciales"]) if datos["parciales"] else None
-            prom_parcialito = sum(datos["parcialitos"]) / len(datos["parcialitos"]) if datos["parcialitos"] else None
-            
-            categorias_validas = [p for p in [prom_tp, prom_parcial, prom_parcialito] if p is not None]
-            prom_final = sum(categorias_validas) / len(categorias_validas) if categorias_validas else 0.0
 
-            resultado.append({
-                "padron": padron,
-                "nombre": datos["nombre"],
-                "prom_tp": round(prom_tp, 2) if prom_tp is not None else "-",
-                "prom_parcial": round(prom_parcial, 2) if prom_parcial is not None else "-",
-                "prom_parcialito": round(prom_parcialito, 2) if prom_parcialito is not None else "-",
-                "prom_final": round(prom_final, 2),
-                "condicion": "Aprobado" if prom_final >= 4 else "Insuficiente"
-            })
-            
+            if tipo_eval not in alumnos_dict[clave]["categorias"]:
+                alumnos_dict[clave]["categorias"][tipo_eval] = []
+
+            alumnos_dict[clave]["categorias"][tipo_eval].append(float(nota))
+
+        # Ahora, para cada curso, consultar qué categorías existen realmente
+        categorias_por_curso = {}
+        for id_curso_check in cursos_visto:
+            categorias_por_curso[id_curso_check] = get_categorias_evaluacion_por_curso(id_curso_check)
+
+        resultado = []
+        for clave, datos in alumnos_dict.items():
+            legajo         = datos["legajo"]
+            id_curso_fila  = datos["id_curso"]
+            categorias_req = categorias_por_curso.get(id_curso_fila, [])
+
+            # Calcular promedios dinámicamente
+            promedios = {}
+            for cat in categorias_req:
+                notas_cat = datos["categorias"].get(cat, [])
+                if notas_cat:
+                    promedios[cat] = sum(notas_cat) / len(notas_cat)
+                else:
+                    promedios[cat] = None
+
+            # Validar: tiene notas en TODAS las categorías requeridas?
+            tiene_todas = all(promedios.get(cat) is not None for cat in categorias_req)
+
+            if tiene_todas:
+                prom_final = sum(promedios[cat] for cat in categorias_req) / len(categorias_req)
+                condicion  = "Aprobado" if prom_final >= 4 else "Insuficiente"
+            else:
+                prom_final = None
+                condicion  = "Incompleto"
+
+            # Armar respuesta con campos dinámicos
+            respuesta = {
+                "legajo":    legajo,
+                "nombre":    datos["nombre"],
+                "curso":     datos["curso"],
+                "prom_final": round(prom_final, 2) if prom_final is not None else "-",
+                "condicion": condicion
+            }
+
+            # Agregar cada categoría como campo: prom_tp, prom_parcial, etc.
+            for cat in categorias_req:
+                prom = promedios.get(cat)
+                respuesta[f"prom_{cat}"] = round(prom, 2) if prom is not None else "-"
+
+            resultado.append(respuesta)
+
         return jsonify(resultado), 200
 
     except Exception as e:
         print(f"Error en resumen-promedios: {e}")
         return jsonify({"error": "Error interno al calcular promedios"}), 500
     finally:
-        if cur: cur.close()
+        if cur:  cur.close()
+        if conn: conn.close()
+
+@notas_bp.route('/periodos', methods=['GET'])
+@token_required
+def listar_periodos(current_user):
+    """
+    Devuelve los pares (anio, semestre) de cursos que tienen
+    al menos una evaluación con notas cargadas.
+    Sirve para poblar el filtro de cuatrimestre en el front.
+    """
+    if current_user.get('rol') not in ['profesor', 'admin']:
+        return jsonify({"error": "Acceso denegado"}), 403
+
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur  = conn.cursor(dictionary=True)
+        cur.execute("""
+            SELECT DISTINCT c.anio, c.semestre
+            FROM cursos c
+            INNER JOIN evaluaciones e ON e.id_curso = c.id_curso
+            INNER JOIN notas n ON n.id_evaluacion = e.id_evaluacion
+            ORDER BY c.anio DESC, c.semestre ASC
+        """)
+        return jsonify(cur.fetchall()), 200
+    except Exception as e:
+        print(f"Error en GET /periodos: {e}")
+        return jsonify({"error": "Error interno"}), 500
+    finally:
+        if cur:  cur.close()
         if conn: conn.close()

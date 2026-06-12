@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from flask_jwt_extended import create_access_token
 from utils.auth import validate_user_credentials
 from data.queries import registrar_login, get_user_profile
@@ -25,11 +25,20 @@ def login():
 
         return jsonify({"error": "Email o contraseña inválidos"}), 401
 
+    session["user_id"] = usuario["id_usuario"]
+    session["email"] = usuario["email"]
+    session["rol"] = usuario["rol"]
+
     perfil = get_user_profile(usuario)
 
     registrar_login(usuario["id_usuario"], email, "exitoso", request.remote_addr)
 
-    access_token = create_access_token(identity=str(usuario["id_usuario"]), additional_claims={"rol": usuario["rol"]})
+    id_persona = usuario["id_usuario"]
+
+    if usuario["rol"] == "profesor" and perfil:
+        id_persona = perfil.get("id_profesor", usuario["id_usuario"])
+
+    access_token = create_access_token(identity=str(id_persona), additional_claims={"rol": usuario["rol"]})
 
     return (
         jsonify(
@@ -38,7 +47,7 @@ def login():
                 "message": "Login exitoso",
                 "token": access_token,
                 "usuario": {
-                    "id": usuario["id_usuario"],
+                    "id": id_persona,
                     "email": usuario["email"],
                     "rol": usuario["rol"],
                     "perfil": perfil,

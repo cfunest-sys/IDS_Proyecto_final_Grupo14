@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}
+Gestión de cursos
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5 mb-5">
+    <h1 class="page-title">
+        Registro de cursos
+    </h1>
+
+    <div class="container mt-5 mb-5 px-0">
+        <h2>
+            Acciones
+        </h2>
+        <div class="row mb-5 mt-4 mx-0 justify-content-evenly">
+        <div class="col-auto">
+            <button class="btn btn-crear" data-bs-toggle="modal" data-bs-target="#modal_crear_curso">Crear curso</button>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-eliminar" data-bs-toggle="modal" data-bs-target="#modal_eliminar_curso">Eliminar curso</button> 
+        </div>
+    </div>
+
+    <div class="container px-0">
+        <form action="/cursos" method="get">
+            <h2>
+            Filtros
+            </h2>
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <label class="input-group-text" for="inputGroupSelect01">ID curso</label>
+                        <select class="form-select" id="inputGroupSelect01" name="id_curso">
+                            <option value="" selected>Elegir ID del curso</option>
+                            {% for curso in cursos_todos %}
+                                <option value="{{ curso.id_curso }}">Curso {{ curso.id_curso }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text" id="inputGroup-sizing-default">Año</span>
+                        <input type="number" class="form-control" name="anio" placeholder="Ej: 2026" min="2000" max="2100">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text" id="inputGroup-sizing-default">Cuatrimestre</span>
+                        <input type="number" class="form-control" name="cuatrimestre" placeholder="1 o 2" min="1" max="2">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text" id="inputGroup-sizing-default">Nombre curso</span>
+                        <input type="text" class="form-control" name="nombre_curso" placeholder="Ej: Artemis 3">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-filtrar">Filtrar</button>
+                </div>
+            </div>
+        </form>   
+    </div>
+
+    <div class="container mt-5 mb-5 px-0">
+        <div class="row mt-5 mx-0">
+            <div class="col-12">
+                <h3 class="titulo-tabla mb-3">
+                    Cursos registrados
+                </h3>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID curso</th>
+                            <th scope="col">Nombre del curso</th>
+                            <th scope="col">Año</th>
+                            <th scope="col">Cuatrimestre</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for curso in cursos %}
+                            <tr>
+                                <th scope="row">{{ curso.id_curso }}</th>
+                                <td>{{ curso.nombre_curso }}</td>
+                                <td>{{ curso.anio }}</td>
+                                <td>{{ curso.cuatrimestre }}°</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="tabla-vacia">
+                                    No se encontraron cursos registrados con los filtros aplicados
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="container px-0 mt-4">
+        <nav>
+            <ul class="pagination justify-content-center">
+                <li class="page-item {% if pag <= 1 %}disabled{% endif %}">
+                    <a class="page-link" href="?pag={{ pag - 1 }}&id_curso={{ request.args.get('id_curso', '') }}&nombre_curso={{ request.args.get('nombre_curso', '') }}&anio={{ request.args.get('anio', '') }}&cuatrimestre={{ request.args.get('cuatrimestre', '') }}">
+                        <span>&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item active">
+                    <a class="page-link" href="#">{{ pag }}</a>
+                </li>
+
+                {% if cursos|length == 15 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?pag={{ pag + 1 }}&id_curso={{ request.args.get('id_curso', '') }}&nombre_curso={{ request.args.get('nombre_curso', '') }}&anio={{ request.args.get('anio', '') }}&cuatrimestre={{ request.args.get('cuatrimestre', '') }}">
+                            {{ pag + 1 }}
+                        </a>
+                    </li>
+                {% endif %}
+                
+                <li class="page-item {% if cursos|length < 15 %}disabled{% endif %}">
+                    <a class="page-link" href="?pag={{ pag + 1 }}&id_curso={{ request.args.get('id_curso', '') }}&nombre_curso={{ request.args.get('nombre_curso', '') }}&anio={{ request.args.get('anio', '') }}&cuatrimestre={{ request.args.get('cuatrimestre', '') }}">
+                        &raquo;
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<!--Código de los modales-->
+<div class="modal fade" id="modal_crear_curso" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nuevo curso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form action="/cursos/crear" method="post">
+                <div class="modal-body">
+                    <h6 class="texto-indicacion-modal mb-3">Complete los siguientes campos:</h6>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Nombre curso</span>
+                        <input type="text" name="nombre_curso" class="form-control" placeholder="Ej: IDS" required>
+                    </div>
+
+                    <div class="input-group mb-4">
+                        <span class="input-group-text">Año</span>
+                        <input type="number" name="anio" class="form-control" placeholder="Ej: 2026" min="2000" max="2100" required>
+                    </div> 
+
+                    <div class="input-group mb-4">
+                        <span class="input-group-text">Cuatrimestre</span>
+                        <input type="number" name="cuatrimestre" class="form-control" placeholder="1 o 2" min="1" max="2" required>
+                    </div> 
+                    
+                    <div class="d-flex justify-content-center mt-2">
+                        <button type="submit" class="btn btn-crear">Crear</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+ 
+<div class="modal fade" id="modal_eliminar_curso" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Eliminar equipo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form action="/cursos/eliminar" method="post">
+                <div class="modal-body">
+                    <h6 class="texto-indicacion-modal mb-2">Complete el siguiente campo:</h6>
+                    <p class="advertencia-eliminar mb-3">PRECAUCIÓN: una vez que se elimine un curso no podrá recuperarlo</p>
+                    <div class="input-group mb-4">
+                        <span class="input-group-text">id_curso</span>
+                        <input type="number" name="id_curso" class="form-control" placeholder="Ej: 104432" required>
+                    </div> 
+                    
+                    <div class="d-flex justify-content-center mt-2">
+                        <button type="submit" class="btn btn-eliminar">Eliminar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

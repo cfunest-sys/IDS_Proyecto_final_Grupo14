@@ -17,13 +17,13 @@ Gestión de equipos
         </h2>
         <div class="row mb-5 mt-4 mx-0">
         <div class="col-md-4">
-            <button class="btn btn-crear-equipo" data-bs-toggle="modal" data-bs-target="#modal_crear_equipo">Crear equipo</button>
+            <button class="btn btn-crear" data-bs-toggle="modal" data-bs-target="#modal_crear_equipo">Crear equipo</button>
         </div>
         <div class="col-md-4">
             <button class="btn btn-modificar-equipo" data-bs-toggle="modal" data-bs-target="#modal_modificar_equipo">Modificar equipo</button>
         </div>
         <div class="col-md-4">
-            <button class="btn btn-eliminar-equipo" data-bs-toggle="modal" data-bs-target="#modal_eliminar_equipo">Eliminar equipo</button> 
+            <button class="btn btn-eliminar" data-bs-toggle="modal" data-bs-target="#modal_eliminar_equipo">Eliminar equipo</button> 
         </div>
     </div>
 
@@ -98,7 +98,7 @@ Gestión de equipos
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="4" class="tabla-equipos-vacia">
+                                <td colspan="4" class="tabla-vacia">
                                     No se encontraron equipos registrados con los filtros aplicados
                                 </td>
                             </tr>
@@ -181,7 +181,7 @@ Gestión de equipos
                     </div> 
                     
                     <div class="d-flex justify-content-center mt-2">
-                        <button type="submit" class="btn btn-crear-equipo">Crear</button>
+                        <button type="submit" class="btn btn-crear">Crear</button>
                     </div>
                 </div>
             </form>
@@ -242,7 +242,7 @@ Gestión de equipos
                     </div> 
                     
                     <div class="d-flex justify-content-center mt-2">
-                        <button type="submit" class="btn btn-eliminar-equipo">Eliminar</button>
+                        <button type="submit" class="btn btn-eliminar">Eliminar</button>
                     </div>
                 </div>
             </form>

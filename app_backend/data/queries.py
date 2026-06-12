@@ -57,14 +57,15 @@ def get_usuario_by_email(email):
 
 
 def get_user_profile(usuario):
-
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-
+    conn = None
+    cursor = None
     try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
 
-        if usuario["rol"] == "profesor":
+        rol = usuario.get("rol", "")
 
+        if rol == "profesor":
             query = """
                 SELECT
                     p.id_profesor,
@@ -73,9 +74,7 @@ def get_user_profile(usuario):
                 FROM profesores p
                 WHERE p.id_usuario = %s
             """
-
-        elif usuario["rol"] == "alumno":
-
+        elif rol == "alumno":
             query = """
                 SELECT
                     a.curso,
@@ -84,17 +83,18 @@ def get_user_profile(usuario):
                 FROM alumnos a
                 WHERE a.id_usuario = %s
             """
-
         else:
             return None
 
-        cursor.execute(query, (usuario["id_usuario"],))
+        cursor.execute(query, (usuario.get("id_usuario"),))
         return cursor.fetchone()
 
+    except Exception as e:
+        print(f"Error en get_user_profile: {e}")
+        return None
     finally:
-        cursor.close()
-        conn.close()
-
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 def crear_alumno(alumno_data):
 
@@ -368,6 +368,34 @@ def get_evaluacion_por_curso(curso_id):
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
 
+def get_categorias_evaluacion_por_curso(id_curso):
+    """
+    Devuelve las categorías de evaluación que existen en un curso específico.
+    Las categorías se derivan del campo 'tipo' de la tabla evaluaciones.
+    """
+    conn = None
+    cur  = None
+    try:
+        conn = get_connection()
+        cur  = conn.cursor()
+        
+        cur.execute("""
+            SELECT DISTINCT LOWER(e.tipo) AS categoria
+            FROM evaluaciones e
+            WHERE e.id_curso = %s
+            ORDER BY categoria
+        """, (id_curso,))
+        
+        categorias = cur.fetchall()
+        # Devuelve una lista: [('tp',), ('parcial',), ...] → ['tp', 'parcial', ...]
+        return [cat[0] for cat in categorias]
+
+    except Exception as e:
+        print(f"Error en get_categorias_evaluacion_por_curso: {e}")
+        return []
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
 
 def get_evaluacion_profesor(id_profesor):
     try:
@@ -458,25 +486,25 @@ def eliminar_evaluacion(id):
     try:
         connection = get_connection()
         cursor = connection.cursor()
-        query_esta = """SELECT * FROM evaluaciones WHERE id = %s"""
+        query_esta = """SELECT * FROM evaluaciones WHERE id_evaluacion = %s"""
         cursor.execute(query_esta, (id,))
         esta = cursor.fetchall()
         if cursor.rowcount == 0:
             cursor.close()
             connection.close()
             return jsonify({"error": "No existe ese id"}), 404
-        query = """DELETE FROM evaluaciones WHERE id = %s"""
+        query = """DELETE FROM evaluaciones WHERE id_evaluacion = %s"""
         cursor.execute(query, (id,))
         connection.commit()
-        query = """SELECT * FROM evaluaciones WHERE id = %s"""
+        query = """SELECT * FROM evaluaciones WHERE id_evaluacion = %s"""
         cursor.execute(query, (id,))
         resultado = cursor.fetchall()
         filas = cursor.rowcount
         cursor.close()
         connection.close()
         if filas != 0:
-            return False, 400
-        return True, 200
+            return False
+        return True
     except Exception as e:
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
@@ -658,7 +686,7 @@ def crear_profesor(profesor):
 
         conn.commit()
         print(profesor)
-        enviar_mail_bienvenida(profesor["email"], profesor["nombre"])
+        enviar_mail_bienvenida(profesor["email"], profesor["nombre"], profesor["password"])
 
         return cur.lastrowid
 
@@ -1511,3 +1539,162 @@ def crear_alumno(alumno):
             cur.close()
         if conn:
             conn.close()
+
+
+def get_curso_profesor(id_profesor, pag, por_pag):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        offset = (pag - 1) * por_pag
+
+        query = """
+            SELECT c.* FROM cursos c
+            JOIN profesor_curso pc ON c.id_curso = pc.id_curso
+            WHERE pc.id_profesor = %s
+            LIMIT %s OFFSET %s
+        """
+        cursor.execute(query, (id_profesor, por_pag, offset))
+        lista_cursos = cursor.fetchall()  
+        
+        return lista_cursos
+
+    except Exception as e:
+        print(f"Error en la obtención de los cursos: {e}")
+        raise e
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
+
+
+def get_cursos_filtrados(id_curso=None, nombre_curso=None, anio=None, cuatrimestre=None, id_profesor=None, pag = None, por_pag = None):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        query = """
+            SELECT c.* FROM cursos c
+            JOIN profesor_curso pc ON c.id_curso = pc.id_curso
+        """
+        parametros = []
+        condiciones = []
+
+        if id_curso:
+            condiciones.append("c.id_curso = %s")
+            parametros.append(id_curso)
+
+        if nombre_curso:
+            condiciones.append("c.nombre_curso LIKE %s")
+            parametros.append(f"%{nombre_curso}%")
+
+        if anio:
+            condiciones.append("c.anio = %s")
+            parametros.append(anio)
+
+        if cuatrimestre:
+            condiciones.append("c.cuatrimestre = %s")
+            parametros.append(cuatrimestre)
+
+        if id_profesor:
+            condiciones.append("pc.id_profesor = %s")
+            parametros.append(id_profesor)
+
+        if condiciones:
+            query += " WHERE " + " AND ".join(condiciones)
+
+        if pag and por_pag:
+            offset = (pag - 1) * por_pag
+            query += " LIMIT %s OFFSET %s"
+            parametros.append(por_pag)
+            parametros.append(offset)
+
+        cursor.execute(query, parametros)
+        cursos = cursor.fetchall()
+
+        return cursos
+
+    except Exception as e:
+        print(f"Error en la obtención del curso: {e}")
+        raise e
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
+
+
+def insertar_curso(nombre_curso, anio, cuatrimestre, id_profesor):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        cursor.execute("INSERT INTO cursos (nombre_curso, anio, cuatrimestre) VALUES (%s, %s, %s)", (nombre_curso, anio, cuatrimestre))
+        conexion.commit()
+
+        id_curso = cursor.lastrowid
+
+        cursor.execute("INSERT INTO profesor_curso (id_profesor, id_curso) VALUES (%s, %s)", (id_profesor, id_curso))
+        conexion.commit()
+
+    except Exception as e:
+        print(f"Error en la creación del curso {e}")
+        raise e
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
+
+
+def delete_curso(id_curso, id_profesor):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        query_desvincular = """
+            DELETE FROM profesor_curso 
+            WHERE id_profesor = %s AND id_curso = %s
+        """
+        cursor.execute(query_desvincular, (id_profesor, id_curso))
+        
+        query_curso_vinculado = """
+            SELECT COUNT(*) as total FROM profesor_curso WHERE id_curso = %s
+        """
+        cursor.execute(query_curso_vinculado, (id_curso,))
+        resultado = cursor.fetchone()
+
+        if resultado and resultado["total"] == 0:
+            query_borrar_curso = "DELETE FROM cursos WHERE id_curso = %s"
+            cursor.execute(query_borrar_curso, (id_curso,))
+  
+        conexion.commit()
+        return True
+    
+    except Exception as e:
+        if conexion:
+            conexion.rollback()
+        print(f"Error al intentar eliminar el curso: {e}")
+        raise e
+    
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()

@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 from flask import Blueprint
-from database.db import get_connection
 from data.queries import (
     get_equipos_filtrados,
     get_equipo_id,

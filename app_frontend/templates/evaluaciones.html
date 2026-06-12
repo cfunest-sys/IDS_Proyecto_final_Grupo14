@@ -63,7 +63,7 @@ Gestión de Evaluaciones | UBA
                         class="form-select">
 
                     <option value="">Todos</option>
-                    {% for evaluacion in evaluaciones %}
+                    {% for evaluacion in evas %}
                         <option value="{{ evaluacion.tipo }}">{{ evaluacion.tipo }}</option>   
                     {% endfor %}
 
@@ -115,7 +115,7 @@ Gestión de Evaluaciones | UBA
                 </h2>
 
                 <span class="table-subtitle">
-                    Total registradas: {{ evaluaciones|length }}
+                    Total registradas: {{ evas|length }}
                 </span>
             </div>
 
@@ -135,7 +135,7 @@ Gestión de Evaluaciones | UBA
                     </tr>
                 </thead>
                 <tbody>
-                {% for evaluacion in evaluaciones %}
+                {% for evaluacion in evas %}
                     <tr>
                         <td>
                             {{ evaluacion.nombre }}
@@ -165,14 +165,18 @@ Gestión de Evaluaciones | UBA
                         </td> -->
                         <td class="text-center">
                             <div class="d-flex justify-content-center gap-2">
-                                <a href="#"
+                                <form href="#"
                                    class="btn btn-sm btn-light border">
                                     <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <button class="btn btn-sm btn-light border btn-delete"
-                                        data-id="{{ evaluacion.id }}">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                                </form>
+                                <form action="/evaluaciones/eliminar" method="POST" 
+                                    class="btn btn-sm btn-light border btn-delete">
+                                    <input name="method" value="delete" type="hidden"></input>
+                                    <input value="{{ evaluacion.id }}" type="hidden" name="id_evaluacion"></input>
+                                    <input type="submit" value="submit">
+                                    <i class="bi bi-trash" ></i>
+                                    </input>
+                                </form>
                             </div>
                         </td>
                     </tr>
