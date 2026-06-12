@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask import Blueprint
 from utils.auth import token_required, rol_required
 from data.queries import (
+    get_user_profile,
     get_curso_profesor,
     get_cursos_filtrados,
     insertar_curso,
@@ -139,7 +140,12 @@ def crear_cursos(current_user):
         except (ValueError, TypeError):
             return jsonify({"error": "El cuatrimestre debe ser un número entero válido"}), 400
 
-        curso_existente = get_cursos_filtrados(nombre_curso=nombre_curso, anio=anio_int, cuatrimestre=cuatrimestre_int, id_profesor=id_profesor)
+        profesor = {"rol": current_user.get("rol", ""), "id_usuario": id_profesor}
+        profesor_encontrado = get_user_profile(profesor)
+        id_profesor = profesor_encontrado.get("id_profesor","")
+
+        curso_existente = get_cursos_filtrados(nombre_curso=nombre_curso, anio=anio_int, 
+            cuatrimestre=cuatrimestre_int, id_profesor=id_profesor)
 
         if curso_existente:
             return jsonify({"error": "El curso ya existe dentro del cuatrimestre elegido"}), 409
