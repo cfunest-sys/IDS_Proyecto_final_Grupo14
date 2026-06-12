@@ -63,7 +63,7 @@
         <select id="filtroCurso" class="form-select">
           <option value="">Todos</option>
           {% for curso in cursos %}
-          <option value="{{ curso.id_curso }}">{{ curso.nombre }}</option>
+          <option value="{{ curso.id_curso }}">{{ curso.nombre_curso }}</option>
           {% endfor %}
         </select>
       </div>
@@ -105,7 +105,7 @@
             <td class="small">{{ eva.fecha }}</td>
             <td class="small text-muted">
               {% for c in cursos %}
-                {% if c.id_curso == eva.curso %}{{ c.nombre }}{% endif %}
+                {% if c.id_curso == eva.curso %}{{ c.nombre_curso }}{% endif %}
               {% endfor %}
             </td>
             <td class="text-center">
@@ -170,7 +170,7 @@
             <select id="curso" name="curso" class="form-select" required>
               <option value="">Seleccionar curso</option>
               {% for c in cursos %}
-              <option value="{{ c.id_curso }}">{{ c.nombre }}</option>
+              <option value="{{ c.id_curso }}">{{ c.nombre_curso }}</option>
               {% endfor %}
             </select>
           </div>
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
     filas.forEach(function(fila) {
       const celdas = fila.querySelectorAll('td');
       const tipoCelda = celdas[1] ? celdas[1].textContent.trim() : '';
-      const cursoCelda = celdas[3] ? celdas[3].textContent.trim() : '';
+      const cursoCelda = fila.dataset.curso || '';
       let coincide = true;
       if (tipo && tipoCelda !== tipo) coincide = false;
       if (curso && !cursoCelda.includes(curso)) coincide = false;

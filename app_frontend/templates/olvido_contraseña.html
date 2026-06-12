@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Recuperar Contraseña{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="row bg-white p-4 p-md-5 rounded-3 shadow-sm border" style="max-width: 450px; width: 100%;">
+        <div class="col-12">
+            <div class="text-center mb-4">
+                <h4>Recuperar Contraseña</h4>
+                <p class="text-secondary small">Introduce tu email para generar un token de recuperación.</p>
+            </div>
+
+            {% if error %}
+                <div class="alert alert-danger small" role="alert">{{ error }}</div>
+            {% endif %}
+
+            <form action="{{ url_for('inicio.forgot_password') }}" method="POST">
+                <div class="mb-3">
+                    <input type="email" class="form-control bg-light border-0 rounded-3 py-2" 
+                    name="email" 
+                    placeholder="Email" 
+                    required>
+                </div>
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-3 py-2" style="font-size: 1.1rem; background-color: #1d2554;">
+                        Solicitar Token
+                    </button>
+                    
+                    <a href="{{ url_for('inicio.login') }}" class="btn btn-link text-decoration-none small mt-2" style="color: #1d2554;">Volver al Login</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -10,9 +10,11 @@ evaluaciones_blueprint = Blueprint("evaluaciones", __name__)
 # Acá se muestra el listado/gestión de evaluaciones
 @evaluaciones_blueprint.route("/", methods=["GET"])
 def listar_evaluaciones():
+    if session.get("rol") == "alumno":
+        return redirect(url_for("evaluaciones.calendario_evaluaciones"))
+
     evaluaciones = []
     rol          = ""
-
     try:
         if not session:
             flash("Sesión no iniciada", "warning")
@@ -99,68 +101,10 @@ def listar_evaluaciones():
 
 
 # 2. RUTA DEL CALENDARIO: http://127.0.0.1:8080/evaluaciones/calendario
-# Acá se muestra el calendario con las evaluaciones
+# Redirige a la ruta principal /calendario en app.py
 @evaluaciones_blueprint.route("/calendario", methods=["GET"])
 def calendario_evaluaciones():
-    eventos = []
-    rol = ""
-
-    try:
-        if not session:
-            flash("Sesión no iniciada", "warning")
-        else:
-            token = session.get("token", "")
-            auth_headers = {'Authorization': 'Bearer ' + token}
-            data = {
-                "rol": session.get("rol", ""),
-                "user_id": session.get("user_id", "")
-            }
-            rol = data["rol"]
-
-            response = requests.post(
-                f"{current_app.config['BACKEND_URL']}/api/evaluaciones/usuario",
-                headers=auth_headers,
-                json=data,
-                timeout=5
-            )
-
-            if response.ok and response.status_code != 204:
-                json_data = response.json()   # fix: variable renombrada, no pisa el módulo json
-                if not json_data.get("error"):
-                    for evento in json_data.get("body", []):
-                        d = datetime.strptime(evento[3], "%Y-%m-%d")
-                        eventos.append({
-                            "nombre": evento[1],
-                            "tipo": evento[2],
-                            "fecha": d.strftime("%Y-%m-%d"),
-                            "curso": evento[4]
-                        })
-
-    except requests.exceptions.RequestException:
-        flash("Error de conexión con el servidor", "danger")
-
-    # fix: año y mes dinámicos desde la fecha actual, no hardcodeados
-    hoy = datetime.now()
-    año_actual = hoy.year
-    mes_actual = hoy.month
-
-    mes_nombre = (
-        "enero", "febrero", "marzo", "abril",
-        "mayo", "junio", "julio", "agosto",
-        "septiembre", "octubre", "noviembre", "diciembre"
-    )
-
-    dias = tuple(calendar.monthrange(año_actual, mes)[1] for mes in range(1, 13))
-
-    return render_template(
-        "calendario.html",
-        mes_actual=mes_actual,
-        año_actual=año_actual,
-        dias=dias,
-        mes_nombre=mes_nombre,
-        eventos=eventos,
-        rol=rol
-    )
+    return redirect(url_for("inicio.mostrar_calendario"))
 
 # 3. RUTA CREAR EVALUACION: http://127.0.0.1:8080/evaluaciones/crear
 # Acá se crean evaluaciones

@@ -60,11 +60,13 @@
                             <i class="bi bi-folder-fill"></i> Materiales
                         </a>
                     </li>
+                    {% if session.get("rol") == "profesor" %}
                     <li class="nav-item">
                         <a class="nav-link {% if '/evaluaciones' in request.path %}active{% endif %}" href="/evaluaciones">
                             <i class="bi bi-journal-check"></i> Evaluaciones
                         </a>
                     </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link {% if '/notas' in request.path %}active{% endif %}" href="/notas">
                             <i class="bi bi-pencil-square"></i> Notas
