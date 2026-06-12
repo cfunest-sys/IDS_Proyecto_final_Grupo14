@@ -455,7 +455,7 @@ def cambiar_evaluacion(id, nombre, tipo, fecha, curso_id):
         connection = get_connection()
         cursor = connection.cursor()
 
-        query_esta = """SELECT * FROM evaluaciones WHERE id = %s"""
+        query_esta = """SELECT * FROM evaluaciones WHERE id_evaluacion = %s"""
         cursor.execute(query_esta, (id,))
         esta = cursor.fetchall()
         if cursor.rowcount == 0:
@@ -466,8 +466,8 @@ def cambiar_evaluacion(id, nombre, tipo, fecha, curso_id):
             SET nombre = %s,
                 tipo = %s,
                 fecha = %s,
-                curso_id = %s
-            WHERE id = %s"""
+                id_curso = %s
+            WHERE id_evaluacion = %s"""
         cursor.execute(query_insertar, (nombre, tipo, fecha, curso_id, id))
         connection.commit()
         cursor.close()
