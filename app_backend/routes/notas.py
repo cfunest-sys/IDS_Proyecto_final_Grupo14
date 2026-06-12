@@ -6,6 +6,7 @@ from data.queries import (
     verificar_alumno_evaluacion, 
     guardar_actualizar_nota,
     get_connection
+    get_categorias_evaluacion_por_curso,
 )
 
 notas_bp = Blueprint('notas', __name__)
