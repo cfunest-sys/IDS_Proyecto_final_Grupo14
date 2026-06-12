@@ -17,7 +17,7 @@ Gestión de Evaluaciones | UBA
         <div class="col-lg-7">
             <div class="page-header">
                 <h1 class="page-title">
-                    Gestión de Evaluaciones
+                    Gestión de Evaluaciones {{ fecha }}
                 </h1>
 
                 <p class="page-subtitle">
@@ -25,7 +25,7 @@ Gestión de Evaluaciones | UBA
                 </p>
             </div>
         </div>
-
+        {% if rol == "profesor" %}
         <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
 
             <button class="btn btn-uba-primary btn-lg"
@@ -37,6 +37,7 @@ Gestión de Evaluaciones | UBA
             </button>
 
         </div>
+        {% endif %}
     </section>
 
     <!-- FILTROS -->
@@ -49,7 +50,7 @@ Gestión de Evaluaciones | UBA
         </div>
 
         <form method="GET"
-              action="#search"
+              action="/evaluaciones"
               class="row g-3 align-items-end">
 
             <div class="col-md-4">
@@ -62,9 +63,9 @@ Gestión de Evaluaciones | UBA
                         class="form-select">
 
                     <option value="">Todos</option>
-                    <option value="Parcial">Parcial</option>
-                    <option value="TP">Trabajo Práctico</option>
-                    <option value="Parcialito">Parcialito</option>
+                    {% for evaluacion in evas %}
+                        <option value="{{ evaluacion.tipo }}">{{ evaluacion.tipo }}</option>   
+                    {% endfor %}
 
                 </select>
             </div>
@@ -114,7 +115,7 @@ Gestión de Evaluaciones | UBA
                 </h2>
 
                 <span class="table-subtitle">
-                    Total registradas: {{ evaluaciones|length }}
+                    Total registradas: {{ evas|length }}
                 </span>
             </div>
 
@@ -129,12 +130,12 @@ Gestión de Evaluaciones | UBA
                         <th>Nombre</th>
                         <th>Tipo</th>
                         <th>Fecha</th>
-                        <th>Estado</th>
+                        <!-- <th>Estado</th> -->
                         <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                {% for evaluacion in evaluaciones %}
+                {% for evaluacion in evas %}
                     <tr>
                         <td>
                             {{ evaluacion.nombre }}
@@ -145,9 +146,9 @@ Gestión de Evaluaciones | UBA
                             </span>
                         </td>
                         <td>
-                            {{ evaluacion.fecha.strftime('%d/%m/%Y') }}
+                            {{ evaluacion.fecha }}
                         </td>
-                        <td>
+<!--                         <td>
                             {% if evaluacion.estado == 'Activa' %}
                                 <span class="status-pill status-active">
                                     Activa
@@ -161,17 +162,21 @@ Gestión de Evaluaciones | UBA
                                     Finalizada
                                 </span>
                             {% endif %}
-                        </td>
+                        </td> -->
                         <td class="text-center">
                             <div class="d-flex justify-content-center gap-2">
-                                <a href="#"
+                                <form href="#"
                                    class="btn btn-sm btn-light border">
                                     <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <button class="btn btn-sm btn-light border btn-delete"
-                                        data-id="{{ evaluacion.id }}">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                                </form>
+                                <form action="/evaluaciones/eliminar" method="POST" 
+                                    class="btn btn-sm btn-light border btn-delete">
+                                    <input name="method" value="delete" type="hidden"></input>
+                                    <input value="{{ evaluacion.id }}" type="hidden" name="id_evaluacion"></input>
+                                    <input type="submit" value="submit">
+                                    <i class="bi bi-trash" ></i>
+                                    </input>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -221,7 +226,7 @@ Gestión de Evaluaciones | UBA
             </div>
 
             <form method="POST"
-                  action="#">
+                  action="/evaluaciones">
 
                 <div class="modal-body">
 
@@ -282,6 +287,21 @@ Gestión de Evaluaciones | UBA
                                class="form-control"
                                id="fecha"
                                name="fecha"
+                               required>
+                    </div>
+
+                    <div class="mb-2">
+
+                        <label for="curso"
+                               class="form-label">
+                            Curso
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               id="curso"
+                               name="curso"
+                               placeholder="Ej: 1"
                                required>
                     </div>
 

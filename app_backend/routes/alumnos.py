@@ -102,7 +102,7 @@ def eliminar_alumno(id):
 @alumnos_bp.route("/cargar-csv", methods=["POST"])
 @token_required
 @rol_required("profesor")
-def cargar_usuarios_alumnos():
+def cargar_usuarios_alumnos(current_user):
     if "archivo" not in request.files:
         return jsonify({"error": "No se envio archivo"}), 400
     archivo = request.files["archivo"]

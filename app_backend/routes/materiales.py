@@ -9,6 +9,8 @@ from data.queries import (
     get_material,
     actualizar_material,
     eliminar_material,
+    obtener_detalles_profesor,
+    get_estadisticas_materiales,
 )
 
 materiales_bp = Blueprint("materiales", __name__)
@@ -30,16 +32,19 @@ def allowed_file(filename):
 @token_required
 @rol_required("profesor")
 def subir_material(current_user):
-    id_profesor = current_user["id"]
+    profe = obtener_detalles_profesor(current_user["id"])
+    if not profe:
+        return jsonify({"error": "Profesor no encontrado"}), 404
+    id_profesor = profe["id_profesor"]
     titulo = request.form.get("titulo", "").strip()
     descripcion = request.form.get("descripcion", "").strip()
     tipo_material = request.form.get("tipo_material", "").strip()
     id_curso = request.form.get("id_curso")
     tema = request.form.get("tema", "").strip()
     orden_material = request.form.get("orden_material", 0, type=int)
-    es_externo = request.form.get("es_externo", "false").lower() == "true"
+    es_externo = request.form.get("es_externo", "false").lower() in ("true", "on", "1")
     tipo_archivo = request.form.get("tipo_archivo", "").strip()
-    es_libre = request.form.get("es_libre", "false").lower() == "true"
+    es_libre = request.form.get("es_libre", "false").lower() in ("true", "on", "1")
     estado = request.form.get("estado", "publicado").strip()
     archivo_ruta = request.form.get("archivo_ruta", "").strip()
     fecha_material = request.form.get("fecha_material")
@@ -95,6 +100,20 @@ def subir_material(current_user):
     return jsonify({"success": True, "id_material": id_material, "mensaje": "Material subido correctamente"}), 201
 
 
+# GET /api/materiales/estadisticas
+@materiales_bp.route("/estadisticas", methods=["GET"])
+@token_required
+def estadisticas_materiales(current_user):
+    id_curso = request.args.get("id_curso", type=int)
+    id_profesor = request.args.get("id_profesor", type=int)
+    if current_user["rol"] == "profesor":
+        profe = obtener_detalles_profesor(current_user["id"])
+        if profe and not id_profesor:
+            id_profesor = profe["id_profesor"]
+    stats = get_estadisticas_materiales(id_curso=id_curso, id_profesor=id_profesor)
+    return jsonify(stats), 200
+
+
 # GET /api/materiales/
 @materiales_bp.route("/", methods=["GET"])
 @token_required
@@ -107,6 +126,8 @@ def listar_materiales(current_user):
     es_libre = request.args.get("es_libre", type=lambda v: v.lower() == "true" if v else None)
     pagina = request.args.get("pagina", 1, type=int)
     limite = request.args.get("limite", 20, type=int)
+    order_by = request.args.get("order_by", "fecha_subida")
+    order_dir = request.args.get("order_dir", "DESC")
     total, materiales = get_materiales(
         id_curso=id_curso,
         id_profesor=id_profesor,
@@ -116,12 +137,15 @@ def listar_materiales(current_user):
         es_libre=es_libre,
         pagina=pagina,
         limite=limite,
+        order_by=order_by,
+        order_dir=order_dir,
     )
+    paginas_totales = max(1, (total + limite - 1) // limite)
     for m in materiales:
         for k, v in m.items():
             if isinstance(v, datetime):
                 m[k] = v.isoformat()
-    return jsonify({"total": total, "pagina": pagina, "limite": limite, "materiales": materiales}), 200
+    return jsonify({"total": total, "pagina": pagina, "limite": limite, "paginas_totales": paginas_totales, "materiales": materiales}), 200
 
 
 # GET /api/materiales/<id>/descargar
@@ -132,7 +156,10 @@ def descargar_material(current_user, id_material):
     if not material:
         return jsonify({"error": "Material no encontrado"}), 404
     if material["es_externo"]:
-        return redirect(material["archivo_ruta"])
+        url = material["archivo_ruta"]
+        if not (url.startswith("http://") or url.startswith("https://")):
+            return jsonify({"error": "URL externa inválida"}), 400
+        return redirect(url)
     ruta_completa = os.path.join(UPLOAD_FOLDER, material["archivo_ruta"].replace("materiales/", ""))
     if not os.path.exists(ruta_completa):
         return jsonify({"error": "Archivo no encontrado en servidor"}), 404
@@ -147,7 +174,8 @@ def editar_material(current_user, id_material):
     material = get_material(id_material)
     if not material:
         return jsonify({"error": "Material no encontrado"}), 404
-    if material["id_profesor"] != current_user["id"]:
+    profe = obtener_detalles_profesor(current_user["id"])
+    if not profe or profe["id_profesor"] != material["id_profesor"]:
         return jsonify({"error": "No tienes permiso para editar este material"}), 403
     data = request.get_json()
     if not data:
@@ -179,7 +207,8 @@ def borrar_material(current_user, id_material):
     material = get_material(id_material)
     if not material:
         return jsonify({"error": "Material no encontrado"}), 404
-    if material["id_profesor"] != current_user["id"]:
+    profe = obtener_detalles_profesor(current_user["id"])
+    if not profe or profe["id_profesor"] != material["id_profesor"]:
         return jsonify({"error": "No tienes permiso para eliminar este material"}), 403
     eliminado = eliminar_material(id_material)
     if not eliminado:

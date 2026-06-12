@@ -1,5 +1,7 @@
+import os
 from flask import Flask
 from flask_jwt_extended import JWTManager
+from flask_session import Session
 import config
 from utils.extensions import mail
 from routes.alumnos import alumnos_bp
@@ -20,11 +22,16 @@ from routes.cursos import cursos_bp
 
 PORT = 5001
 app = Flask(__name__)
-
+ 
 app.config["JWT_SECRET_KEY"] = config.JWT_SECRET_KEY
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = config.JWT_ACCESS_TOKEN_EXPIRES
-jwt = JWTManager(app)
 
+
+jwt = JWTManager(app)
+app.config["SECRET_KEY"] = "clave-secreta"
+app.config["SESSION_TYPE"] = "filesystem"
+
+Session(app)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
@@ -48,7 +55,7 @@ app.register_blueprint(dashboard_bp)
 app.register_blueprint(asistencia_bp, url_prefix="/api/asistencia")
 app.register_blueprint(cursos_bp, url_prefix="/api/cursos")
 
-
+ 
 @app.route("/")
 def hello_world():
     respuesta = {"mensaje": "Hello, World!"}
@@ -56,4 +63,5 @@ def hello_world():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=PORT)
+    debug_mode = os.getenv("FLASK_DEBUG", "False").lower() in ("true", "1", "t")
+    app.run(debug=debug_mode, host="0.0.0.0", port=PORT)

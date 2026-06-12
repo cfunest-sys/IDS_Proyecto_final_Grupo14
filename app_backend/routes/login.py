@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from flask_jwt_extended import create_access_token
 from utils.auth import validate_user_credentials
 from data.queries import registrar_login, get_user_profile
@@ -24,6 +24,10 @@ def login():
         registrar_login(None, email, "fallido", request.remote_addr)
 
         return jsonify({"error": "Email o contraseña inválidos"}), 401
+
+    session["user_id"] = usuario["id_usuario"]
+    session["email"] = usuario["email"]
+    session["rol"] = usuario["rol"]
 
     perfil = get_user_profile(usuario)
 

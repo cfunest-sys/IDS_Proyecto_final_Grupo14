@@ -4,6 +4,8 @@
 Inicio
 {% endblock %}
 
+{% block main_class %}{% endblock %}
+
 {% block content %}
 
 <section class="hero-section">
@@ -19,61 +21,15 @@ Inicio
         </p>
 
         <div class="mt-4">
+            {% if session.get("rol") == "admin" %}
             <a
                 href="/register"
                 class="btn btn-primary btn-lg">
 
-                Registrarse
+                Registrar profesores
 
             </a>
-
-            <a
-                href="/evaluaciones"
-                class="btn btn-primary btn-lg">
-
-                Evaluaciones
-
-            </a>
-
-            <a
-                href="{{ url_for('notas.ver_notas') }}"
-                class="btn btn-primary btn-lg">
-
-                Notas
-
-            </a>
-
-            <a
-                href="/material"
-                class="btn btn-primary btn-lg">
-
-                Material
-
-            </a>
-
-            <a
-                href="{{ url_for('evaluaciones.calendario_evaluaciones') }}"
-                class="btn btn-light btn-lg">
-
-                Calendario
-
-            </a>
-
-            <a
-                href="/reportes"
-                class="btn btn-primary btn-lg">
-
-                Reportes
-
-            </a>
-
-            <a
-                href="/asistencia"
-                class="btn btn-light btn-lg">
-
-                Asistencia
-
-            </a>
+            {% endif %}
 
         </div>
         

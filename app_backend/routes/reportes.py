@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, jsonify, send_file
 from database.db import get_connection
 from reportlab.platypus import (
@@ -92,12 +93,15 @@ def reporte_alumnos():
             filas
         )
 
-        return send_file(
-            ruta,
-            as_attachment=True,
-            download_name="reporte_alumnos.pdf",
-            mimetype="application/pdf"
-        )
+        try:
+            return send_file(
+                ruta,
+                as_attachment=True,
+                download_name="reporte_alumnos.pdf",
+                mimetype="application/pdf"
+            )
+        finally:
+            os.unlink(ruta)
 
     except Exception as e:
         print(e)
@@ -142,12 +146,15 @@ def reporte_estadisticas():
             filas
         )
 
-        return send_file(
-            ruta,
-            as_attachment=True,
-            download_name="reporte_estadisticas.pdf",
-            mimetype="application/pdf"
-        )
+        try:
+            return send_file(
+                ruta,
+                as_attachment=True,
+                download_name="reporte_estadisticas.pdf",
+                mimetype="application/pdf"
+            )
+        finally:
+            os.unlink(ruta)
 
     except Exception as e:
         print(e)
@@ -190,12 +197,15 @@ def reporte_equipos():
             filas
         )
 
-        return send_file(
-            ruta,
-            as_attachment=True,
-            download_name="reporte_equipos.pdf",
-            mimetype="application/pdf"
-        )
+        try:
+            return send_file(
+                ruta,
+                as_attachment=True,
+                download_name="reporte_equipos.pdf",
+                mimetype="application/pdf"
+            )
+        finally:
+            os.unlink(ruta)
 
     except Exception as e:
         print(e)

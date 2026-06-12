@@ -151,7 +151,8 @@ CREATE TABLE materiales(
     estado ENUM(
         'borrador',
         'publicado',
-        'archivado'
+        'archivado',
+        'programado'
     ) DEFAULT 'publicado',
     fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -167,6 +168,14 @@ CREATE TABLE materiales(
     INDEX idx_tema (tema),
     INDEX idx_tipo (tipo_material),
     INDEX idx_curso_tipo (id_curso, tipo_material)
+);
+CREATE TABLE temas (
+    id_tema INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    id_curso INT NOT NULL,
+    orden INT DEFAULT 0,
+    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso) ON DELETE CASCADE,
+    UNIQUE KEY unique_tema_curso (nombre, id_curso)
 );
 CREATE TABLE qr_asistencia (
     id_qr INT AUTO_INCREMENT PRIMARY KEY,
@@ -189,7 +198,7 @@ CREATE TABLE asistencia (
 
 INSERT INTO usuarios (email, contrasenia, rol)
 VALUES
- ('admin@example.com', 'scrypt:32768:8:1$Hid9QZTkQuxvOQsc$75db4c395ec522e9159b5e58cf012086b1f51e05388e72c4a898b9b76ec8ace4fb08590a30e9a3ce04acb71b6e633462d1773c1e8aed8ed6112bd5a0a7f3e0a8', 'admin'),
+ ('admin@example.com', 'scrypt:32768:8:1$Hid9QZTkQuxvOQsc$75db4c395ec522e9159b5e58cf012086b1f51e05388e72c4a898b9b76ec8ace4fb08590a30e9a3ce04acb71b6e633462d1773c1e8aed8ed6112bd5a0a7f3e0a8', 'admin'), -- Contraseña: admin123
  ('profesor@example.com', 'scrypt:32768:8:1$8DIUDP0hWtiGIYf5$dfa9cafbc33ae053c7ec1aa3e680074e0f8fb6a220fc7ba763c063c3b36dce8a6ab3a71f3ab9d375b1766402c2a54d61228070f531dcbaa2cd5fa89b76ac355d', 'profesor'),
  ('alumno@example.com', 'scrypt:32768:8:1$CJT3ez7XdwNDV3oS$f86dd776ceaa5b38df2ccd16164b3e6f50dd3fc76bc951b353ac9316283e57e59ece0079bc76eeb98290e8a04ba95d0428e87632dfb39b6c43cd5525ff6536cc', 'alumno'),
  ('JuanPerez@gmail.com', 'scrypt:32768:8:1$xVqTD27xuA95I8wt$51965ef800581032c12342c890ecdff213d189e043a57b8fb7485cd10e6b40fc31c880cd42cf05c6ddb5df14545648e173793d4478825f65af12669a8593427c', 'profesor');

@@ -5,6 +5,7 @@ from database.db import get_connection
 from flask import jsonify
 import csv
 import io
+import traceback
 
 # def crear_base_datos():
 #     connection = get_connection()
@@ -408,7 +409,7 @@ def crear_evaluacion(nombre, tipo, fecha, curso_id):
     try:
         connection = get_connection()
         cursor = connection.cursor()
-        query = """INSERT INTO evaluaciones (nombre, tipo, fecha, curso_id) 
+        query = """INSERT INTO evaluaciones (nombre, tipo, fecha, id_curso) 
                 VALUES (%s, %s, %s, %s)"""
         cursor.execute(query, (nombre, tipo, fecha, curso_id))
         connection.commit()
@@ -457,25 +458,25 @@ def eliminar_evaluacion(id):
     try:
         connection = get_connection()
         cursor = connection.cursor()
-        query_esta = """SELECT * FROM evaluaciones WHERE id = %s"""
+        query_esta = """SELECT * FROM evaluaciones WHERE id_evaluacion = %s"""
         cursor.execute(query_esta, (id,))
         esta = cursor.fetchall()
         if cursor.rowcount == 0:
             cursor.close()
             connection.close()
             return jsonify({"error": "No existe ese id"}), 404
-        query = """DELETE FROM evaluaciones WHERE id = %s"""
+        query = """DELETE FROM evaluaciones WHERE id_evaluacion = %s"""
         cursor.execute(query, (id,))
         connection.commit()
-        query = """SELECT * FROM evaluaciones WHERE id = %s"""
+        query = """SELECT * FROM evaluaciones WHERE id_evaluacion = %s"""
         cursor.execute(query, (id,))
         resultado = cursor.fetchall()
         filas = cursor.rowcount
         cursor.close()
         connection.close()
         if filas != 0:
-            return False, 400
-        return True, 200
+            return False
+        return True
     except Exception as e:
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
@@ -657,10 +658,7 @@ def crear_profesor(profesor):
 
         conn.commit()
         print(profesor)
-        enviar_mail_bienvenida(
-            profesor["email"],
-            profesor["nombre"]
-        )
+        enviar_mail_bienvenida(profesor["email"], profesor["nombre"], profesor["password"])
 
         return cur.lastrowid
 
@@ -802,7 +800,7 @@ CAMPOS_PERMITIDOS_UPDATE = {
     "es_libre",
     "tipo_material",
 }
-ESTADOS_VALIDOS = {"borrador", "publicado", "archivado"}
+ESTADOS_VALIDOS = {"borrador", "publicado", "archivado", "programado"}
 
 
 def insertar_material(
@@ -858,7 +856,7 @@ def insertar_material(
         return cursor.lastrowid
     except Exception as e:
         conn.rollback()
-        print(f"Error inserting material: {e}")
+        traceback.print_exc()
         return None
     finally:
         conn.close()
@@ -874,6 +872,8 @@ def get_materiales(
     activo=True,
     pagina=1,
     limite=20,
+    order_by="fecha_subida",
+    order_dir="DESC",
 ):
     conn = get_connection()
     try:
@@ -881,34 +881,39 @@ def get_materiales(
         where_clauses = []
         params = []
         if activo is not None:
-            where_clauses.append("activo = %s")
+            where_clauses.append("m.activo = %s")
             params.append(activo)
         if id_curso:
-            where_clauses.append("id_curso = %s")
+            where_clauses.append("m.id_curso = %s")
             params.append(id_curso)
         if id_profesor:
-            where_clauses.append("id_profesor = %s")
+            where_clauses.append("m.id_profesor = %s")
             params.append(id_profesor)
         if tipo_material:
-            where_clauses.append("tipo_material = %s")
+            where_clauses.append("m.tipo_material = %s")
             params.append(tipo_material)
         if tema:
-            where_clauses.append("tema = %s")
+            where_clauses.append("m.tema = %s")
             params.append(tema)
         if estado:
-            where_clauses.append("estado = %s")
+            where_clauses.append("m.estado = %s")
             params.append(estado)
         if es_libre is not None:
-            where_clauses.append("es_libre = %s")
+            where_clauses.append("m.es_libre = %s")
             params.append(es_libre)
+        order_by_whitelist = {"titulo", "tipo_material", "tema", "fecha_material", "estado", "fecha_subida"}
+        sort_col = order_by if order_by in order_by_whitelist else "fecha_subida"
+        sort_dir = "ASC" if order_dir.upper() == "ASC" else "DESC"
         where_sql = " AND ".join(where_clauses) if where_clauses else "1=1"
-        cursor.execute(f"SELECT COUNT(*) as total FROM materiales WHERE {where_sql}", params)
+        cursor.execute(f"SELECT COUNT(*) as total FROM materiales m WHERE {where_sql}", params)
         total = cursor.fetchone()["total"]
         offset = (pagina - 1) * limite
         query = f"""
-            SELECT * FROM materiales
+            SELECT m.*, p.nombre AS profesor_nombre
+            FROM materiales m
+            LEFT JOIN profesores p ON m.id_profesor = p.id_profesor
             WHERE {where_sql}
-            ORDER BY fecha_subida DESC
+            ORDER BY m.{sort_col} {sort_dir}
             LIMIT %s OFFSET %s
         """
         params.extend([limite, offset])
@@ -922,11 +927,49 @@ def get_materiales(
         conn.close()
 
 
+def get_estadisticas_materiales(id_curso=None, id_profesor=None):
+    conn = get_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        where_clauses = ["activo = TRUE"]
+        params = []
+        if id_curso:
+            where_clauses.append("id_curso = %s")
+            params.append(id_curso)
+        if id_profesor:
+            where_clauses.append("id_profesor = %s")
+            params.append(id_profesor)
+        where_sql = " AND ".join(where_clauses)
+        cursor.execute(f"SELECT COUNT(*) as total FROM materiales WHERE {where_sql}", params)
+        total = cursor.fetchone()["total"]
+        cursor.execute(f"SELECT tipo_material, COUNT(*) as cant FROM materiales WHERE {where_sql} GROUP BY tipo_material", params)
+        por_tipo = {r["tipo_material"]: r["cant"] for r in cursor.fetchall()}
+        cursor.execute(f"SELECT estado, COUNT(*) as cant FROM materiales WHERE {where_sql} GROUP BY estado", params)
+        por_estado = {r["estado"]: r["cant"] for r in cursor.fetchall()}
+        return {
+            "total": total,
+            "pdfs": por_tipo.get("documento", 0) + por_tipo.get("apunte", 0) + por_tipo.get("guia", 0) + por_tipo.get("bibliografia", 0),
+            "videos": por_tipo.get("video", 0),
+            "imagenes": por_tipo.get("imagen", 0),
+            "borradores": por_estado.get("borrador", 0),
+            "publicados": por_estado.get("publicado", 0),
+            "archivados": por_estado.get("archivado", 0),
+            "programados": por_estado.get("programado", 0),
+            "por_tipo": por_tipo,
+            "por_estado": por_estado,
+        }
+    except Exception as e:
+        print(f"Error getting estadisticas: {e}")
+        return {"total": 0, "pdfs": 0, "videos": 0, "imagenes": 0, "borradores": 0, "publicados": 0, "archivados": 0, "programados": 0, "por_tipo": {}, "por_estado": {}}
+    finally:
+        conn.close()
+
+
 def get_material(id_material):
     conn = get_connection()
     try:
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM materiales WHERE id_material = %s AND activo = TRUE", (id_material,))
+        cursor.execute("SELECT m.*, p.nombre AS profesor_nombre FROM materiales m LEFT JOIN profesores p ON m.id_profesor = p.id_profesor WHERE m.id_material = %s AND m.activo = TRUE", (id_material,))
         return cursor.fetchone()
     except Exception as e:
         print(f"Error getting material: {e}")
@@ -1169,24 +1212,6 @@ def guardar_actualizar_nota(legajo_alumno, id_evaluacion, calificacion):
             conn.close()
 
 
-def registrar_login(id_usuario, email, resultado, ip):
-    conn = get_connection()
-    cur = conn.cursor()
-
-    cur.execute(
-        """
-        INSERT INTO logs_login
-        (id_usuario, email, resultado, ip)
-        VALUES (%s, %s, %s, %s)
-        """,
-        (id_usuario, email, resultado, ip),
-    )
-
-    conn.commit()
-    cur.close()
-    conn.close()
-
-
 # <===================== CARGAR ALUMNOS COMO USUARIOS =========================>
 
 
@@ -1395,7 +1420,7 @@ def obtener_detalles_profesor(id_usuario):
         if profesor:
 
             query_cursos = """
-                SELECT cursos.nombre AS curso_nombre, cursos.anio, cursos.semestre
+                SELECT cursos.id_curso, cursos.nombre, cursos.anio, cursos.semestre
                 FROM profesor_curso
                 INNER JOIN cursos ON profesor_curso.id_curso = cursos.id_curso
                 WHERE profesor_curso.id_profesor = %s
