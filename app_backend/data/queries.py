@@ -1375,7 +1375,7 @@ def obtener_usuario_por_id(id_usuario):
     try:
         conn = get_connection()
         cur = conn.cursor(dictionary=True)
-        query = "SELECT id_usuario, email, rol FROM usuarios WHERE id_usuario = %s"
+        query = "SELECT id_usuario, email, rol, contrasenia FROM usuarios WHERE id_usuario = %s"
         cur.execute(query, (id_usuario,))
         return cur.fetchone()
     except Exception as e:
@@ -1698,3 +1698,129 @@ def delete_curso(id_curso, id_profesor):
             cursor.close()
         if conexion:
             conexion.close()
+
+def cambiar_contrasena(id_usuario, contrasena_nueva):
+   conn = None
+   cur = None
+   try:
+       conn = get_connection()
+       cur = conn.cursor(dictionary=True)
+
+
+       password_hash = generate_password_hash(contrasena_nueva)
+
+
+       cur.execute(
+           "UPDATE usuarios SET contrasenia = %s WHERE id_usuario = %s",
+           (password_hash, id_usuario)
+       )
+       conn.commit()
+       return cur.rowcount > 0
+
+
+   except Exception as e:
+       print(f"Error cambiando contraseña: {e}")
+       return False
+   finally:
+       if cur: cur.close()
+       if conn: conn.close()
+
+
+
+
+def editar_perfil_alumno(id_usuario, nombre, apellido, email):
+   conn = None
+   cur = None
+   try:
+       conn = get_connection()
+       cur = conn.cursor(dictionary=True)
+
+
+       cur.execute(
+           "UPDATE alumnos SET nombre = %s, apellido = %s WHERE id_usuario = %s",
+           (nombre, apellido, id_usuario)
+       )
+       cur.execute(
+           "UPDATE usuarios SET email = %s WHERE id_usuario = %s",
+           (email, id_usuario)
+       )
+       conn.commit()
+       return True
+
+
+   except Exception as e:
+       print(f"Error editando perfil alumno: {e}")
+       return False
+   finally:
+       if cur: cur.close()
+       if conn: conn.close()
+
+
+
+
+def editar_perfil_profesor(id_usuario, nombre, departamento, email):
+   conn = None
+   cur = None
+   try:
+       conn = get_connection()
+       cur = conn.cursor(dictionary=True)
+
+
+       cur.execute(
+           "UPDATE profesores SET nombre = %s, departamento = %s WHERE id_usuario = %s",
+           (nombre, departamento, id_usuario)
+       )
+       cur.execute(
+           "UPDATE usuarios SET email = %s WHERE id_usuario = %s",
+           (email, id_usuario)
+       )
+       conn.commit()
+       return True
+
+
+   except Exception as e:
+       print(f"Error editando perfil profesor: {e}")
+       return False
+   finally:
+       if cur: cur.close()
+       if conn: conn.close()
+
+
+def obtener_historial_alumno(id_usuario):
+   conn = None
+   cur = None
+   try:
+       conn = get_connection()
+       cur = conn.cursor(dictionary=True)
+
+
+       cur.execute(
+           "SELECT legajo FROM alumnos WHERE id_usuario = %s",
+           (id_usuario,)
+       )
+       alumno = cur.fetchone()
+
+
+       if not alumno:
+           return None
+
+
+       cur.execute(
+           """
+           SELECT e.nombre AS evaluacion, e.tipo, n.calificacion, n.fecha
+           FROM notas n
+           INNER JOIN evaluaciones e ON n.id_evaluacion = e.id_evaluacion
+           WHERE n.legajo_alumno = %s
+           ORDER BY n.fecha ASC
+           """,
+           (alumno['legajo'],)
+       )
+       return cur.fetchall()
+
+
+   except Exception as e:
+       print(f"Error obteniendo historial: {e}")
+       return None
+   finally:
+       if cur: cur.close()
+       if conn: conn.close()
