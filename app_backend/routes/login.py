@@ -33,12 +33,7 @@ def login():
 
     registrar_login(usuario["id_usuario"], email, "exitoso", request.remote_addr)
 
-    id_persona = usuario["id_usuario"]
-
-    if usuario["rol"] == "profesor" and perfil:
-        id_persona = perfil.get("id_profesor", usuario["id_usuario"])
-
-    access_token = create_access_token(identity=str(id_persona), additional_claims={"rol": usuario["rol"]})
+    access_token = create_access_token(identity=str(usuario["id_usuario"]), additional_claims={"rol": usuario["rol"]})
 
     return (
         jsonify(
@@ -47,7 +42,7 @@ def login():
                 "message": "Login exitoso",
                 "token": access_token,
                 "usuario": {
-                    "id": id_persona,
+                    "id": usuario["id_usuario"],
                     "email": usuario["email"],
                     "rol": usuario["rol"],
                     "perfil": perfil,
@@ -56,4 +51,3 @@ def login():
         ),
         200,
     )
-
