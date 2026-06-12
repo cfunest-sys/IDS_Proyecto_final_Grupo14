@@ -57,14 +57,15 @@ def get_usuario_by_email(email):
 
 
 def get_user_profile(usuario):
-
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-
+    conn = None
+    cursor = None
     try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
 
-        if usuario["rol"] == "profesor":
+        rol = usuario.get("rol", "")
 
+        if rol == "profesor":
             query = """
                 SELECT
                     p.id_profesor,
@@ -73,9 +74,7 @@ def get_user_profile(usuario):
                 FROM profesores p
                 WHERE p.id_usuario = %s
             """
-
-        elif usuario["rol"] == "alumno":
-
+        elif rol == "alumno":
             query = """
                 SELECT
                     a.curso,
@@ -84,17 +83,18 @@ def get_user_profile(usuario):
                 FROM alumnos a
                 WHERE a.id_usuario = %s
             """
-
         else:
             return None
 
-        cursor.execute(query, (usuario["id_usuario"],))
+        cursor.execute(query, (usuario.get("id_usuario"),))
         return cursor.fetchone()
 
+    except Exception as e:
+        print(f"Error en get_user_profile: {e}")
+        return None
     finally:
-        cursor.close()
-        conn.close()
-
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 def crear_alumno(alumno_data):
 
@@ -368,6 +368,34 @@ def get_evaluacion_por_curso(curso_id):
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
 
+def get_categorias_evaluacion_por_curso(id_curso):
+    """
+    Devuelve las categorías de evaluación que existen en un curso específico.
+    Las categorías se derivan del campo 'tipo' de la tabla evaluaciones.
+    """
+    conn = None
+    cur  = None
+    try:
+        conn = get_connection()
+        cur  = conn.cursor()
+        
+        cur.execute("""
+            SELECT DISTINCT LOWER(e.tipo) AS categoria
+            FROM evaluaciones e
+            WHERE e.id_curso = %s
+            ORDER BY categoria
+        """, (id_curso,))
+        
+        categorias = cur.fetchall()
+        # Devuelve una lista: [('tp',), ('parcial',), ...] → ['tp', 'parcial', ...]
+        return [cat[0] for cat in categorias]
+
+    except Exception as e:
+        print(f"Error en get_categorias_evaluacion_por_curso: {e}")
+        return []
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
 
 def get_evaluacion_profesor(id_profesor):
     try:
