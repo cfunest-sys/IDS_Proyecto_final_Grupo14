@@ -182,7 +182,7 @@ def reporte_equipos():
             SELECT
                 e.id_equipo,
                 e.nombre_equipo,
-                c.nombre
+                c.nombre_curso
             FROM equipos e
             LEFT JOIN cursos c
                 ON e.id_curso = c.id_curso
