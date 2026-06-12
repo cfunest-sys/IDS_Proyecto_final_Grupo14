@@ -20,9 +20,9 @@ Perfil Docente
             
             <div class="tarjeta-foto">
                 <div class="avatar-iniciales avatar-profesor">
-                    {{ detalle.nombre[0] | upper }}{{ detalle.apellido[0] | upper }}
+                    {{ detalle.nombre[0] | upper }}
                 </div>
-                <h2 class="nombre-profesor">{{ detalle.nombre }} {{ detalle.apellido }}</h2>
+                <h2 class="nombre-profesor">{{ detalle.nombre }}</h2>
                 <span class="badge-estado badge-activo-prof">Docente Activo</span>
             </div>
 
@@ -57,7 +57,7 @@ Perfil Docente
                     {% for curso in detalle.cursos_asignados %}
                         <div>
                             <span class="subetiqueta-equipo text-profesor">Cátedra activa: </span>
-                            <h4 class="nombre-equipo">{{ curso.curso_nombre }}</h4>
+                            <h4 class="nombre-equipo">{{ curso.nombre }}</h4>
                         </div>
                         <div class="footer-equipo">
                             <p>Período: <span class="destaque-texto">{{ curso.semestre }}° Semestre</span></p>
@@ -87,7 +87,7 @@ Perfil Docente
                             <div class="fecha-evaluacion">
                                 <span class="texto-fecha-label">Estado:</span>
                                 <span class="badge-fecha
-                                    {% if ev.estado_evaluacion == 'corregido' %}badge-corregido
+                                    {% if ev.estado_evaluacion == 'corregida' %}badge-corregido
                                     {% elif ev.estado_evaluacion == 'pendiente' %}badge-pendiente
                                     {% endif %}">
                                     {{ ev.estado_evaluacion | capitalize }}
