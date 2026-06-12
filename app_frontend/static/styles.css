@@ -646,12 +646,14 @@ h3 {
     background-color: transparent !important;
     border: 1px solid #6c757d !important;
     color: #6c757d !important;
+    box-shadow: none !important;
 }
 
 .btn-perfil-historial:hover {
     background-color: #6c757d !important;
     color: white !important;
 }
+
 /* Materiales - Drag & Drop */
 .drop-zone.dragover {
   background: #e8f4fd !important;
