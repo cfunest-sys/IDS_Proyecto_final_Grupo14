@@ -72,9 +72,9 @@ CREATE TABLE profesor_curso (
 );
 CREATE TABLE cursos (
     id_curso INTEGER PRIMARY KEY AUTO_INCREMENT,
-    nombre TEXT NOT NULL,
+    nombre_curso TEXT NOT NULL,
     anio INTEGER NOT NULL,
-    semestre INTEGER NOT NULL
+    cuatrimestre INTEGER NOT NULL
 );
 CREATE TABLE evaluaciones (
     id_evaluacion INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -221,7 +221,7 @@ VALUES (
     'activo',
     3
 );
-INSERT INTO cursos (nombre, anio, semestre)
+INSERT INTO cursos (nombre_curso, anio, cuatrimestre)
 VALUES
  ('Introducción al Desarrollo', 2024, 1),
  ('Fundamentos de Programación', 2024, 2);

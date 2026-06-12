@@ -14,6 +14,7 @@ from routes.notas import notas_bp
 from routes.login import login_bp
 from routes.dashboard import dashboard_bp
 from routes.registro_asistencia import asistencia_bp
+from routes.cursos import cursos_bp
 
 
 
@@ -45,6 +46,7 @@ app.register_blueprint(notas_bp, url_prefix="/api/notas")
 app.register_blueprint(login_bp, url_prefix="/api/login")
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(asistencia_bp, url_prefix="/api/asistencia")
+app.register_blueprint(cursos_bp, url_prefix="/api/cursos")
 
 
 @app.route("/")
