@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
     filas.forEach(function(fila) {
       const celdas = fila.querySelectorAll('td');
       const tipoCelda = celdas[1] ? celdas[1].textContent.trim() : '';
-      const cursoCelda = celdas[3] ? celdas[3].textContent.trim() : '';
+      const cursoCelda = fila.dataset.curso || '';
       let coincide = true;
       if (tipo && tipoCelda !== tipo) coincide = false;
       if (curso && !cursoCelda.includes(curso)) coincide = false;

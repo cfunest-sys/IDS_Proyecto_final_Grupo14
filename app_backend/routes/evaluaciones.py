@@ -42,7 +42,13 @@ def obtener_eva_usuario():
     if perfil is None:
         return jsonify({"error": "Usuario no encontrado"}), 404
 
-    evaluacion = get_evaluacion_profesor(perfil["id_profesor"])
+    rol = data.get("rol", "")
+    if rol == "profesor":
+        evaluacion = get_evaluacion_profesor(perfil["id_profesor"])
+    elif rol == "alumno":
+        evaluacion = get_evaluacion_por_curso(perfil["curso"])
+    else:
+        return jsonify({"error": "Rol no válido"}), 400
     if not evaluacion or len(evaluacion) <= 0:
         return jsonify({"body": []}), 204
 
