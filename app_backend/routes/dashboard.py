@@ -56,3 +56,91 @@ def resumen_dashboard():
     finally:
         cur.close()
         conn.close()
+
+
+@dashboard_bp.route("/api/dashboard/alumno/<int:legajo>")
+def dashboard_alumno(legajo):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+
+        # DATOS PERSONALES
+        cur.execute("""
+            SELECT
+                a.nombre,
+                a.apellido,
+                a.legajo,
+                u.email
+            FROM alumnos a
+            INNER JOIN usuarios u
+                ON a.id_usuario = u.id_usuario
+            WHERE a.legajo = %s
+        """, (legajo,))
+
+        alumno = cur.fetchone()
+
+        if not alumno:
+            return jsonify({
+                "error": "Alumno no encontrado"
+            }), 404
+
+
+        # NOTAS
+        cur.execute("""
+            SELECT COUNT(*)
+            FROM notas
+            WHERE legajo_alumno = %s
+        """, (legajo,))
+
+        cantidad_notas = cur.fetchone()[0]
+
+
+        # ASISTENCIAS
+        cur.execute("""
+            SELECT COUNT(*)
+            FROM asistencia
+            WHERE alumno_legajo = %s
+        """, (legajo,))
+
+        total_asistencias = cur.fetchone()[0]
+
+
+        # EQUIPOS
+        cur.execute("""
+            SELECT COUNT(*)
+            FROM miembros_equipo
+            WHERE legajo_alumno = %s
+        """, (legajo,))
+
+        total_equipos = cur.fetchone()[0]
+
+
+        # EVALUACIONES PENDIENTES
+        cur.execute("""
+            SELECT COUNT(*)
+            FROM evaluaciones
+            WHERE fecha >= CURDATE()
+        """)
+
+        proximas = cur.fetchone()[0]
+
+
+        return jsonify({
+
+            "nombre": alumno[0],
+            "apellido": alumno[1],
+            "legajo": alumno[2],
+            "email": alumno[3],
+
+            "notas": cantidad_notas,
+            "asistencias": total_asistencias,
+            "equipos": total_equipos,
+            "proximas_evaluaciones": proximas
+
+        })
+
+    finally:
+        cur.close()
+        conn.close()
+
