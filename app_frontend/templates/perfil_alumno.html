@@ -57,7 +57,7 @@
                     Editar Información
                 </button>
 
-                <a href="/perfil/historial" class="btn btn-perfil-historial w-100">
+                <a href="{{ url_for('perfil.historial') }}" class="btn btn-perfil-historial w-100">
                     Descargar Historial
                 </a>
             </div>
@@ -127,7 +127,7 @@
                 <h5 class="modal-title">Cambiar Contraseña</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="/perfil/contrasena" method="POST">
+            <form action="{{ url_for('perfil.contrasena') }}" method="POST">
                 <div class="modal-body">
                     <input type="password" name="contrasena_actual" class="form-control mb-2" placeholder="Contraseña actual">
                     <input type="password" name="contrasena_nueva" class="form-control mb-2" placeholder="Nueva contraseña">
@@ -149,7 +149,7 @@
                 <h5 class="modal-title">Editar Información Personal</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="/perfil/editar" method="POST">
+            <form action="{{ url_for('perfil.editar') }}" method="POST">
                 <div class="modal-body">
                     <input type="text" name="nombre" class="form-control mb-2" placeholder="Nombre" value="{{ detalle.nombre }}">
                     <input type="text" name="apellido" class="form-control mb-2" placeholder="Apellido" value="{{ detalle.apellido }}">

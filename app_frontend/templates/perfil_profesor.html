@@ -43,12 +43,13 @@
 
             <div class="tarjeta-datos">
                 <h3 class="titulo-seccion-lateral">Opciones:</h3>
+
                 <button type="button" class="btn btn-perfil-contrasena w-100 mb-2"
                     data-bs-toggle="modal" data-bs-target="#modalContrasena">
                     Cambiar Contraseña
                 </button>
 
-                <button type="button" class="btn btn-perfil-editar w-100 mb-2"
+                <button type="button" class="btn btn-perfil-editar w-100"
                     data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">
                     Editar Información
                 </button>
@@ -64,8 +65,8 @@
                 <div class="contenedor-equipo">
                     {% for curso in detalle.cursos_asignados %}
                         <div>
-                            <span class="subetiqueta-equipo text-profesor">Cátedra activa: </span>
-                            <h4 class="nombre-equipo">{{ curso.nombre }}</h4>
+                            <span class="subetiqueta-equipo text-profesor">Cátedra activa:</span>
+                            <h4 class="nombre-equipo">{{ curso.curso_nombre }}</h4>
                         </div>
                         <div class="footer-equipo">
                             <p>Período: <span class="destaque-texto">{{ curso.semestre }}° Semestre</span></p>
@@ -119,7 +120,7 @@
                 <h5 class="modal-title">Cambiar Contraseña</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="/perfil/contrasena" method="POST">
+            <form action="{{ url_for('perfil.cambiar_contrasena') }}" method="POST">
                 <div class="modal-body">
                     <input type="password" name="contrasena_actual" class="form-control mb-2" placeholder="Contraseña actual">
                     <input type="password" name="contrasena_nueva" class="form-control mb-2" placeholder="Nueva contraseña">
@@ -141,7 +142,7 @@
                 <h5 class="modal-title">Editar Información Personal</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="/perfil/editar" method="POST">
+            <form action="{{ url_for('perfil.editar_perfil') }}" method="POST">
                 <div class="modal-body">
                     <input type="text" name="nombre" class="form-control mb-2" placeholder="Nombre" value="{{ detalle.nombre }}">
                     <input type="text" name="departamento" class="form-control mb-2" placeholder="Departamento" value="{{ detalle.departamento }}">
