@@ -103,9 +103,11 @@ def modificar_equipo():
     
     id_equipo = request.form.get("id_equipo")
     nombre = request.form.get("nombre_equipo")
+    id_curso = request.form.get("id_curso")
 
     data = {
-        "nombre_equipo": nombre
+        "nombre_equipo": nombre,
+        "id_curso": id_curso
     }
 
     try:

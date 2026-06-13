@@ -113,7 +113,7 @@ Gestión de equipos
         <nav>
             <ul class="pagination justify-content-center">
                 <li class="page-item {% if pag <= 1 %}disabled{% endif %}">
-                    <a class="page-link" href="?pag={{ pagina_actual - 1 }}&id_curso={{ request.args.get('id_curso', '') }}&id_equipo={{ request.args.get('id_equipo', '') }}&nombre_equipo={{ request.args.get('nombre_equipo', '') }}">
+                    <a class="page-link" href="?pag={{ pag - 1 }}&id_curso={{ request.args.get('id_curso', '') }}&id_equipo={{ request.args.get('id_equipo', '') }}&nombre_equipo={{ request.args.get('nombre_equipo', '') }}">
                         <span>&laquo;</span>
                     </a>
                 </li>
@@ -123,14 +123,14 @@ Gestión de equipos
 
                 {% if cursos|length == 15 %}
                     <li class="page-item">
-                        <a class="page-link" href="?pag={{ pagina_actual + 1 }}&id_curso={{ request.args.get('id_curso', '') }}&id_equipo={{ request.args.get('id_equipo', '') }}&nombre_equipo={{ request.args.get('nombre_equipo', '') }}">
+                        <a class="page-link" href="?pag={{ pag + 1 }}&id_curso={{ request.args.get('id_curso', '') }}&id_equipo={{ request.args.get('id_equipo', '') }}&nombre_equipo={{ request.args.get('nombre_equipo', '') }}">
                             {{ pag + 1 }}
                         </a>
                     </li>
                 {% endif %}
                 
                 <li class="page-item {% if cursos|length < 15 %}disabled{% endif %}">
-                    <a class="page-link" href="?pag={{ pagina_actual + 1 }}&id_curso={{ request.args.get('id_curso', '') }}&id_equipo={{ request.args.get('id_equipo', '') }}&nombre_equipo={{ request.args.get('nombre_equipo', '') }}">
+                    <a class="page-link" href="?pag={{ pag + 1 }}&id_curso={{ request.args.get('id_curso', '') }}&id_equipo={{ request.args.get('id_equipo', '') }}&nombre_equipo={{ request.args.get('nombre_equipo', '') }}">
                         &raquo;
                     </a>
                 </li>
