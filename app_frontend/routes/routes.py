@@ -10,28 +10,6 @@ def index():
     return render_template("inicio.html", rol=rol)
 
 
-@inicio.route("/asistencia", methods=["GET", "POST"])
-def asistencia():
-    # LOGICA SOLO PARA LA GENERACION DE QR
-    qr_generado = None
-    mensaje = None
-    rol = session.get("rol")
-    if request.method == "POST":
-        if rol == "profesor":
-            try:
-                respuesta = requests.post("http://192.168.0.232:5001/api/asistencia/generar-qr", timeout=15)
-                data = respuesta.json()
-                if respuesta.status_code == 200:
-                    codigo = data.get("qr_code")
-                    qr_generado = f"http://localhost:8080/" f"registrar-asistencia?qr={codigo}"
-                else:
-                    mensaje = data.get("error")
-            except Exception as e:
-                mensaje = str(e)
-
-    return render_template("asistencia.html", rol=rol, qr_generado=qr_generado, mensaje=mensaje)
-
-
 @inicio.route("/reportes")
 def reportes():
     return render_template("reportes.html")
@@ -359,28 +337,63 @@ def cargar_csv():
     return redirect("/alumnos")
 
 
-@inicio.route("/registrar-asistencia", methods=["GET", "POST"])
-def registrar_asistencia():
-    # LOGICA PARA REGISTRAR QR
-    mensaje = None
-
-    qr_code = request.args.get("qr")
-
+@inicio.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
     if request.method == "POST":
-
-        legajo = request.form.get("legajo")
-        qr_code = request.form.get("qr_code")
+        email = request.form.get("email")
+        data = {"email": email}
 
         try:
-            respuesta = requests.post( "http://192.168.0.232:5001/api/asistencia/registrar", json={"legajo": legajo, "qr_code": qr_code}, timeout=15)
+            
+            response = requests.post(
+                f"{current_app.config['BACKEND_URL']}/api/auth/forgot-credentials", 
+                json=data, 
+                timeout=5
+            )
+        except requests.exceptions.RequestException:
+            return render_template("olvido_contraseña.html", error="Error de conexión con el servidor")
 
-            data = respuesta.json()
+        if response.status_code == 200:
+            flash("Token generado. Revise la consola del backend.", "success")
+            # Redirigimos al formulario donde pondra el token y la nueva contraseña
+            return redirect("/reset-password")
+        
+        elif response.status_code == 404:
+            return render_template("olvido_contraseña.html", error="No existe un usuario con ese email")
 
-            mensaje = data.get("message") or data.get("error")
+        return render_template("olvido_contraseña.html", error="Ocurrió un error inesperado")
 
-        except Exception as e:
+    return render_template("olvido_contraseña.html")
 
-            mensaje = str(e)
 
-    return render_template("registrar_asistencia.html", qr_code=qr_code, mensaje=mensaje)
+@inicio.route("/reset-password", methods=["GET", "POST"])
+def reset_password():
+    if request.method == "POST":
+        token = request.form.get("token")
+        nueva_password = request.form.get("nueva_password")
+        
+        data = {
+            "token": token,
+            "nueva_password": nueva_password
+        }
 
+        try:
+            
+            response = requests.patch(
+                f"{current_app.config['BACKEND_URL']}/api/auth/reset-password-with-token", 
+                json=data, 
+                timeout=5
+            )
+        except requests.exceptions.RequestException:
+            return render_template("reset_contraseña.html", error="Error de conexión con el servidor")
+
+        if response.status_code == 200:
+            flash("Contraseña actualizada correctamente. Ya puede iniciar sesión.", "success")
+            return redirect("/login")
+        
+        elif response.status_code == 404:
+            return render_template("reset_contraseña.html", error="Token inválido o ya utilizado")
+
+        return render_template("reset_contraseña.html", error="No se pudo actualizar la contraseña")
+
+    return render_template("reset_contraseña.html")

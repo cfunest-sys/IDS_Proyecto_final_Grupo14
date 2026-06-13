@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask import Blueprint
 from utils.auth import token_required, rol_required
 from data.queries import (
+    get_user_profile,
     get_curso_profesor,
     get_cursos_filtrados,
     insertar_curso,
@@ -22,6 +23,10 @@ def listar_cursos(current_user):
         if pag <= 0:
             return jsonify({"error": "La página debe ser un número positivo"}), 400
         
+        profesor = {"rol": current_user.get("rol", ""), "id_usuario": id_profesor}
+        profesor_encontrado = get_user_profile(profesor)
+        id_profesor = profesor_encontrado.get("id_profesor","")
+
         cursos = get_curso_profesor(id_profesor, pag, por_pag)
 
         if not cursos:
@@ -91,6 +96,9 @@ def listar_cursos_filtrados(current_user):
             except (ValueError, TypeError):
                 return jsonify({"error": "El cuatrimestre debe ser un número entero válido"}), 400
             
+        profesor = {"rol": current_user.get("rol", ""), "id_usuario": id_profesor}
+        profesor_encontrado = get_user_profile(profesor)
+        id_profesor = profesor_encontrado.get("id_profesor","")
 
         lista_cursos = get_cursos_filtrados(id_curso_int, filtro_nombre_curso, anio_int, cuatrimestre_int, id_profesor, pag, por_pag)
 
@@ -139,7 +147,12 @@ def crear_cursos(current_user):
         except (ValueError, TypeError):
             return jsonify({"error": "El cuatrimestre debe ser un número entero válido"}), 400
 
-        curso_existente = get_cursos_filtrados(nombre_curso=nombre_curso, anio=anio_int, cuatrimestre=cuatrimestre_int, id_profesor=id_profesor)
+        profesor = {"rol": current_user.get("rol", ""), "id_usuario": id_profesor}
+        profesor_encontrado = get_user_profile(profesor)
+        id_profesor = profesor_encontrado.get("id_profesor","")
+
+        curso_existente = get_cursos_filtrados(nombre_curso=nombre_curso, anio=anio_int, 
+            cuatrimestre=cuatrimestre_int, id_profesor=id_profesor)
 
         if curso_existente:
             return jsonify({"error": "El curso ya existe dentro del cuatrimestre elegido"}), 409

@@ -25,4 +25,6 @@ def dashboard_profesor():
         pass
 
     return render_template("dashboard_profesor.html", nombre=session.get("nombre"), resumen=resumen)
+    
+  
 

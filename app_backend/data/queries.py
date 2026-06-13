@@ -57,14 +57,15 @@ def get_usuario_by_email(email):
 
 
 def get_user_profile(usuario):
-
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-
+    conn = None
+    cursor = None
     try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
 
-        if usuario["rol"] == "profesor":
+        rol = usuario.get("rol", "")
 
+        if rol == "profesor":
             query = """
                 SELECT
                     p.id_profesor,
@@ -73,9 +74,7 @@ def get_user_profile(usuario):
                 FROM profesores p
                 WHERE p.id_usuario = %s
             """
-
-        elif usuario["rol"] == "alumno":
-
+        elif rol == "alumno":
             query = """
                 SELECT
                     a.curso,
@@ -84,17 +83,18 @@ def get_user_profile(usuario):
                 FROM alumnos a
                 WHERE a.id_usuario = %s
             """
-
         else:
             return None
 
-        cursor.execute(query, (usuario["id_usuario"],))
+        cursor.execute(query, (usuario.get("id_usuario"),))
         return cursor.fetchone()
 
+    except Exception as e:
+        print(f"Error en get_user_profile: {e}")
+        return None
     finally:
-        cursor.close()
-        conn.close()
-
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 def crear_alumno(alumno_data):
 
@@ -368,6 +368,34 @@ def get_evaluacion_por_curso(curso_id):
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
 
+def get_categorias_evaluacion_por_curso(id_curso):
+    """
+    Devuelve las categorías de evaluación que existen en un curso específico.
+    Las categorías se derivan del campo 'tipo' de la tabla evaluaciones.
+    """
+    conn = None
+    cur  = None
+    try:
+        conn = get_connection()
+        cur  = conn.cursor()
+        
+        cur.execute("""
+            SELECT DISTINCT LOWER(e.tipo) AS categoria
+            FROM evaluaciones e
+            WHERE e.id_curso = %s
+            ORDER BY categoria
+        """, (id_curso,))
+        
+        categorias = cur.fetchall()
+        # Devuelve una lista: [('tp',), ('parcial',), ...] → ['tp', 'parcial', ...]
+        return [cat[0] for cat in categorias]
+
+    except Exception as e:
+        print(f"Error en get_categorias_evaluacion_por_curso: {e}")
+        return []
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
 
 def get_evaluacion_profesor(id_profesor):
     try:
@@ -418,7 +446,7 @@ def crear_evaluacion(nombre, tipo, fecha, curso_id):
         connection.close()
         return jsonify({"id": evaluacion}), 201
     except Exception as e:
-        print(e)
+        traceback.print_exc()
         return jsonify({"error": "Error interno del servidor"}), 500
 
 
@@ -427,7 +455,7 @@ def cambiar_evaluacion(id, nombre, tipo, fecha, curso_id):
         connection = get_connection()
         cursor = connection.cursor()
 
-        query_esta = """SELECT * FROM evaluaciones WHERE id = %s"""
+        query_esta = """SELECT * FROM evaluaciones WHERE id_evaluacion = %s"""
         cursor.execute(query_esta, (id,))
         esta = cursor.fetchall()
         if cursor.rowcount == 0:
@@ -438,8 +466,8 @@ def cambiar_evaluacion(id, nombre, tipo, fecha, curso_id):
             SET nombre = %s,
                 tipo = %s,
                 fecha = %s,
-                curso_id = %s
-            WHERE id = %s"""
+                id_curso = %s
+            WHERE id_evaluacion = %s"""
         cursor.execute(query_insertar, (nombre, tipo, fecha, curso_id, id))
         connection.commit()
         cursor.close()
@@ -1225,7 +1253,7 @@ def cargar_alumnos_csv(archivo_csv):
     """
     CSV ejemplo:
     legajo,nombre,apellido,dni,email,curso,anio,cuatrimestre
-
+    112111,pepe,gonzlez,50100200,pGonza@gmail.com,analisis I,2026,1
     """
     from utils.auth import hash_password
 
@@ -1353,7 +1381,7 @@ def obtener_usuario_por_id(id_usuario):
     try:
         conn = get_connection()
         cur = conn.cursor(dictionary=True)
-        query = "SELECT id_usuario, email, rol FROM usuarios WHERE id_usuario = %s"
+        query = "SELECT id_usuario, email, rol, contrasenia FROM usuarios WHERE id_usuario = %s"
         cur.execute(query, (id_usuario,))
         return cur.fetchone()
     except Exception as e:
@@ -1426,7 +1454,7 @@ def obtener_detalles_profesor(id_usuario):
         if profesor:
 
             query_cursos = """
-                SELECT cursos.id_curso, cursos.nombre, cursos.anio, cursos.semestre
+                SELECT cursos.id_curso, cursos.nombre_curso, cursos.anio, cursos.cuatrimestre
                 FROM profesor_curso
                 INNER JOIN cursos ON profesor_curso.id_curso = cursos.id_curso
                 WHERE profesor_curso.id_profesor = %s
@@ -1699,3 +1727,130 @@ def existe_equipo(nombre_equipo, id_curso):
     finally:
         if cursor: cursor.close()
         if conexion: conexion.close()
+
+        
+def cambiar_contrasena(id_usuario, contrasena_nueva):
+   conn = None
+   cur = None
+   try:
+       conn = get_connection()
+       cur = conn.cursor(dictionary=True)
+
+
+       password_hash = generate_password_hash(contrasena_nueva)
+
+
+       cur.execute(
+           "UPDATE usuarios SET contrasenia = %s WHERE id_usuario = %s",
+           (password_hash, id_usuario)
+       )
+       conn.commit()
+       return cur.rowcount > 0
+
+
+   except Exception as e:
+       print(f"Error cambiando contraseña: {e}")
+       return False
+   finally:
+       if cur: cur.close()
+       if conn: conn.close()
+
+
+
+
+def editar_perfil_alumno(id_usuario, nombre, apellido, email):
+   conn = None
+   cur = None
+   try:
+       conn = get_connection()
+       cur = conn.cursor(dictionary=True)
+
+
+       cur.execute(
+           "UPDATE alumnos SET nombre = %s, apellido = %s WHERE id_usuario = %s",
+           (nombre, apellido, id_usuario)
+       )
+       cur.execute(
+           "UPDATE usuarios SET email = %s WHERE id_usuario = %s",
+           (email, id_usuario)
+       )
+       conn.commit()
+       return True
+
+
+   except Exception as e:
+       print(f"Error editando perfil alumno: {e}")
+       return False
+   finally:
+       if cur: cur.close()
+       if conn: conn.close()
+
+
+
+
+def editar_perfil_profesor(id_usuario, nombre, departamento, email):
+   conn = None
+   cur = None
+   try:
+       conn = get_connection()
+       cur = conn.cursor(dictionary=True)
+
+
+       cur.execute(
+           "UPDATE profesores SET nombre = %s, departamento = %s WHERE id_usuario = %s",
+           (nombre, departamento, id_usuario)
+       )
+       cur.execute(
+           "UPDATE usuarios SET email = %s WHERE id_usuario = %s",
+           (email, id_usuario)
+       )
+       conn.commit()
+       return True
+
+
+   except Exception as e:
+       print(f"Error editando perfil profesor: {e}")
+       return False
+   finally:
+       if cur: cur.close()
+       if conn: conn.close()
+
+
+def obtener_historial_alumno(id_usuario):
+   conn = None
+   cur = None
+   try:
+       conn = get_connection()
+       cur = conn.cursor(dictionary=True)
+
+
+       cur.execute(
+           "SELECT legajo FROM alumnos WHERE id_usuario = %s",
+           (id_usuario,)
+       )
+       alumno = cur.fetchone()
+
+
+       if not alumno:
+           return None
+
+
+       cur.execute(
+           """
+           SELECT e.nombre AS evaluacion, e.tipo, n.calificacion, n.fecha
+           FROM notas n
+           INNER JOIN evaluaciones e ON n.id_evaluacion = e.id_evaluacion
+           WHERE n.legajo_alumno = %s
+           ORDER BY n.fecha ASC
+           """,
+           (alumno['legajo'],)
+       )
+       return cur.fetchall()
+
+
+   except Exception as e:
+       print(f"Error obteniendo historial: {e}")
+       return None
+   finally:
+       if cur: cur.close()
+       if conn: conn.close()

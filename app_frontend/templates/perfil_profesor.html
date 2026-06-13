@@ -1,107 +1,159 @@
 {% extends "base.html" %}
 
-{% block title %}
-Perfil Docente
-{% endblock %}
+{% block title %}Perfil Docente{% endblock %}
 
 {% block content %}
 <div class="contenedor-principal">
-    
-    <header class="header-plataforma">
-        <div>
-            <h1 class="logo-texto">Mi Perfil</h1>
-        </div>
-        <span class="badge-rol badge-profesor">Rol: Profesor</span>
-    </header>
 
-    <div class="grid-layout">
-        
-        <div class="columna-izquierda">
-            
-            <div class="tarjeta-foto">
-                <div class="avatar-iniciales avatar-profesor">
-                    {{ detalle.nombre[0] | upper }}
-                </div>
-                <h2 class="nombre-profesor">{{ detalle.nombre }}</h2>
-                <span class="badge-estado badge-activo-prof">Docente Activo</span>
-            </div>
+   <header class="header-plataforma">
+       <div>
+           <h1 class="logo-texto">Mi Perfil</h1>
+       </div>
+       <span class="badge-rol badge-profesor">Rol: Profesor</span>
+   </header>
 
-            <div class="tarjeta-datos">
-                <h3 class="titulo-seccion-lateral">Información Institucional</h3>
-                
-                <div class="item-dato">
-                    <span class="etiqueta-dato">Correo Institucional</span>
-                    <p class="valor-dato">{{ usuario.email }}</p>
-                </div>
+   <div class="grid-layout">
 
-                <div class="item-dato">
-                    <span class="etiqueta-dato">Departamento</span>
-                    <p class="valor-dato">{{ detalle.departamento }}</p>
-                </div>
-                
-                <div class="item-dato">
-                    <span class="etiqueta-dato">ID Docente</span>
-                    <p class="valor-badge-dato">#{{ detalle.id_profesor }}</p>
-                </div>
+       <div class="columna-izquierda">
 
-            </div>
+           <div class="tarjeta-foto">
+               <div class="avatar-iniciales avatar-profesor">
+                   {{ usuario.nombre[0] | upper if usuario.nombre else (detalle.nombre[0] | upper if detalle.nombre else 'P') }}
+               </div>
+               <h2 class="nombre-profesor">{{ detalle.nombre if detalle.nombre else usuario.nombre }}</h2>
+               <span class="badge-estado badge-activo-prof">Docente Activo</span>
+           </div>
 
-        </div>
+           <div class="tarjeta-datos">
+               <h3 class="titulo-seccion-lateral">Información Institucional</h3>
 
-        <div class="columna-derecha">
-            
-            <div class="tarjeta-academica">
-                <h3 class="titulo-seccion-principal">Mis Cursos: </h3>
-                
-                <div class="contenedor-equipo">
-                    {% for curso in detalle.cursos_asignados %}
-                        <div>
-                            <span class="subetiqueta-equipo text-profesor">Cátedra activa: </span>
-                            <h4 class="nombre-equipo">{{ curso.nombre }}</h4>
-                        </div>
-                        <div class="footer-equipo">
-                            <p>Período: <span class="destaque-texto">{{ curso.semestre }}° Semestre</span></p>
-                            <span class="badge-periodo">Año {{ curso.anio }}</span>
-                        </div>
-                        {% if not loop.last %}<br>{% endif %}
-                    {% else %}
-                        <p class="valor-dato">No tiene materias asignadas para este ciclo lectivo.</p>
-                    {% endfor %}
-                </div>
-            </div>
+               <div class="item-dato">
+                   <span class="etiqueta-dato">Correo</span>
+                   <p class="valor-dato">{{ usuario.email }}</p>
+               </div>
+               <div class="item-dato">
+                   <span class="etiqueta-dato">Departamento</span>
+                   <p class="valor-dato">{{ detalle.departamento }}</p>
+               </div>
+               <div class="item-dato">
+                   <span class="etiqueta-dato">ID Docente</span>
+                   <p class="valor-badge-dato">#{{ detalle.id_profesor }}</p>
+               </div>
+           </div>
 
-            <div class="tarjeta-academica">
-                <h3 class="titulo-seccion-principal">Evaluaciones: </h3>
-                
-                <div class="lista-evaluaciones">
-                    {% for ev in detalle.evaluaciones %}
-                        <div class="tarjeta-evaluacion 
-                            {% if ev.evaluacion_tipo == 'TP' %}borde-Tp
-                            {% elif ev.evaluacion_tipo == 'parcial' %}borde-parcial
-                            {% else %}borde-parcialito
-                            {% endif %}">
-                            <div class="info-evaluacion">
-                                <h4 class="nombre-evaluacion">{{ ev.evaluacion_nombre }}</h4>
-                                <span class="tipo-evaluacion">{{ ev.evaluacion_tipo | upper }}</span>
-                            </div>
-                            <div class="fecha-evaluacion">
-                                <span class="texto-fecha-label">Estado:</span>
-                                <span class="badge-fecha
-                                    {% if ev.estado_evaluacion == 'corregida' %}badge-corregido
-                                    {% elif ev.estado_evaluacion == 'pendiente' %}badge-pendiente
-                                    {% endif %}">
-                                    {{ ev.estado_evaluacion | capitalize }}
-                                </span>
-                                <span class="badge-fecha">{{ ev.fecha }}</span>
-                            </div>
-                        </div>
-                    {% else %}
-                        <p class="valor-dato">No hay evaluaciones registradas en el sistema.</p>
-                    {% endfor %}    
-                </div>
-            </div>
+           <div class="tarjeta-datos">
+               <h3 class="titulo-seccion-lateral">Opciones:</h3>
 
-        </div>
-    </div>
+               <button type="button" class="btn btn-perfil-contrasena w-100 mb-2"
+                   data-bs-toggle="modal" data-bs-target="#modalContrasena">
+                   Cambiar Contraseña
+               </button>
+
+               <button type="button" class="btn btn-perfil-editar w-100"
+                   data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">
+                   Editar Información
+               </button>
+           </div>
+
+       </div>
+
+       <div class="columna-derecha">
+
+           <div class="tarjeta-academica">
+               <h3 class="titulo-seccion-principal">Mis Cursos:</h3>
+
+               <div class="contenedor-equipo">
+                   {% for curso in detalle.cursos_asignados %}
+                       <div>
+                           <span class="subetiqueta-equipo text-profesor">Cátedra activa:</span>
+                           <h4 class="nombre-equipo">{{ curso.curso_nombre }}</h4>
+                       </div>
+                       <div class="footer-equipo">
+                           <p>Período: <span class="destaque-texto">{{ curso.semestre }}° Semestre</span></p>
+                           <span class="badge-periodo">Año {{ curso.anio }}</span>
+                       </div>
+                       {% if not loop.last %}<br>{% endif %}
+                   {% else %}
+                       <p class="valor-dato">No tiene materias asignadas para este ciclo lectivo.</p>
+                   {% endfor %}
+               </div>
+           </div>
+
+           <div class="tarjeta-academica">
+               <h3 class="titulo-seccion-principal">Evaluaciones:</h3>
+
+               <div class="lista-evaluaciones">
+                   {% for ev in detalle.evaluaciones %}
+                       <div class="tarjeta-evaluacion
+                           {% if ev.evaluacion_tipo == 'TP' %}borde-Tp
+                           {% elif ev.evaluacion_tipo == 'parcial' %}borde-parcial
+                           {% else %}borde-parcialito{% endif %}">
+                           <div class="info-evaluacion">
+                               <h4 class="nombre-evaluacion">{{ ev.evaluacion_nombre }}</h4>
+                               <span class="tipo-evaluacion">{{ ev.evaluacion_tipo | upper }}</span>
+                           </div>
+                           <div class="fecha-evaluacion">
+                               <span class="texto-fecha-label">Estado:</span>
+                               <span class="badge-fecha
+                                   {% if ev.estado_evaluacion == 'corregida' %}badge-corregido
+                                   {% elif ev.estado_evaluacion == 'pendiente' %}badge-pendiente
+                                   {% endif %}">
+                                   {{ ev.estado_evaluacion | capitalize }}
+                               </span>
+                               <span class="badge-fecha">{{ ev.fecha }}</span>
+                           </div>
+                       </div>
+                   {% else %}
+                       <p class="valor-dato">No hay evaluaciones registradas en el sistema.</p>
+                   {% endfor %}
+               </div>
+           </div>
+
+       </div>
+   </div>
+</div>
+
+<div class="modal fade" id="modalContrasena" tabindex="-1">
+   <div class="modal-dialog">
+       <div class="modal-content">
+           <div class="modal-header">
+               <h5 class="modal-title">Cambiar Contraseña</h5>
+               <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+           </div>
+           <form action="{{ url_for('perfil.cambiar_contrasena') }}" method="POST">
+               <div class="modal-body">
+                   <input type="password" name="contrasena_actual" class="form-control mb-2" placeholder="Contraseña actual" required>
+                   <input type="password" name="contrasena_nueva" class="form-control mb-2" placeholder="Nueva contraseña" required>
+                   <input type="password" name="contrasena_repetir" class="form-control" placeholder="Repetir nueva contraseña" required>
+               </div>
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                   <button type="submit" class="btn btn-primary">Guardar</button>
+               </div>
+           </form>
+       </div>
+   </div>
+</div>
+
+<div class="modal fade" id="modalEditarPerfil" tabindex="-1">
+   <div class="modal-dialog">
+       <div class="modal-content">
+           <div class="modal-header">
+               <h5 class="modal-title">Editar Información Personal</h5>
+               <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+           </div>
+           <form action="{{ url_for('perfil.editar_perfil') }}" method="POST">
+               <div class="modal-body">
+                   <input type="text" name="nombre" class="form-control mb-2" placeholder="Nombre" value="{{ detalle.nombre if detalle.nombre else usuario.nombre }}" required>
+                   <input type="text" name="departamento" class="form-control mb-2" placeholder="Departamento" value="{{ detalle.departamento }}" required>
+                   <input type="email" name="email" class="form-control" placeholder="Email" value="{{ usuario.email }}" required>
+               </div>
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                   <button type="submit" class="btn btn-primary">Guardar</button>
+               </div>
+           </form>
+       </div>
+   </div>
 </div>
 {% endblock %}
