@@ -1,15 +1,20 @@
-from flask import Blueprint, redirect, render_template, request, flash, jsonify, current_app
+from flask import Blueprint, redirect, render_template, request, flash, jsonify, current_app, session
 import requests
 
 equipos_bp = Blueprint("equipos_bp",__name__)
 
 @equipos_bp.route("/equipos", methods=['GET'])
 def ver_equipos():
+    if session.get("rol") != "profesor":
+        flash("Solo los profesores tienen acceso a esta funcionalidad.", "warning")
+        return redirect("/")
+
     id_curso = request.args.get("id_curso")
     id_equipo = request.args.get("id_equipo")
     nombre_equipo = request.args.get("nombre_equipo")
+    pag = request.args.get("pag", default=1, type=int)
 
-    params = {}
+    params = {"pag": pag}
 
     if id_curso:
         params["id_curso"] = int(id_curso)
@@ -24,7 +29,10 @@ def ver_equipos():
     lista_cursos = []
 
     try:
-        response_todo = requests.get(f"{current_app.config['BACKEND_URL']}/api/equipos")
+        token = session.get("token") 
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+
+        response_todo = requests.get(f"{current_app.config['BACKEND_URL']}/api/equipos", headers=headers)
         if response_todo.status_code == 200:
             equipos_todos = response_todo.json()
 
@@ -34,7 +42,8 @@ def ver_equipos():
 
         response_filtrada = requests.get(
             f"{current_app.config['BACKEND_URL']}/api/equipos",
-            params=params
+            params=params,
+            headers=headers
         ) 
 
         if response_filtrada.status_code == 200:
@@ -46,11 +55,15 @@ def ver_equipos():
     
     lista_cursos.sort()
 
-    return render_template("equipos.html", equipos=lista_equipos, cursos=lista_cursos)
+    return render_template("equipos.html", equipos=lista_equipos, cursos=lista_cursos, pag=pag)
 
 
 @equipos_bp.route("/equipos/crear", methods=['POST'])
 def crear_equipo():
+    if session.get("rol") != "profesor":
+        flash("Solo los profesores tienen acceso a esta funcionalidad.", "warning")
+        return redirect("/")
+    
     nombre = request.form.get("nombre_equipo")
     id_curso = request.form.get("id_curso")
 
@@ -60,9 +73,13 @@ def crear_equipo():
     }
 
     try:
+        token = session.get("token") 
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+
         response = requests.post(
             f"{current_app.config['BACKEND_URL']}/api/equipos",
-            json=data
+            json=data,
+            headers=headers
         )
         
         if response.status_code == 201:
@@ -80,19 +97,25 @@ def crear_equipo():
 
 @equipos_bp.route("/equipos/modificar", methods=['POST'])
 def modificar_equipo():
+    if session.get("rol") != "profesor":
+        flash("Solo los profesores tienen acceso a esta funcionalidad.", "warning")
+        return redirect("/")
+    
     id_equipo = request.form.get("id_equipo")
     nombre = request.form.get("nombre_equipo")
-    id_curso = request.form.get("id_curso")
 
     data = {
-        "nombre_equipo": nombre,
-        "id_curso": id_curso
+        "nombre_equipo": nombre
     }
 
     try:
+        token = session.get("token") 
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+
         response = requests.put(
             f"{current_app.config['BACKEND_URL']}/api/equipos/{id_equipo}",
-            json=data
+            json=data,
+            headers=headers
         )
         
         if response.status_code == 200:
@@ -110,11 +133,19 @@ def modificar_equipo():
 
 @equipos_bp.route("/equipos/eliminar", methods=['POST'])
 def eliminar_equipo():
+    if session.get("rol") != "profesor":
+        flash("Solo los profesores tienen acceso a esta funcionalidad.", "warning")
+        return redirect("/")
+    
     id_equipo = request.form.get("id_equipo")
 
     try:
+        token = session.get("token") 
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+
         response = requests.delete(
-            f"{current_app.config['BACKEND_URL']}/api/equipos/{id_equipo}"
+            f"{current_app.config['BACKEND_URL']}/api/equipos/{id_equipo}",
+            headers=headers
         )
         
         if response.status_code == 204:
@@ -132,6 +163,10 @@ def eliminar_equipo():
 
 @equipos_bp.route("/equipos/agregar-alumno", methods=['POST'])
 def agregar_alumno_equipo():
+    if session.get("rol") != "profesor":
+        flash("Solo los profesores tienen acceso a esta funcionalidad.", "warning")
+        return redirect("/")
+    
     id_equipo = request.form.get("id_equipo")
     legajo_alumno = request.form.get("legajo_alumno")
 
@@ -141,9 +176,13 @@ def agregar_alumno_equipo():
     }
 
     try:
+        token = session.get("token") 
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+
         response = requests.post(
             f"{current_app.config['BACKEND_URL']}/api/equipos/miembros",
-            json=data
+            json=data,
+            headers=headers
         )
         
         if response.status_code == 201:
@@ -160,11 +199,19 @@ def agregar_alumno_equipo():
 
 @equipos_bp.route("/equipos/eliminar-alumno", methods=['POST'])
 def eliminar_alumno_equipo():
+    if session.get("rol") != "profesor":
+        flash("Solo los profesores tienen acceso a esta funcionalidad.", "warning")
+        return redirect("/")
+    
     id_miembro = request.form.get("id_miembro")
 
     try:
+        token = session.get("token") 
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+
         response = requests.delete(
-            f"{current_app.config['BACKEND_URL']}/api/equipos/miembros/{id_miembro}"
+            f"{current_app.config['BACKEND_URL']}/api/equipos/miembros/{id_miembro}",
+            headers=headers
         )
         
         if response.status_code == 204:
@@ -182,8 +229,14 @@ def eliminar_alumno_equipo():
 #Ruta auxiliar para los datos que necesita js
 @equipos_bp.route("/equipos/datos/<id_equipo>", methods=['GET'])
 def obtener_datos_equipos(id_equipo):
+    if session.get("rol") != "profesor":
+        return jsonify({"error": "No tienes permisos para acceder a estos datos"}), 403
+    
     try:
-        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/equipos/{id_equipo}")
+        token = session.get("token") 
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+
+        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/equipos/{id_equipo}", headers=headers)
         
         return jsonify(response.json()), response.status_code
     except Exception as e:

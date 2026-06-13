@@ -482,7 +482,7 @@ def eliminar_evaluacion(id):
         return jsonify({"error": "Error interno del servidor"}), 500
 
 
-def get_equipos_filtrados(id_equipo=None, nombre_equipo=None, id_curso=None):
+def get_equipos_filtrados(id_equipo=None, nombre_equipo=None, id_curso=None, pag = None, por_pag = None):
     conexion = None
     cursor = None
 
@@ -499,8 +499,8 @@ def get_equipos_filtrados(id_equipo=None, nombre_equipo=None, id_curso=None):
             parametros.append(id_equipo)
 
         if nombre_equipo:
-            condiciones.append("nombre_equipo = %s")
-            parametros.append(nombre_equipo)
+            condiciones.append("nombre_equipo LIKE %s")
+            parametros.append(f"%{nombre_equipo}%")
 
         if id_curso:
             condiciones.append("id_curso = %s")
@@ -508,6 +508,12 @@ def get_equipos_filtrados(id_equipo=None, nombre_equipo=None, id_curso=None):
 
         if condiciones:
             query += " WHERE " + " AND ".join(condiciones)
+
+        if pag and por_pag:
+            offset = (pag - 1) * por_pag
+            query += " LIMIT %s OFFSET %s"
+            parametros.append(por_pag)
+            parametros.append(offset)
 
         cursor.execute(query, parametros)
         equipos = cursor.fetchall()
@@ -1670,3 +1676,26 @@ def delete_curso(id_curso, id_profesor):
             cursor.close()
         if conexion:
             conexion.close()
+
+
+def existe_equipo(nombre_equipo, id_curso):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        query = "SELECT id_equipo FROM equipos WHERE nombre_equipo = %s AND id_curso = %s"
+
+        cursor.execute(query, (nombre_equipo, id_curso))
+        equipos = cursor.fetchone()
+        
+        return equipos
+
+    except Exception as e:
+        print(f"Error al verificar duplicado de equipo: {e}")
+        raise e
+    finally:
+        if cursor: cursor.close()
+        if conexion: conexion.close()

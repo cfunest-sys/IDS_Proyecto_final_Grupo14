@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask import Blueprint
+from utils.auth import token_required, rol_required
 from data.queries import (
     get_equipos_filtrados,
     get_equipo_id,
@@ -8,15 +9,25 @@ from data.queries import (
     delete_equipo,
     get_miembros_equipo,
     insertar_miembro,
-    delete_miembro
+    delete_miembro,
+    existe_equipo,
 )
 
 equipos_bp = Blueprint('equipos', __name__)
 
 
 @equipos_bp.route('/', methods=['GET'])
-def obtener_equipos():
+@token_required
+@rol_required("profesor")
+def obtener_equipos(current_user):
+
     try:
+        pag = request.args.get('pag', default=1, type=int)
+        por_pag = 15 
+
+        if pag <= 0:
+            return jsonify({"error": "La página debe ser un número positivo"}), 400
+
         filtro_id_equipo = request.args.get('id_equipo')
         filtro_nombre_equipo = request.args.get('nombre_equipo')
         filtro_id_curso = request.args.get('id_curso')
@@ -42,7 +53,7 @@ def obtener_equipos():
             except ValueError:
                 return jsonify({"error":"El ID del curso debe ser un número válido"}), 400
 
-        lista_equipos = get_equipos_filtrados(id_equipo_int, filtro_nombre_equipo, id_curso_int)
+        lista_equipos = get_equipos_filtrados(id_equipo_int, filtro_nombre_equipo, id_curso_int, pag, por_pag)
 
         return jsonify(lista_equipos), 200
     
@@ -52,12 +63,14 @@ def obtener_equipos():
 
 
 @equipos_bp.route('/<int:id_equipo>', methods=['GET'])
-def obtener_equipo_id(id_equipo):
-     
+@token_required
+@rol_required("profesor")
+def obtener_equipo_id(current_user, id_equipo):
+
     if id_equipo <= 0:
         return jsonify({"error": "El ID debe ser un número positivo"}), 400
 
-    try:
+    try:       
         equipo = get_equipo_id(id_equipo)
 
         if not equipo:
@@ -75,7 +88,10 @@ def obtener_equipo_id(id_equipo):
 
 
 @equipos_bp.route('/', methods=['POST'])
-def crear_equipo():
+@token_required
+@rol_required("profesor")
+def crear_equipo(current_user):
+
     try:
         datos = request.get_json()
         
@@ -102,7 +118,7 @@ def crear_equipo():
         except (ValueError, TypeError):
             return jsonify({"error": "El ID del curso debe ser un número entero válido"}), 400
 
-        equipo_existente = get_equipos_filtrados(None, nombre_equipo, id_curso_int)
+        equipo_existente = existe_equipo(nombre_equipo, id_curso_int)
 
         if equipo_existente:
             return jsonify({"error": "El equipo ya existe dentro del curso elegido"}), 409
@@ -116,7 +132,9 @@ def crear_equipo():
 
 
 @equipos_bp.route('/<int:id_equipo>', methods=['PUT'])
-def reemplazar_equipo(id_equipo):
+@token_required
+@rol_required("profesor")
+def reemplazar_equipo(current_user, id_equipo):
 
     if id_equipo <= 0:
         return jsonify({"error": "El ID debe ser un número positivo"}), 400
@@ -161,7 +179,9 @@ def reemplazar_equipo(id_equipo):
         
         
 @equipos_bp.route('/<int:id_equipo>', methods=['DELETE'])
-def eliminar_equipo(id_equipo):
+@token_required
+@rol_required("profesor")
+def eliminar_equipo(current_user, id_equipo):
 
     if id_equipo <= 0:
         return jsonify({"error": "El ID debe ser un número positivo"}), 400
@@ -182,7 +202,9 @@ def eliminar_equipo(id_equipo):
 
 #endpoints de los miembros de los equipos
 @equipos_bp.route('/miembros', methods=['POST'])
-def crear_alumno():
+@token_required
+@rol_required("profesor")
+def crear_alumno(current_user):
 
     try:
         datos = request.get_json()
@@ -214,11 +236,11 @@ def crear_alumno():
         miembros_actuales = get_miembros_equipo(None, id_equipo_int, None)
         if len(miembros_actuales) >= 10:
             return jsonify({"error": "El equipo alcanzó el límite máximo de 10 integrantes"}), 400
-
+        
         alumno_equipo = get_miembros_equipo(None, None, legajo_alumno_int)
         if alumno_equipo:
             return jsonify({"error": "El alumno ya está asignado a un equipo"}), 409
-
+        
         insertar_miembro(id_equipo_int, legajo_alumno_int)
         return jsonify({"mensaje": "Alumno agregado al equipo con éxito"}), 201
    
@@ -228,7 +250,9 @@ def crear_alumno():
 
 
 @equipos_bp.route('/miembros/<int:id_miembro>', methods=['DELETE'])
-def eliminar_miembro(id_miembro):
+@token_required
+@rol_required("profesor")
+def eliminar_miembro(current_user, id_miembro):
 
     if id_miembro <= 0:
         return jsonify({"error": "El ID debe ser un número positivo"}), 400
