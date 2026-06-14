@@ -190,7 +190,7 @@
                         <select id="alumno" name="alumno" class="form-select" required>
                             <option value="">Seleccionar alumno</option>
                             {% for a in alumnos %}
-                            <option value="{{ a.legajo }}">{{ a.nombre_completo }}</option>
+                            <option value="{{ a.legajo }}">{{ a.nombre }} {{ a.apellido }}</option>
                             {% endfor %}
                         </select>
                     </div>
