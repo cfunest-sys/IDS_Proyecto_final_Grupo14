@@ -11,22 +11,6 @@ Gestión de equipos
         Registro de equipos
     </h1>
 
-    <div class="container mt-5 mb-5 px-0">
-        <h2>
-            Acciones
-        </h2>
-        <div class="row mb-5 mt-4 mx-0">
-        <div class="col-md-4">
-            <button class="btn btn-crear" data-bs-toggle="modal" data-bs-target="#modal_crear_equipo">Crear equipo</button>
-        </div>
-        <div class="col-md-4">
-            <button class="btn btn-modificar-equipo" data-bs-toggle="modal" data-bs-target="#modal_modificar_equipo">Modificar equipo</button>
-        </div>
-        <div class="col-md-4">
-            <button class="btn btn-eliminar" data-bs-toggle="modal" data-bs-target="#modal_eliminar_equipo">Eliminar equipo</button> 
-        </div>
-    </div>
-
     <div class="container px-0">
         <form action="/equipos" method="get">
             <h2>
@@ -71,29 +55,43 @@ Gestión de equipos
     <div class="container mt-5 mb-5 px-0">
         <div class="row mt-5 mx-0">
             <div class="col-12">
-                <h3 class="titulo-tabla mb-3">
-                    Equipos registrados
-                </h3>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="titulo-tabla mb-0">
+                      Equipos registrados
+                    </h3>
+                    <button class="btn btn-crear" data-bs-toggle="modal" data-bs-target="#modal_crear_equipo">Crear equipo</button>
+                </div>
 
                 <table class="table">
                     <thead>
                         <tr>
-                            <th scope="col">ID equipo</th>
-                            <th scope="col">Nombre del equipo</th>
-                            <th scope="col">ID curso</th>
-                            <th scope="col">Integrantes</th>
+                            <th style="width: 10%;" class="text-center">ID equipo</th>
+                            <th style="width: 50%;">Nombre del equipo</th>
+                            <th style="width: 10%;" class="text-center">ID curso</th>
+                            <th style="width: 15%;" class="text-center">Integrantes</th>
+                            <th style="width: 15%;" class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for equipo in equipos %}
                             <tr>
-                                <th scope="row">{{ equipo.id_equipo }}</th>
+                                <th scope="row" class="text-center">{{ equipo.id_equipo }}</th>
                                 <td>{{ equipo.nombre_equipo }}</td>
-                                <td>{{ equipo.id_curso }}</td>
-                                <td>
+                                <td class="text-center">{{ equipo.id_curso }}</td>
+                                <td class="text-center">
                                     <button class="btn btn-alumnos" data-bs-toggle="modal" data-bs-target="#modal_alumnos" data-id="{{ equipo.id_equipo }}">
                                         Alumnos
                                     </button>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button type="button" class="btn btn-sm btn-outline-primary btn-modif-equipo" data-bs-toggle="modal"  data-bs-target="#modal_modificar_equipo" data-id="{{ equipo.id_equipo }}" title="Modificar equipo">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"  data-bs-target="#modal_eliminar_equipo" data-id="{{ equipo.id_equipo }}" title="ELiminar equipo">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         {% else %}
@@ -229,10 +227,8 @@ Gestión de equipos
             <form action="/equipos/modificar" method="post">
                 <div class="modal-body">
                     <h6 class="texto-indicacion-modal mb-3">Complete los siguientes campos:</h6>
-                    <div class="input-group mb-3">
-                        <span class="input-group-text">id_equipo</span>
-                        <input type="number" id="modificar_id_equipo" name="id_equipo" class="form-control" placeholder="Ej: 104432" required>
-                    </div> 
+
+                    <input type="hidden" id="modificar_id_equipo" name="id_equipo">
 
                     <div class="input-group mb-3">
                         <span class="input-group-text">Nombre equipo</span>
@@ -258,19 +254,16 @@ Gestión de equipos
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Eliminar equipo</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
             <form action="/equipos/eliminar" method="post">
-                <div class="modal-body">
-                    <h6 class="texto-indicacion-modal mb-2">Complete el siguiente campo:</h6>
-                    <p class="advertencia-eliminar mb-3">PRECAUCIÓN: una vez que se elimine un equipo no podrá recuperarlo</p>
-                    <div class="input-group mb-4">
-                        <span class="input-group-text">id_equipo</span>
-                        <input type="number" name="id_equipo" class="form-control" placeholder="Ej: 104432" required>
-                    </div> 
+                <div class="modal-body text-center">
+                    <p class="advertencia-eliminar mb-3">PRECAUCIÓN: una vez que se elimine un equipo no podras recuperarlo ¿Deseas proceder?</p>
                     
-                    <div class="d-flex justify-content-center mt-2">
+                    <input type="hidden" id="eliminar_id_equipo" name="id_equipo">
+                    
+                    <div class="d-flex justify-content-center gap-3 mt-4">
+                        <button type="button" class="btn btn-modificar-equipo" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-eliminar">Eliminar</button>
                     </div>
                 </div>

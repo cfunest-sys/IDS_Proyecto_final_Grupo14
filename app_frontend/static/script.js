@@ -155,37 +155,33 @@ if (formulario) {
 
 
 // Modificar equipo
-const inputIdModificar = document.getElementById("modificar_id_equipo");
-const inputNombreModificar = document.getElementById("modificar_nombre_equipo");
-const inputCursoModificar = document.getElementById("modificar_id_curso");
+const modalModificar = document.getElementById('modal_modificar_equipo');
 
-if (inputIdModificar) {
-    inputIdModificar.addEventListener("input", function() {
-        const idBuscado = this.value;
+if (modalModificar) {
+    modalModificar.addEventListener('show.bs.modal', function (event) {
+        const boton = event.relatedTarget;
+        const idEquipo = boton.getAttribute('data-id');
+        const inputId = modalModificar.querySelector("#modificar_id_equipo");
+        const inputNombre = modalModificar.querySelector("#modificar_nombre_equipo");
+        const inputCurso = modalModificar.querySelector("#modificar_id_curso");
 
-        if (idBuscado !== "") {
-            fetch(`/equipos/datos/${idBuscado}`)
-                .then(response => {
-                    return response.json().then(data => {
-                        if (!response.ok) {
-                            throw new Error(data.error || "Error del servidor");
-                        }
-                        return data;
-                    });
-                })
-                .then(equipo => {
-                    inputNombreModificar.value = equipo.nombre_equipo;
-                    inputCursoModificar.value = equipo.id_curso;
-                })
-                .catch(error => {
-                    console.warn(`Buscando...: ${error.message}`);
-                    inputNombreModificar.value = ""
-                    inputCursoModificar.value = ""
-                });
-        } else {
-            inputNombreModificar.value = "";
-            inputCursoModificar.value = "";
-        }
+        inputId.value = idEquipo;
+
+        fetch(`/equipos/datos/${idEquipo}`)
+            .then(response => {
+                if (!response.ok) throw new Error("Error al recuperar datos");
+                return response.json();
+            })
+            .then(equipo => {
+                inputNombre.value = equipo.nombre_equipo;
+                inputCurso.value = equipo.id_curso;
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                inputNombre.value = "";
+                inputCurso.value = "";
+                alert("Error al cargar los datos del equipo");
+            });
     });
 }
 
@@ -240,6 +236,19 @@ if (modalAlumnos) {
             });
     });
 } 
+
+// Eliminar equipos
+const modalEliminar = document.getElementById('modal_eliminar_equipo');
+
+if (modalEliminar) {
+    modalEliminar.addEventListener('show.bs.modal', function (event) {
+        const boton = event.relatedTarget;
+        const idEquipo = boton.getAttribute('data-id');
+        const inputId = modalEliminar.querySelector("#eliminar_id_equipo");
+        
+        inputId.value = idEquipo;
+    });
+}
 
 // GENERACION DE QR
 

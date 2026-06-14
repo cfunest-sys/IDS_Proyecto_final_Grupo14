@@ -242,6 +242,9 @@ main {
   background-color: #b31b1b;
   color: white;
   border: none;
+  padding: 4px 12px;
+  font-size: 14px;
+  border-radius: 4px;
 }
 
 .btn.btn-eliminar-alumno:hover {
@@ -265,7 +268,8 @@ main {
 }
 
 .advertencia-eliminar {
-  color: #811313;
+  color: black;
+  font-weight: bold;
 }
 
 .table tbody tr:nth-child(even) th,
@@ -310,6 +314,7 @@ h3 {
   display: flex !important;
   justify-content: space-between;
   align-items: center;
+  padding: 10px 0;
 }
 
 /* perfil */
