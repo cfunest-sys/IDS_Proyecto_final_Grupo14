@@ -21,9 +21,9 @@ Gestión de equipos
                     <div class="input-group">
                         <label class="input-group-text" for="inputGroupSelect01">ID curso</label>
                         <select class="form-select" id="inputGroupSelect01" name="id_curso">
-                            <option value="" selected>Elegir ID del curso</option>
+                            <option value="" {% if not request.args.get('id_curso') %}selected{% endif %}>Elegir ID del curso</option>
                             {% for curso in cursos %}
-                                <option value="{{ curso }}">Curso {{ curso }}</option>
+                                <option value="{{ curso }}" {% if request.args.get('id_curso')|string == curso|string %}selected{% endif %}>Curso {{ curso }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -32,12 +32,12 @@ Gestión de equipos
                 <div class="col-md-5">
                     <div class="input-group">
                         <span class="input-group-text" id="inputGroup-sizing-default">ID equipo</span>
-                        <input type="text" class="form-control" name="id_equipo">
+                        <input type="text" class="form-control" name="id_equipo" value="{{ request.args.get('id_equipo', '') }}">
                     </div>
                 </div>
 
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-filtrar">Filtrar</button>
+                    <button type="submit" class="btn btn-filtrar w-100">Filtrar</button>
                 </div>
             </div>
             
@@ -45,8 +45,12 @@ Gestión de equipos
                 <div class="col-md-10">
                     <div class="input-group">
                         <span class="input-group-text" id="inputGroup-sizing-default">Nombre equipo</span>
-                        <input type="text" class="form-control" name="nombre_equipo">
+                        <input type="text" class="form-control" name="nombre_equipo" value="{{ request.args.get('nombre_equipo', '') }}">
                     </div>
+                </div>
+
+                <div class="col-md-2">
+                    <a href="/equipos" class="btn btn-filtrar w-100">Reestablecer</a>
                 </div>
             </div>
         </form>   
