@@ -133,6 +133,8 @@ def reset_password_with_token():
         }), 200
 
     except Exception as e:
+        if conn:
+            conn.rollback()
         print(e)
         return jsonify({
             "error": "Error interno del servidor."
