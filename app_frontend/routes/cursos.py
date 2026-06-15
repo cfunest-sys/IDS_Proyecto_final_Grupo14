@@ -9,10 +9,9 @@ def ver_cursos():
         flash("Solo los profesores tienen acceso a esta funcionalidad.", "warning")
         return redirect("/")
 
-    id_curso = request.args.get("id_curso")
-    nombre_curso = request.args.get("nombre_curso")
-    anio = request.args.get("anio")
-    cuatrimestre = request.args.get("cuatrimestre")
+    id_curso = request.args.get("id_curso", "")
+    anio = request.args.get("anio", "")
+    cuatrimestre = request.args.get("cuatrimestre", "")
     pag = request.args.get("pag", default=1, type=int)
 
     lista_cursos_todos = []
@@ -30,9 +29,6 @@ def ver_cursos():
 
         if id_curso and str(id_curso).strip():
             params["id_curso"] = int(id_curso)
-            
-        if nombre_curso and str(nombre_curso).strip():
-            params["nombre_curso"] = nombre_curso
             
         if anio and str(anio).strip():
             params["anio"] = int(anio)
@@ -70,8 +66,8 @@ def ver_cursos():
     
     lista_cursos.sort(key=lambda x: x.get("id_curso", 0))
 
-    return render_template("cursos.html", cursos=lista_cursos, cursos_todos=lista_cursos_todos, pag=pag)
-
+    return render_template("cursos.html", cursos=lista_cursos, cursos_todos=lista_cursos_todos, pag=pag,
+        id_curso=id_curso, anio=anio, cuatrimestre=cuatrimestre)
 
 @cursos_bp.route("/cursos/crear", methods=['POST'])
 def crear_cursos():
@@ -133,6 +129,37 @@ def eliminar_curso():
             flash("Curso eliminado correctamente", "success")
         else:
             error_msg = response.json().get("error", "No se pudo eliminar el curso")
+            flash(f"Error: {error_msg}", "danger")
+
+    except Exception as e:
+        print(f"Error al conectar con la API: {e}")
+        flash("Error interno: No se pudo conectar con el servidor", "danger")
+
+    return redirect("/cursos")
+
+@cursos_bp.route("/cursos/modificar", methods=['POST'])
+def modificar_curso():
+    if session.get("rol") != "profesor":
+        flash("Solo los profesores tienen acceso a esta funcionalidad.","warning")
+        return redirect("/")
+    
+    id_curso = request.form.get("id_curso", "")
+    cuatrimestre = request.form.get("cuatrimestre", "")
+    anio = request.form.get("anio", "")
+
+    try:
+        token = session.get("token") 
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+        data = {"id_curso": id_curso, "cuatrimestre":cuatrimestre, "anio":anio}
+        response = requests.put(
+            f"{current_app.config['BACKEND_URL']}/api/cursos/modificar", 
+            headers=headers,json=data
+        )
+        
+        if response.status_code == 200:
+            flash("Curso Modificado correctamente", "success")
+        else:
+            error_msg = response.json().get("error", "")
             flash(f"Error: {error_msg}", "danger")
 
     except Exception as e:

@@ -7,6 +7,7 @@ from data.queries import (
     get_cursos_filtrados,
     insertar_curso,
     delete_curso,
+    modificar_curso_query,
 )
 
 cursos_bp = Blueprint('cursos', __name__)
@@ -172,7 +173,9 @@ def borrar_cursos(current_user, id_curso):
     if id_curso <= 0:
         return jsonify({"error": "El ID debe ser un número positivo"}), 400
         
-    id_profesor = current_user["id"]
+    profesor_encontrado = get_user_profile({"rol": current_user.get("rol", ""), 
+        "id_usuario": current_user.get("id", "")})
+    id_profesor = profesor_encontrado.get("id_profesor","")
 
     try:
         curso_existente = get_cursos_filtrados(id_curso, id_profesor=id_profesor)
@@ -186,3 +189,55 @@ def borrar_cursos(current_user, id_curso):
     except Exception as e:
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
+
+@cursos_bp.route('/modificar', methods=['PUT'])
+@token_required
+@rol_required("profesor")
+def modificar_curso(current_user):
+    try:
+        datos = request.get_json()
+        profesor_encontrado = get_user_profile({"rol": current_user.get("rol", ""), 
+            "id_usuario": current_user.get("id", "")})
+        id_profesor = profesor_encontrado.get("id_profesor","")
+
+        if not datos:
+            return jsonify({"error": "Body vacío"}), 400
+        
+        if "id_curso" not in datos or "anio" not in datos or "cuatrimestre" not in datos:
+            return jsonify({"error": "Faltan campos obligatorios"}), 400
+        
+        id_curso = datos.get("id_curso")
+        anio = datos.get("anio")
+        cuatrimestre = datos.get("cuatrimestre")
+
+        if not id_curso or not anio or not cuatrimestre:
+            return jsonify({"error": "Campos obligatorios vacios"}), 400
+        
+        try:
+            anio_int = int(anio)
+            if anio_int <= 0:
+                return jsonify({"error": "El año debe ser un número positivo"}), 400
+            
+        except (ValueError, TypeError):
+            return jsonify({"error": "El año debe ser un número entero válido"}), 400
+        
+        try:
+            cuatrimestre_int = int(cuatrimestre)
+            if cuatrimestre_int <= 0 or cuatrimestre_int > 2:
+                return jsonify({"error": "El cuatrimestre debe ser 1 o 2"}), 400
+        
+        except (ValueError, TypeError):
+            return jsonify({"error": "El cuatrimestre debe ser un número entero válido"}), 400
+
+        curso_existente = get_cursos_filtrados(id_curso=id_curso)
+
+        if len(curso_existente) == 0:
+            return jsonify({"error": "El curso no existe"}), 404
+
+        modificar_curso_query(cuatrimestre_int, anio_int, id_curso)
+        return jsonify({"mensaje": "Curso modificado con éxito"}), 200
+   
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+

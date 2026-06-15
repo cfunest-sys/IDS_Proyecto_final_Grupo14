@@ -1705,6 +1705,44 @@ def delete_curso(id_curso, id_profesor):
         if conexion:
             conexion.close()
 
+def modificar_curso_query(cuatrimestre, anio, id_curso):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        query_modificar = """
+            UPDATE cursos
+            SET cuatrimestre = %s, anio = %s
+            WHERE id_curso = %s
+        """
+        cursor.execute(query_modificar, (cuatrimestre, anio, id_curso,))
+        conexion.commit()
+
+        query_verificar = """
+        SELECT * FROM cursos 
+        WHERE cuatrimestre = %s and anio = %s and id_curso = %s;
+        """
+        cursor.execute(query_verificar, (cuatrimestre, anio, id_curso,))
+        resultado = cursor.fetchall()
+        if (resultado == None or resultado == {} or resultado == []):
+            return False;
+        return True
+    
+    except Exception as e:
+        if conexion:
+            conexion.rollback()
+        print(f"Error al intentar modificar el curso: {e}")
+        raise e
+    
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
+
 
 def existe_equipo(nombre_equipo, id_curso):
     conexion = None

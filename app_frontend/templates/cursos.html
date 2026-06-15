@@ -11,19 +11,6 @@ Gestión de cursos
         Registro de cursos
     </h1>
 
-    <div class="container mt-5 mb-5 px-0">
-        <h2>
-            Acciones
-        </h2>
-        <div class="row mb-5 mt-4 mx-0 justify-content-evenly">
-        <div class="col-auto">
-            <button class="btn btn-crear" data-bs-toggle="modal" data-bs-target="#modal_crear_curso">Crear curso</button>
-        </div>
-        <div class="col-auto">
-            <button class="btn btn-eliminar" data-bs-toggle="modal" data-bs-target="#modal_eliminar_curso">Eliminar curso</button> 
-        </div>
-    </div>
-
     <div class="container px-0">
         <form action="/cursos" method="get">
             <h2>
@@ -34,9 +21,9 @@ Gestión de cursos
                     <div class="input-group">
                         <label class="input-group-text" for="inputGroupSelect01">ID curso</label>
                         <select class="form-select" id="inputGroupSelect01" name="id_curso">
-                            <option value="" selected>Elegir ID del curso</option>
+                            <option value="" >Elegir ID del curso</option>
                             {% for curso in cursos_todos %}
-                                <option value="{{ curso.id_curso }}">Curso {{ curso.id_curso }}</option>
+                                <option value="{{ curso.id_curso }}" {{'selected' if curso.id_curso | int == id_curso | int}}>Curso {{ curso.id_curso }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -45,55 +32,66 @@ Gestión de cursos
                 <div class="col-md-4">
                     <div class="input-group">
                         <span class="input-group-text" id="inputGroup-sizing-default">Año</span>
-                        <input type="number" class="form-control" name="anio" placeholder="Ej: 2026" min="2000" max="2100">
+                        <input type="number" value="{{ anio }}" class="form-control" name="anio" placeholder="Ej: 2026" min="2000" max="2100">
                     </div>
                 </div>
 
                 <div class="col-md-4">
                     <div class="input-group">
                         <span class="input-group-text" id="inputGroup-sizing-default">Cuatrimestre</span>
-                        <input type="number" class="form-control" name="cuatrimestre" placeholder="1 o 2" min="1" max="2">
+                        <input type="number" value="{{ cuatrimestre }}" class="form-control" name="cuatrimestre" placeholder="1 o 2" min="1" max="2">
                     </div>
                 </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-filtrar">Filtrar</button>
             </div>
             
-            <div class="row mb-4">
-                <div class="col-md-10">
-                    <div class="input-group">
-                        <span class="input-group-text" id="inputGroup-sizing-default">Nombre curso</span>
-                        <input type="text" class="form-control" name="nombre_curso" placeholder="Ej: Artemis 3">
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-filtrar">Filtrar</button>
-                </div>
-            </div>
         </form>   
     </div>
 
     <div class="container mt-5 mb-5 px-0">
         <div class="row mt-5 mx-0">
             <div class="col-12">
-                <h3 class="titulo-tabla mb-3">
-                    Cursos registrados
-                </h3>
-
+                <div class="row mx-0">
+                    <h3 class="titulo-tabla mb-3 col">
+                        Cursos registrados
+                    </h3>
+                    <div class="col-auto">
+                        <button class="btn btn-crear" data-bs-toggle="modal" data-bs-target="#modal_crear_curso">Crear curso</button>
+                    </div>
+                </div>
                 <table class="table">
                     <thead>
                         <tr>
-                            <th scope="col">ID curso</th>
-                            <th scope="col">Nombre del curso</th>
-                            <th scope="col">Año</th>
-                            <th scope="col">Cuatrimestre</th>
+                            <th class="text-center" scope="col">ID curso</th>
+                            <th class="text-center" scope="col">Año</th>
+                            <th class="text-center" scope="col">Cuatrimestre</th>
+                            <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for curso in cursos %}
-                            <tr>
+                            <tr class="text-center">
                                 <th scope="row">{{ curso.id_curso }}</th>
-                                <td>{{ curso.nombre_curso }}</td>
                                 <td>{{ curso.anio }}</td>
                                 <td>{{ curso.cuatrimestre }}°</td>
+                                <td> 
+                                    <div class="d-flex justify-content-center gap-1">
+                                    <div class="col-auto">
+                                        <button class="btn btn-sm btn-outline-primary btn-editar-eva" data-bs-toggle="modal" data-bs-target="#modal_modificar_curso" title="Modificar curso">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    </div>
+                                    <form action="/cursos/eliminar" method="POST" class="d-inline">
+                                      <input name="method" value="delete" type="hidden">
+                                      <input value="{{ curso.id_curso }}" type="hidden" name="id_curso">
+                                      <button type="submit" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Eliminar curso">
+                                        <i class="bi bi-trash"></i>
+                                      </button>
+                                    </form>
+                                  </div>
+                                </td>
                             </tr>
                         {% else %}
                             <tr>
@@ -174,31 +172,42 @@ Gestión de cursos
         </div>
     </div>
 </div>
- 
-<div class="modal fade" id="modal_eliminar_curso" tabindex="-1">
+<!-- Modal de modificar curso -->
+<div class="modal fade" id="modal_modificar_curso" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Eliminar equipo</h5>
+                <h5 class="modal-title">Modificar curso</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
-            <form action="/cursos/eliminar" method="post">
+            <form action="/cursos/modificar" method="post">
                 <div class="modal-body">
-                    <h6 class="texto-indicacion-modal mb-2">Complete el siguiente campo:</h6>
-                    <p class="advertencia-eliminar mb-3">PRECAUCIÓN: una vez que se elimine un curso no podrá recuperarlo</p>
+                    <h6 class="texto-indicacion-modal mb-3">Complete los siguientes campos:</h6>
+
                     <div class="input-group mb-4">
-                        <span class="input-group-text">id_curso</span>
-                        <input type="number" name="id_curso" class="form-control" placeholder="Ej: 104432" required>
+                        <span class="input-group-text">Id Curso</span>
+                        <input type="number" name="id_curso" class="form-control" placeholder="Ej: 1" min="1" required>
+                    </div> 
+
+                    <div class="input-group mb-4">
+                        <span class="input-group-text">Año</span>
+                        <input type="number" name="anio" class="form-control" placeholder="Ej: 2026" min="2000" max="2100" required>
+                    </div> 
+
+                    <div class="input-group mb-4">
+                        <span class="input-group-text">Cuatrimestre</span>
+                        <input type="number" name="cuatrimestre" class="form-control" placeholder="1 o 2" min="1" max="2" required>
                     </div> 
                     
                     <div class="d-flex justify-content-center mt-2">
-                        <button type="submit" class="btn btn-eliminar">Eliminar</button>
+                        <button type="submit" class="btn btn-crear">Modificar</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 
 {% endblock %}
