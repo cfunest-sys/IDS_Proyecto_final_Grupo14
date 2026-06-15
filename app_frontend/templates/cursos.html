@@ -43,10 +43,16 @@ Gestión de cursos
                     </div>
                 </div>
             </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-filtrar">Filtrar</button>
+            <div class="row mb-4 position-relative">
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-filtrar">Filtrar</button>
+                </div>
+                <div class="col-md-3">
+                    <a href="/cursos" class="btn btn-filtrar w-100">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Limpiar Período
+                    </a>
+                </div>
             </div>
-            
         </form>   
     </div>
 
@@ -72,14 +78,14 @@ Gestión de cursos
                     </thead>
                     <tbody>
                         {% for curso in cursos %}
-                            <tr class="text-center">
+                            <tr class="text-center" data-id="{{curso.id_curso}}" data-anio="{{ curso.anio }}" data-cuatri="{{ curso.cuatrimestre }}">
                                 <th scope="row">{{ curso.id_curso }}</th>
                                 <td>{{ curso.anio }}</td>
                                 <td>{{ curso.cuatrimestre }}°</td>
                                 <td> 
                                     <div class="d-flex justify-content-center gap-1">
                                     <div class="col-auto">
-                                        <button class="btn btn-sm btn-outline-primary btn-editar-eva" data-bs-toggle="modal" data-bs-target="#modal_modificar_curso" title="Modificar curso">
+                                        <button class="btn btn-sm btn-outline-primary btn-editar-curso" data-bs-toggle="modal" data-bs-target="#modal_modificar_curso" title="Modificar curso">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                     </div>
@@ -184,20 +190,16 @@ Gestión de cursos
             <form action="/cursos/modificar" method="post">
                 <div class="modal-body">
                     <h6 class="texto-indicacion-modal mb-3">Complete los siguientes campos:</h6>
-
-                    <div class="input-group mb-4">
-                        <span class="input-group-text">Id Curso</span>
-                        <input type="number" name="id_curso" class="form-control" placeholder="Ej: 1" min="1" required>
-                    </div> 
+                    <input type="hidden" id="id_curso_modal" name="id_curso" class="form-control" required> 
 
                     <div class="input-group mb-4">
                         <span class="input-group-text">Año</span>
-                        <input type="number" name="anio" class="form-control" placeholder="Ej: 2026" min="2000" max="2100" required>
+                        <input type="number" id="anio_modal" name="anio" class="form-control" placeholder="Ej: 2026" min="2000" max="2100" required>
                     </div> 
 
                     <div class="input-group mb-4">
                         <span class="input-group-text">Cuatrimestre</span>
-                        <input type="number" name="cuatrimestre" class="form-control" placeholder="1 o 2" min="1" max="2" required>
+                        <input type="number" id="cuatrimestre_modal" name="cuatrimestre" class="form-control" placeholder="1 o 2" min="1" max="2" required>
                     </div> 
                     
                     <div class="d-flex justify-content-center mt-2">
@@ -209,5 +211,20 @@ Gestión de cursos
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+  // Editar evaluacion - abrir modal con datos
+  document.querySelectorAll('.btn-editar-curso').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const tr = btn.closest('tr');
+      document.getElementById('id_curso_modal').value = tr.dataset.id;
+      document.getElementById('anio_modal').value = tr.dataset.anio;
+      document.getElementById('cuatrimestre_modal').value = tr.dataset.cuatri;
+      new bootstrap.Modal(document.getElementById('modalEditarEvaluacion')).show();
+    });
+  });
+});
+</script>
 
 {% endblock %}
