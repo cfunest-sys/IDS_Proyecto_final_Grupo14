@@ -229,7 +229,7 @@ def modificar_curso(current_user):
         except (ValueError, TypeError):
             return jsonify({"error": "El cuatrimestre debe ser un número entero válido"}), 400
 
-        curso_existente = get_cursos_filtrados(id_curso=id_curso)
+        curso_existente = get_cursos_filtrados(id_curso=id_curso, id_profesor=id_profesor)
 
         if len(curso_existente) == 0:
             return jsonify({"error": "El curso no existe"}), 404
