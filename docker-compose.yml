@@ -11,8 +11,6 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 10s
       retries: 10
-    ports:
-      - "3306:3306"
   backend:
     build:
       context: .
@@ -30,6 +28,7 @@ services:
       - "5001:5001"
     volumes:
       - uploads_data:/app/backend/uploads
+      - flask_sessions:/app/backend/flask_session
   frontend:
     build:
       context: .
@@ -43,3 +42,4 @@ services:
 volumes:
   mysql_data:
   uploads_data:
+  flask_sessions:
