@@ -628,3 +628,39 @@ function initEliminarButtons() {
     new bootstrap.Modal(document.getElementById('modalEliminarMaterial')).show();
   });
 }
+
+// Editar_cursos - abrir modal con datos
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.btn-editar-curso').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const tr = btn.closest('tr');
+      const id = tr.getAttribute('data-id');
+      const anio = tr.getAttribute('data-anio');
+      const cuatri = tr.getAttribute('data-cuatri');
+            
+      document.getElementById('id_curso_modal').value = tr.dataset.id;
+      document.getElementById('anio_modal').value = tr.dataset.anio;
+      document.getElementById('cuatrimestre_modal').value = tr.dataset.cuatri;
+      new bootstrap.Modal(document.getElementById('modal_modificar_curso')).show();
+
+      elModal.addEventListener('hidden.bs.modal', function () {
+        document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+        document.body.style.overflow = 'auto';
+        document.body.classList.remove('modal-open');
+      });
+    });
+  });
+});
+
+// Eliminar curso
+const modalEliminarCurso = document.getElementById('modal_eliminar_curso');
+
+if (modalEliminarCurso) {
+    modalEliminarCurso.addEventListener('show.bs.modal', function (event) {
+        const boton = event.relatedTarget;
+        const idCurso = boton.getAttribute('data-id');
+        const inputId = modalEliminarCurso.querySelector("#eliminar_id_curso");
+        
+        inputId.value = idCurso;
+    });
+}
