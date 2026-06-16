@@ -1547,7 +1547,7 @@ def crear_alumno(alumno):
             conn.close()
 
 
-def get_cursos_filtrados(id_curso=None, nombre_curso=None, anio=None, cuatrimestre=None, id_profesor=None, pag = None, por_pag = None):
+def get_cursos_filtrados(id_curso=None, anio=None, cuatrimestre=None, pag = None, por_pag = None):
     conexion = None
     cursor = None
 
@@ -1556,31 +1556,22 @@ def get_cursos_filtrados(id_curso=None, nombre_curso=None, anio=None, cuatrimest
         cursor = conexion.cursor(dictionary=True)
 
         query = """
-            SELECT c.* FROM cursos c
-            JOIN profesor_curso pc ON c.id_curso = pc.id_curso
+            SELECT * FROM cursos
         """
         parametros = []
         condiciones = []
 
         if id_curso:
-            condiciones.append("c.id_curso = %s")
+            condiciones.append("id_curso = %s")
             parametros.append(id_curso)
 
-        if nombre_curso:
-            condiciones.append("c.nombre_curso LIKE %s")
-            parametros.append(f"%{nombre_curso}%")
-
         if anio:
-            condiciones.append("c.anio = %s")
+            condiciones.append("anio = %s")
             parametros.append(anio)
 
         if cuatrimestre:
-            condiciones.append("c.cuatrimestre = %s")
+            condiciones.append("cuatrimestre = %s")
             parametros.append(cuatrimestre)
-
-        if id_profesor:
-            condiciones.append("pc.id_profesor = %s")
-            parametros.append(id_profesor)
 
         if condiciones:
             query += " WHERE " + " AND ".join(condiciones)
@@ -1607,7 +1598,7 @@ def get_cursos_filtrados(id_curso=None, nombre_curso=None, anio=None, cuatrimest
             conexion.close()
 
 
-def insertar_curso(nombre_curso, anio, cuatrimestre, id_profesor):
+def insertar_curso(anio, cuatrimestre, id_profesor):
     conexion = None
     cursor = None
 
@@ -1615,7 +1606,7 @@ def insertar_curso(nombre_curso, anio, cuatrimestre, id_profesor):
         conexion = get_connection()
         cursor = conexion.cursor(dictionary=True)
 
-        cursor.execute("INSERT INTO cursos (nombre_curso, anio, cuatrimestre) VALUES (%s, %s, %s)", (nombre_curso, anio, cuatrimestre))
+        cursor.execute("INSERT INTO cursos (anio, cuatrimestre) VALUES (%s, %s)", (anio, cuatrimestre))
         conexion.commit()
 
         id_curso = cursor.lastrowid
@@ -1634,7 +1625,7 @@ def insertar_curso(nombre_curso, anio, cuatrimestre, id_profesor):
             conexion.close()
 
 
-def delete_curso(id_curso, id_profesor):
+def delete_curso(id_curso):
     conexion = None
     cursor = None
 
@@ -1642,21 +1633,8 @@ def delete_curso(id_curso, id_profesor):
         conexion = get_connection()
         cursor = conexion.cursor(dictionary=True)
 
-        query_desvincular = """
-            DELETE FROM profesor_curso 
-            WHERE id_profesor = %s AND id_curso = %s
-        """
-        cursor.execute(query_desvincular, (id_profesor, id_curso))
-        
-        query_curso_vinculado = """
-            SELECT COUNT(*) as total FROM profesor_curso WHERE id_curso = %s
-        """
-        cursor.execute(query_curso_vinculado, (id_curso,))
-        resultado = cursor.fetchone()
-
-        if resultado and resultado["total"] == 0:
-            query_borrar_curso = "DELETE FROM cursos WHERE id_curso = %s"
-            cursor.execute(query_borrar_curso, (id_curso,))
+        borrar_curso = "DELETE FROM cursos WHERE id_curso = %s"
+        cursor.execute(borrar_curso, (id_curso,))
   
         conexion.commit()
         return True
@@ -1672,6 +1650,7 @@ def delete_curso(id_curso, id_profesor):
             cursor.close()
         if conexion:
             conexion.close()
+            
 
 def modificar_curso_query(cuatrimestre, anio, id_curso):
     conexion = None

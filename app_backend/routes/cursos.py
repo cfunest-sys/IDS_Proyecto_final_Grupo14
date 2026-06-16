@@ -9,14 +9,6 @@ from data.queries import (
     modificar_curso_query,
 )
 
-from data.queries import (
-    get_user_profile,
-    get_cursos_filtrados,
-    insertar_curso,
-    delete_curso,
-)
-
-
 cursos_bp = Blueprint('cursos', __name__)
 
 
@@ -32,7 +24,6 @@ def listar_cursos_filtrados(current_user):
             return jsonify({"error": "La página debe ser un número positivo"}), 400
         
         filtro_id_curso = request.args.get('id_curso')
-        filtro_nombre_curso = request.args.get('nombre_curso')
         filtro_anio = request.args.get('anio')
         filtro_cuatrimestre = request.args.get('cuatrimestre')
 
@@ -67,7 +58,10 @@ def listar_cursos_filtrados(current_user):
             except (ValueError, TypeError):
                 return jsonify({"error": "El cuatrimestre debe ser un número entero válido"}), 400
 
-        lista_cursos = get_cursos_filtrados(id_curso_int, filtro_nombre_curso, anio_int, cuatrimestre_int, pag, por_pag)
+        lista_cursos = get_cursos_filtrados(id_curso_int, anio_int, cuatrimestre_int, pag, por_pag)
+
+        if not lista_cursos:
+            return jsonify([]), 200
 
         return jsonify(lista_cursos), 200
 
@@ -86,14 +80,13 @@ def crear_cursos(current_user):
         if not datos:
             return jsonify({"error": "Body vacío"}), 400
         
-        if "nombre_curso" not in datos or "anio" not in datos or "cuatrimestre" not in datos:
+        if "anio" not in datos or "cuatrimestre" not in datos:
             return jsonify({"error": "Faltan campos obligatorios"}), 400
         
-        nombre_curso = datos.get("nombre_curso")
         anio = datos.get("anio")
         cuatrimestre = datos.get("cuatrimestre")
 
-        if not nombre_curso or not anio or not cuatrimestre:
+        if not anio or not cuatrimestre:
             return jsonify({"error": "Campos obligatorios vacios"}), 400
         
         try:
@@ -112,17 +105,24 @@ def crear_cursos(current_user):
         except (ValueError, TypeError):
             return jsonify({"error": "El cuatrimestre debe ser un número entero válido"}), 400
 
-        id_profesor = current_user.get("identity") or current_user.get("id_usuario") or current_user.get("sub")
+        id_usuario = current_user.get("id")
 
-        if not id_profesor:
+        if not id_usuario:
             return jsonify({"error": "No se encontró el ID del profesor en el token"}), 400
+        
+        perfil_profe = get_user_profile({"rol": "profesor", "id_usuario": int(id_usuario)})
 
-        curso_existente = get_cursos_filtrados(nombre_curso=nombre_curso, anio=anio_int, cuatrimestre=cuatrimestre_int)
+        if not perfil_profe or "id_profesor" not in perfil_profe:
+            return jsonify({"error": "No se encontró un perfil de profesor asociado"}), 404
+        
+        id_profesor = perfil_profe["id_profesor"]
+
+        curso_existente = get_cursos_filtrados(anio=anio_int, cuatrimestre=cuatrimestre_int)
 
         if curso_existente:
             return jsonify({"error": "El curso ya existe dentro del cuatrimestre elegido"}), 409
 
-        insertar_curso(nombre_curso, anio_int, cuatrimestre_int, id_profesor)
+        insertar_curso(anio_int, cuatrimestre_int, id_profesor)
         return jsonify({"mensaje": "Curso creado con éxito"}), 201
    
     except Exception as e:
@@ -137,11 +137,10 @@ def borrar_cursos(current_user, id_curso):
     if id_curso <= 0:
         return jsonify({"error": "El ID debe ser un número positivo"}), 400
         
-
     try:
         curso_existente = get_cursos_filtrados(id_curso=id_curso)
 
-        if not curso_existente:
+        if not curso_existente or len(curso_existente) == 0:
             return jsonify({"error":"Curso no encontrado"}), 404
     
         delete_curso(id_curso)

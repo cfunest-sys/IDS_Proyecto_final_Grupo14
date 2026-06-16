@@ -23,7 +23,11 @@ def ver_cursos():
 
         response_todo = requests.get(f"{current_app.config['BACKEND_URL']}/api/cursos/", headers=headers)
         if response_todo.status_code == 200:
-            lista_cursos_todos = response_todo.json()
+            datos_todos = response_todo.json()
+            if isinstance(datos_todos, list):
+                lista_cursos_todos = datos_todos
+            elif isinstance(datos_todos, dict) and "error" not in datos_todos:
+                lista_cursos_todos = [datos_todos]
 
         params = {"pag": pag}
 
@@ -36,18 +40,11 @@ def ver_cursos():
         if cuatrimestre and str(cuatrimestre).strip():
             params["cuatrimestre"] = int(cuatrimestre)
 
-        if len(params) > 1: 
-            response_filtrada = requests.get(
-                f"{current_app.config['BACKEND_URL']}/api/cursos/filtros/",
-                params=params,
-                headers=headers
-            ) 
-        else:
-            response_filtrada = requests.get(
-                f"{current_app.config['BACKEND_URL']}/api/cursos/",
-                params={"pag": pag},
-                headers=headers
-            )
+        response_filtrada = requests.get(
+            f"{current_app.config['BACKEND_URL']}/api/cursos/",
+            params=params,
+            headers=headers
+        ) 
 
         if response_filtrada.status_code == 200:
             datos_recibidos = response_filtrada.json()
@@ -64,10 +61,12 @@ def ver_cursos():
         print(f"Error al traer los cursos: {e}")
         flash("No se pudieron cargar los cursos del servidor", "danger")
     
-    lista_cursos.sort(key=lambda x: x.get("id_curso", 0))
+    if isinstance(lista_cursos, list) and len(lista_cursos) > 0:
+        lista_cursos.sort(key=lambda x: x.get("id_curso", 0) if isinstance(x, dict) else 0)
 
     return render_template("cursos.html", cursos=lista_cursos, cursos_todos=lista_cursos_todos, pag=pag,
         id_curso=id_curso, anio=anio, cuatrimestre=cuatrimestre)
+
 
 @cursos_bp.route("/cursos/crear", methods=['POST'])
 def crear_cursos():
@@ -75,14 +74,12 @@ def crear_cursos():
         flash("Solo los profesores tienen acceso a esta funcionalidad.","warning")
         return redirect("/")
     
-    nombre_curso = request.form.get("nombre_curso")
     anio_raw = request.form.get("anio")
     cuatrimestre_raw = request.form.get("cuatrimestre")
 
     data = {
-        "nombre_curso": nombre_curso,
-        "anio": int(anio_raw),
-        "cuatrimestre": int(cuatrimestre_raw)
+        "anio": anio_raw,
+        "cuatrimestre": cuatrimestre_raw
     }
 
     try:
@@ -136,6 +133,7 @@ def eliminar_curso():
         flash("Error interno: No se pudo conectar con el servidor", "danger")
 
     return redirect("/cursos")
+
 
 @cursos_bp.route("/cursos/modificar", methods=['POST'])
 def modificar_curso():

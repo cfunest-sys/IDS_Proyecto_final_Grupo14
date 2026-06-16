@@ -68,11 +68,10 @@ CREATE TABLE profesor_curso (
     id_profesor INTEGER NOT NULL,
     id_curso INTEGER NOT NULL,
     FOREIGN KEY (id_profesor) REFERENCES profesores(id_profesor),
-    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
+    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso) ON DELETE CASCADE
 );
 CREATE TABLE cursos (
     id_curso INTEGER PRIMARY KEY AUTO_INCREMENT,
-    nombre_curso TEXT NOT NULL,
     anio INTEGER NOT NULL,
     cuatrimestre INTEGER NOT NULL
 );
@@ -82,7 +81,7 @@ CREATE TABLE evaluaciones (
     tipo VARCHAR(100) NOT NULL,
     fecha DATE NOT NULL,
     id_curso INT NOT NULL,
-    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
+    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso) ON DELETE CASCADE
 );
 
 CREATE TABLE notas (
@@ -110,9 +109,9 @@ CREATE TABLE equipos (
     id_curso INT NOT NULL,
 
     INDEX (id_curso),
-    FOREIGN KEY (id_curso) REFERENCES cursos (id_curso)
+    FOREIGN KEY (id_curso) REFERENCES cursos (id_curso) 
         ON UPDATE CASCADE
-        ON DELETE RESTRICT
+        ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE miembros_equipo (
@@ -230,10 +229,10 @@ VALUES (
     'activo',
     3
 );
-INSERT INTO cursos (nombre_curso, anio, cuatrimestre)
+INSERT INTO cursos (anio, cuatrimestre)
 VALUES
- ('Introducción al Desarrollo', 2024, 1),
- ('Fundamentos de Programación', 2024, 2);
+ (2024, 1),
+ (2024, 2);
 
 INSERT INTO evaluaciones (nombre, tipo, fecha, id_curso)
 VALUES 

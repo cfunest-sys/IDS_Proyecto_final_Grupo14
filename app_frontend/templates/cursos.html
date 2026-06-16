@@ -85,17 +85,13 @@ Gestión de cursos
                                 <td> 
                                     <div class="d-flex justify-content-center gap-1">
                                     <div class="col-auto">
-                                        <button class="btn btn-sm btn-outline-primary btn-editar-curso" data-bs-toggle="modal" data-bs-target="#modal_modificar_curso" title="Modificar curso">
+                                        <button type="button" class="btn btn-sm btn-outline-primary btn-editar-curso" data-bs-toggle="modal" data-bs-target="#modal_modificar_curso" title="Modificar curso">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                     </div>
-                                    <form action="/cursos/eliminar" method="POST" class="d-inline">
-                                      <input name="method" value="delete" type="hidden">
-                                      <input value="{{ curso.id_curso }}" type="hidden" name="id_curso">
-                                      <button type="submit" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Eliminar curso">
-                                        <i class="bi bi-trash"></i>
-                                      </button>
-                                    </form>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modal_eliminar_curso" data-id="{{ curso.id_curso }}" title="Eliminar curso">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                   </div>
                                 </td>
                             </tr>
@@ -155,11 +151,6 @@ Gestión de cursos
             <form action="/cursos/crear" method="post">
                 <div class="modal-body">
                     <h6 class="texto-indicacion-modal mb-3">Complete los siguientes campos:</h6>
-                    <div class="input-group mb-3">
-                        <span class="input-group-text">Nombre curso</span>
-                        <input type="text" name="nombre_curso" class="form-control" placeholder="Ej: IDS" required>
-                    </div>
-
                     <div class="input-group mb-4">
                         <span class="input-group-text">Año</span>
                         <input type="number" name="anio" class="form-control" placeholder="Ej: 2026" min="2000" max="2100" required>
@@ -210,21 +201,30 @@ Gestión de cursos
         </div>
     </div>
 </div>
+<!-- Modal de eliminar curso -->
+<div class="modal fade" id="modal_eliminar_curso" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Eliminar curso</h5>
+            </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
+            <form action="/cursos/eliminar" method="post">
+                <div class="modal-body text-center">
+                    <p class="advertencia-eliminar mb-3">PRECAUCIÓN: una vez que se elimine un curso no podras recuperarlo ¿Deseas proceder?</p>
+                    
+                    <input type="hidden" id="eliminar_id_curso" name="id_curso">
+                    
+                    <div class="d-flex justify-content-center gap-3 mt-4">
+                        <button type="button" class="btn btn-modificar-equipo" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-eliminar">Eliminar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-  // Editar evaluacion - abrir modal con datos
-  document.querySelectorAll('.btn-editar-curso').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      const tr = btn.closest('tr');
-      document.getElementById('id_curso_modal').value = tr.dataset.id;
-      document.getElementById('anio_modal').value = tr.dataset.anio;
-      document.getElementById('cuatrimestre_modal').value = tr.dataset.cuatri;
-      new bootstrap.Modal(document.getElementById('modalEditarEvaluacion')).show();
-    });
-  });
-});
-</script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 
 {% endblock %}
