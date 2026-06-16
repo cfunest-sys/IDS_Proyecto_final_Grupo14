@@ -142,8 +142,9 @@ def borrar_cursos(current_user, id_curso):
 
         if not curso_existente or len(curso_existente) == 0:
             return jsonify({"error":"Curso no encontrado"}), 404
-    
+
         delete_curso(id_curso)
+
         return "", 204
         
     except Exception as e:

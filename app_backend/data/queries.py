@@ -1454,7 +1454,7 @@ def obtener_detalles_profesor(id_usuario):
         if profesor:
 
             query_cursos = """
-                SELECT cursos.id_curso, cursos.nombre AS nombre_curso, cursos.anio, cursos.cuatrimestre AS cuatrimestre
+                SELECT cursos.id_curso, CONCAT(cursos.anio, ' ', cursos.cuatrimestre) AS nombre_curso, cursos.anio, cursos.cuatrimestre AS cuatrimestre
                 FROM profesor_curso
                 INNER JOIN cursos ON profesor_curso.id_curso = cursos.id_curso
                 WHERE profesor_curso.id_profesor = %s
@@ -1666,7 +1666,7 @@ def insertar_curso(anio, cuatrimestre, id_profesor):
             conexion.close()
 
 
-def delete_curso(id_curso, id_profesor):
+def delete_curso(id_curso):
     conexion = None
     cursor = None
 
@@ -1676,9 +1676,9 @@ def delete_curso(id_curso, id_profesor):
 
         query_desvincular = """
             DELETE FROM profesor_curso 
-            WHERE id_profesor = %s AND id_curso = %s
+            WHERE id_curso = %s
         """
-        cursor.execute(query_desvincular, (id_profesor, id_curso))
+        cursor.execute(query_desvincular, (id_curso,))
         
         query_curso_vinculado = """
             SELECT COUNT(*) as total FROM profesor_curso WHERE id_curso = %s
