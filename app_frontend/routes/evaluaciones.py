@@ -14,47 +14,35 @@ def listar_evaluaciones():
         return redirect(url_for("evaluaciones.calendario_evaluaciones"))
 
     evaluaciones = []
-    rol          = ""
+    rol = ""
     try:
         if not session:
             flash("Sesión no iniciada", "warning")
-            return render_template("evaluaciones.html", evas=evaluaciones, rol=rol, cursos=[])
+            return render_template("evaluaciones.html", evas=evaluaciones, rol=rol, cursos=[], stats={})
 
-        token        = session.get("token", "")
-        auth_headers = {'Authorization': 'Bearer ' + token}
-        data         = {
-            "rol":     session.get("rol", ""),
-            "user_id": session.get("user_id", "")
-        }
+        token = session.get("token", "")
+        auth_headers = {"Authorization": "Bearer " + token}
+        data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
         rol = data["rol"]
 
         response = requests.post(
-            f"{current_app.config['BACKEND_URL']}/api/evaluaciones/usuario",
-            headers=auth_headers,
-            json=data,
-            timeout=5
+            f"{current_app.config['BACKEND_URL']}/api/evaluaciones/usuario", headers=auth_headers, json=data, timeout=5
         )
 
         if response.status_code == 204:
-            pass   #sin evaluaciones
+            pass  # sin evaluaciones
         elif response.ok:
             json_data = response.json()
             for eva in json_data.get("body", []):
-                evaluaciones.append({
-                    "id":     eva[0],
-                    "nombre": eva[1],
-                    "tipo":   eva[2],
-                    "fecha":  eva[3],
-                    "curso":  eva[4]
-                })
+                evaluaciones.append({"id": eva[0], "nombre": eva[1], "tipo": eva[2], "fecha": eva[3], "curso": eva[4]})
         else:
             flash("No se pudieron cargar las evaluaciones", "warning")
 
     except requests.exceptions.RequestException:
         flash("Error de conexión con el servidor", "danger")
-        return render_template("evaluaciones.html", evas=evaluaciones, rol=rol, cursos=[])
+        return render_template("evaluaciones.html", evas=evaluaciones, rol=rol, cursos=[], stats={})
 
-    #Filtros
+    # Filtros
     tipo_filtro = request.args.get("tipo")
     fecha_desde = request.args.get("fecha_desde")
     fecha_hasta = request.args.get("fecha_hasta")
@@ -63,27 +51,22 @@ def listar_evaluaciones():
         evaluaciones = [e for e in evaluaciones if e["tipo"] == tipo_filtro]
     if fecha_desde:
         fecha_desde_dt = datetime.strptime(fecha_desde, "%Y-%m-%d")
-        evaluaciones   = [
-            e for e in evaluaciones
-            if datetime.strptime(e["fecha"], "%Y-%m-%d") >= fecha_desde_dt
-        ]
+        evaluaciones = [e for e in evaluaciones if datetime.strptime(e["fecha"], "%Y-%m-%d") >= fecha_desde_dt]
     if fecha_hasta:
         fecha_hasta_dt = datetime.strptime(fecha_hasta, "%Y-%m-%d")
-        evaluaciones   = [
-            e for e in evaluaciones
-            if datetime.strptime(e["fecha"], "%Y-%m-%d") <= fecha_hasta_dt
-        ]
+        evaluaciones = [e for e in evaluaciones if datetime.strptime(e["fecha"], "%Y-%m-%d") <= fecha_hasta_dt]
 
     cursos = []
     try:
         resp = requests.get(
             f"{current_app.config['BACKEND_URL']}/api/perfil/",
             headers={"Authorization": f"Bearer {session.get('token', '')}"},
-            timeout=5
+            timeout=5,
         )
         if resp.ok:
             data = resp.json()
-            cursos = data.get("detalles", {}).get("cursos_asignados", [])
+            detalles = data.get("detalles") or {}
+            cursos = detalles.get("cursos_asignados", [])
     except requests.exceptions.RequestException:
         pass
 
@@ -106,6 +89,7 @@ def listar_evaluaciones():
 def calendario_evaluaciones():
     return redirect(url_for("inicio.mostrar_calendario"))
 
+
 # 3. RUTA CREAR EVALUACION: http://127.0.0.1:8080/evaluaciones/crear
 # Acá se crean evaluaciones
 @evaluaciones_blueprint.route("/", methods=["POST"])
@@ -124,12 +108,13 @@ def crear_evaluacion():
         if not response.ok:
             err = response.json().get("error", "Error desconocido")
             flash(f"Error al crear evaluación: {err}", "danger")
-            return redirect(url_for('evaluaciones.listar_evaluaciones'))
+            return redirect(url_for("evaluaciones.listar_evaluaciones"))
     except requests.exceptions.RequestException:
         flash("Error de conexión con el servidor", "danger")
-        return redirect(url_for('evaluaciones.listar_evaluaciones'))
+        return redirect(url_for("evaluaciones.listar_evaluaciones"))
     flash("Evaluación creada con éxito", "success")
-    return redirect(url_for('evaluaciones.listar_evaluaciones'))
+    return redirect(url_for("evaluaciones.listar_evaluaciones"))
+
 
 # 4. RUTA ACTUALIZAR EVALUACION
 @evaluaciones_blueprint.route("/actualizar", methods=["POST"])
@@ -137,7 +122,7 @@ def actualizar_evaluacion():
     data = {}
     if not session:
         flash("Sesión no iniciada", "warning")
-        return redirect(url_for('evaluaciones.listar_evaluaciones'))
+        return redirect(url_for("evaluaciones.listar_evaluaciones"))
     try:
         data["id"] = request.form.get("id")
         data["nombre"] = request.form.get("nombre")
@@ -145,9 +130,7 @@ def actualizar_evaluacion():
         data["fecha"] = request.form.get("fecha")
         data["curso_id"] = request.form.get("curso")
         response = requests.put(
-            f"{current_app.config['BACKEND_URL']}/api/evaluaciones/actualizar/",
-            json=data,
-            timeout=5
+            f"{current_app.config['BACKEND_URL']}/api/evaluaciones/actualizar/", json=data, timeout=5
         )
         if response.ok:
             flash("Evaluación actualizada con éxito", "success")
@@ -156,17 +139,17 @@ def actualizar_evaluacion():
             flash(f"Error al actualizar: {err}", "danger")
     except requests.exceptions.RequestException:
         flash("Error de conexión con el servidor", "danger")
-    return redirect(url_for('evaluaciones.listar_evaluaciones'))
+    return redirect(url_for("evaluaciones.listar_evaluaciones"))
 
 
 # 5. RUTA ELIMINAR EVALUACION: http://127.0.0.1:8080/evaluaciones/destruir/<int:id>
 # Acá se crean evaluaciones
-@evaluaciones_blueprint.route("/eliminar", methods=["POST","DELETE"])
+@evaluaciones_blueprint.route("/eliminar", methods=["POST", "DELETE"])
 def eliminar_evaluacion():
     data = {}
-    if (request.form.get("method") != "delete"):
+    if request.form.get("method") != "delete":
         flash("Error, intento de conexión indebido", "danger")
-        return redirect(url_for('evaluaciones.listar_evaluaciones'))
+        return redirect(url_for("evaluaciones.listar_evaluaciones"))
     try:
         if session:
             data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
@@ -178,10 +161,10 @@ def eliminar_evaluacion():
             if response.json().get("body", "") != "":
                 json = response.json().get("body", "")
                 if json.get("estado") == True:
-                    flash("Eliminado con éxito","success")
+                    flash("Eliminado con éxito", "success")
                 else:
                     flash("No se pudo eliminar", "danger")
     except requests.exceptions.RequestException:
         flash("Error de conexión con el servidor", "danger")
-        return redirect(url_for('evaluaciones.listar_evaluaciones'))
-    return redirect(url_for('evaluaciones.listar_evaluaciones'))
+        return redirect(url_for("evaluaciones.listar_evaluaciones"))
+    return redirect(url_for("evaluaciones.listar_evaluaciones"))

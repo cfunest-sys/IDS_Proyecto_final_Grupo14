@@ -19,7 +19,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">
-                <i class="bi bi-mortarboard-fill me-2"></i>Campus FIUBA - Introducción al Desarrollo de Software
+                <i class="bi bi-mortarboard-fill me-2"></i>Introducción al Desarrollo de Software
             </a>
 
             <button
@@ -38,29 +38,33 @@
 
                 <ul class="navbar-nav ms-auto">
 
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">
-                            <i class="bi bi-house-fill"></i> Inicio
-                        </a>
-                    </li>
                     {% if session.get("user_id") %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if '/perfil/' in request.path %}active{% endif %}" href="{% if session.get('rol') == 'alumno' %}/perfil/alumno{% else %}/perfil/profesor{% endif %}">
-                            <i class="bi bi-person-fill"></i> Perfil
-                        </a>
-                    </li>
-                    <li class="nav-item">
+                   <li class="nav-item">
                       <a class="nav-link {% if '/asistencia' in request.path %}active{% endif %}" href="/asistencia">
                             <i class="bi bi-qr-code"></i> Asistencia
                         </a>
                     </li>
-                    
+                   <li class="nav-item">
+                     <a class="nav-link {% if '/calendario' in request.path %}active{% endif %} " href="/calendario">
+                            <i class="bi bi-calendar-event"></i> calendario
+                     </a>
+                   </li> 
                     <li class="nav-item">
                         <a class="nav-link {% if '/material' in request.path %}active{% endif %}" href="/material">
                             <i class="bi bi-folder-fill"></i> Materiales
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/equipos' in request.path %}active{% endif %}" href="/equipos">
+                            <i class="bi bi-people-fill"></i> Equipos
+                        </a>
+                    </li>
                     {% if session.get("rol") == "profesor" %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/alumnos' in request.path %}active{% endif %}" href="/alumnos">
+                            <i class="bi bi-person-vcard"></i> Alumnos
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link {% if '/evaluaciones' in request.path %}active{% endif %}" href="/evaluaciones">
                             <i class="bi bi-journal-check"></i> Evaluaciones

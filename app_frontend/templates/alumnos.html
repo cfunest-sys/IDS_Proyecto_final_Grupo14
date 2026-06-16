@@ -1,75 +1,172 @@
 {% extends "base.html" %}
 
 {% block title %}
-Gestion de alumnos - Campus FIUBA
+Gestión de Alumnos - Campus FIUBA
 {% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-	<div class="col">
-		<section class="container py-5">
-			<div class="card shadow-sm card-custom p-4">
-				<h2 class="text-center">Listado de Alumnos</h2>
-				<div class="form-check content-center">
-				  	<input class="form-check-input" type="checkbox" value="inactivo" id="incluir-inactivos">
-				  	<label class="form-check-label" for="incluir-inactivos">Incluir inactivos</label>
-				</div>
-			    <div class="row justify-content-center">
-			        <div class="col-auto px-5 bg-primary-subtle border-secondary">Legajo</div>
-			        <div class="col-auto px-5 bg-primary-subtle border-secondary">Nombre</div>
-			        <div class="col-auto px-5 bg-primary-subtle border-secondary">Estado</div>
-			    </div>
-			    <div class="container py-3">
-			    	{% for alumno in alumnos %}	
-					    <div class="row justify-content-center alumno">
-					    	<!-- <div class="col"></div> -->
-					    	<div class="col px-5 bg-primary-subtle border border-secondary legajo">{{alumno.legajo}}</div>
-					        <div class="col px-5 bg-primary-subtle border border-secondary nombre">{{alumno.nombre}}</div>
-					        <div class="col px-5 bg-primary-subtle border border-secondary estado ">{{alumno.estado}}</div>
-					    	<!-- <div class="col"></div> -->
-					    </div>
-			        {% endfor %}
-			    </div>
-			</div>
-		</section>
-	</div>
-<div class="col">
-    <section class="container py-5">
-        <div class="card shadow-sm card-custom p-4">
-            <h2 class="text-center">Subir alumnos</h2>
-            <p class="text-center text-muted">
-                Formato CSV: legajo, nombre, apellido, dni, email, curso, anio, cuatrimestre
-            </p>
-            <form action="/alumnos/cargar-csv" method="POST" enctype="multipart/form-data">
-                <div class="input-group mb-3">
-                    <input type="file"
-                           name="archivo"
-                           accept=".csv"
-                           class="form-control"
-                           required>
-                    <button type="submit" class="btn btn-campus">Cargar</button>
-                </div>
-            </form>
+
+{% set activos = alumnos | selectattr("estado", "equalto", "activo") | list | length %}
+{% set inactivos = alumnos | selectattr("estado", "equalto", "inactivo") | list | length %}
+{% set total = alumnos | length %}
+
+<div class="gestion-alumnos-container">
+  <div class="card shadow-sm card-custom p-4">
+    <h1 class="page-title text-center mb-1">Gestión de Alumnos</h1>
+
+    <div class="alumnos-stats">
+      <span class="stat-item">Total: <strong>{{ total }}</strong></span>
+      <span class="stat-item stat-activos">Activos: <strong>{{ activos }}</strong></span>
+      <span class="stat-item stat-inactivos">Inactivos: <strong>{{ inactivos }}</strong></span>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-9">
+        <div class="alumnos-toolbar">
+          <input type="text" id="buscador-alumno" class="form-control" placeholder="Buscar por legajo, nombre o apellido...">
+          <div class="form-check mb-0">
+            <input class="form-check-input" type="checkbox" id="incluir-inactivos" checked>
+            <label class="form-check-label" for="incluir-inactivos">Mostrar inactivos</label>
+          </div>
         </div>
-    </section>
+
+        <div class="tabla-alumnos-container">
+          <div class="tabla-alumnos-wrapper">
+            <table class="table tabla-alumnos">
+              <thead>
+                <tr>
+                  <th>Legajo</th>
+                  <th>Apellido y Nombre</th>
+                  <th>Estado</th>
+                  <th class="col-acciones">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for a in alumnos %}
+                <tr class="fila-alumno"
+                  data-legajo="{{ a.legajo }}"
+                  data-nombre="{{ a.nombre }}"
+                  data-apellido="{{ a.apellido }}"
+                  data-dni="{{ a.dni }}"
+                  data-email="{{ a.email or '' }}"
+                  data-curso="{{ a.curso or '' }}"
+                  data-anio="{{ a.anio or '' }}"
+                  data-cuatrimestre="{{ a.cuatrimestre or '' }}"
+                  data-estado="{{ a.estado }}">
+                  <td>{{ a.legajo }}</td>
+                  <td>{{ a.apellido }}, {{ a.nombre }}</td>
+                  <td><span class="badge estado-badge estado-{{ a.estado }}">{{ a.estado }}</span></td>
+                  <td>
+                <button class="btn btn-sm btn-outline-primary btn-ver" title="Ver alumno">
+                  <i class="bi bi-eye"></i>
+                </button>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 d-flex flex-column">
+        <div class="importar-alumnos" style="border:none;margin:0;padding:0;max-width:none;flex:1;display:flex;flex-direction:column;">
+          <h2 class="text-center h5 mb-2">Importar alumnos desde CSV</h2>
+          <form action="/alumnos/cargar-csv" method="POST" enctype="multipart/form-data" id="form-csv" class="d-flex flex-column flex-fill">
+            <div class="drop-zone flex-fill" id="drop-zone" style="padding:20px;border-radius:8px;border:2px solid #ccc;display:flex;align-items:center;justify-content:center;">
+              <div class="drop-zone-content">
+                <p class="mb-1">Arrastrá un archivo CSV aquí</p>
+                <p class="text-muted small mb-2">o</p>
+                <button type="button" class="btn btn-outline-primary btn-sm" id="btn-seleccionar">Seleccionar archivo</button>
+              </div>
+              <input type="file" name="archivo" accept=".csv" id="input-csv" hidden required>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modal-ver-alumno" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Datos del Alumno</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="modal-body-alumno"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-    const botonInactivo = document.getElementById("incluir-inactivos");
-    botonInactivo.checked = true;
-    function clickCheck() {
-        const filas = document.querySelectorAll(".alumno");
-        filas.forEach(fila => {
-            const checked = botonInactivo.checked;
-            if (fila.querySelector(".estado").innerText == "inactivo" && !checked) {
-                fila.style.display = "None";
-            } else {
-                fila.style.display = "";
-            }
-        });
-    }
-    clickCheck();
-    botonInactivo.addEventListener("click", clickCheck);
+function filtrar() {
+  const termino = document.getElementById("buscador-alumno").value.toLowerCase();
+  const mostrarInactivos = document.getElementById("incluir-inactivos").checked;
+  document.querySelectorAll(".fila-alumno").forEach(fila => {
+    const texto = fila.textContent.toLowerCase();
+    const coincideTexto = texto.includes(termino);
+    const coincideEstado = mostrarInactivos || fila.dataset.estado !== "inactivo";
+    fila.style.display = (coincideTexto && coincideEstado) ? "" : "none";
+  });
+}
+
+document.getElementById("buscador-alumno").addEventListener("keyup", filtrar);
+document.getElementById("incluir-inactivos").addEventListener("change", filtrar);
+
+const dropZone = document.getElementById("drop-zone");
+const inputCsv = document.getElementById("input-csv");
+const btnImportar = document.getElementById("btn-importar");
+const btnSeleccionar = document.getElementById("btn-seleccionar");
+
+["dragenter", "dragover"].forEach(evt => {
+  dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add("dragover"); });
+});
+["dragleave", "drop"].forEach(evt => {
+  dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove("dragover"); });
+});
+dropZone.addEventListener("drop", e => {
+  const files = e.dataTransfer.files;
+  if (files.length) {
+    const dt = new DataTransfer();
+    dt.items.add(files[0]);
+    inputCsv.files = dt.files;
+    document.getElementById("form-csv").submit();
+  }
+});
+dropZone.addEventListener("click", (e) => {
+  if (e.target.tagName !== 'BUTTON') inputCsv.click();
+});
+btnSeleccionar.addEventListener("click", () => inputCsv.click());
+inputCsv.addEventListener("change", () => {
+  if (inputCsv.files.length > 0) document.getElementById("form-csv").submit();
+});
+
+document.querySelectorAll(".btn-ver").forEach(btn => {
+  btn.addEventListener("click", function() {
+    const tr = this.closest("tr");
+    const d = tr.dataset;
+    const body = document.getElementById("modal-body-alumno");
+    body.innerHTML = `
+      <table class="table table-sm mb-0">
+        <tr><th style="width:120px">Legajo</th><td>${d.legajo}</td></tr>
+        <tr><th>Apellido</th><td>${d.apellido}</td></tr>
+        <tr><th>Nombre</th><td>${d.nombre}</td></tr>
+        <tr><th>DNI</th><td>${d.dni}</td></tr>
+        <tr><th>Email</th><td>${d.email || '-'}</td></tr>
+        <tr><th>Curso</th><td>${d.curso || '-'}</td></tr>
+        <tr><th>Año</th><td>${d.anio || '-'}</td></tr>
+        <tr><th>Cuatrimestre</th><td>${d.cuatrimestre || '-'}</td></tr>
+        <tr><th>Estado</th><td>${d.estado}</td></tr>
+      </table>
+    `;
+    new bootstrap.Modal(document.getElementById("modal-ver-alumno")).show();
+  });
+});
 </script>
 
 {% endblock %}

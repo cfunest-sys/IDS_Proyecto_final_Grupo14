@@ -63,7 +63,7 @@ Gestión de equipos
                     <h3 class="titulo-tabla mb-0">
                       Equipos registrados
                     </h3>
-                    <button class="btn btn-crear" data-bs-toggle="modal" data-bs-target="#modal_crear_equipo">Crear equipo</button>
+                    <button class="btn btn-crear" data-bs-toggle="modal" data-bs-target="#modal_crear_equipo"><i class="bi bi-plus-lg"></i> Crear equipo</button>
                 </div>
 
                 <table class="table">
@@ -88,8 +88,8 @@ Gestión de equipos
                                     </button>
                                 </td>
                                 <td class="text-center">
-                                    <div class="d-flex justify-content-center gap-2">
-                                        <button type="button" class="btn btn-sm btn-outline-primary btn-modif-equipo" data-bs-toggle="modal"  data-bs-target="#modal_modificar_equipo" data-id="{{ equipo.id_equipo }}" title="Modificar equipo">
+                                    <div class="d-flex justify-content-center gap-1">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"  data-bs-target="#modal_modificar_equipo" data-id="{{ equipo.id_equipo }}" title="Modificar equipo">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                         <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"  data-bs-target="#modal_eliminar_equipo" data-id="{{ equipo.id_equipo }}" title="ELiminar equipo">
@@ -275,7 +275,5 @@ Gestión de equipos
         </div>
     </div>
 </div>
-
-<script src="{{ url_for('static', filename='script.js') }}"></script>
 
 {% endblock %}

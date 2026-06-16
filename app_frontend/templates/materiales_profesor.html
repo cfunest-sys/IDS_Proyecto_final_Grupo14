@@ -1,59 +1,49 @@
 {% extends "base.html" %}
 {% block title %}Gesti&oacute;n de Materiales | Campus FIUBA{% endblock %}
 {% block content %}
-<main class="container-fluid py-4 px-lg-5">
-  <!-- HEADER -->
-  <section class="row mb-4 align-items-center">
-    <div class="col-lg-7">
-      <h1 class="page-title">Gesti&oacute;n de Materiales</h1>
-      <p>Subir, organizar y administrar materiales del curso.</p>
-    </div>
-    <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
-      <button class="btn btn-campus" data-bs-toggle="modal" data-bs-target="#modalSubirMaterial">
-        <i class="bi bi-plus-lg"></i> Subir Material
-      </button>
-    </div>
-  </section>
+<div class="container mt-5 mb-5">
+
+  <h1 class="page-title">Gesti&oacute;n de Materiales</h1>
 
   <!-- ESTADISTICAS -->
-  <section class="row g-3 mb-4" id="statsSection">
+  <div class="row g-3 mb-4">
     <div class="col-6 col-md-2">
-      <div class="card border-0 shadow-sm text-center p-3 bg-light">
-        <h3 class="mb-0 text-primary">{{ stats.get('total', 0) }}</h3>
-        <small class="text-muted">Totales</small>
+      <div class="stat-card text-center">
+        <div class="stat-value">{{ stats.get('total', 0) }}</div>
+        <div class="stat-label">Totales</div>
       </div>
     </div>
     <div class="col-6 col-md-2">
-      <div class="card border-0 shadow-sm text-center p-3 bg-light">
-        <h3 class="mb-0 text-success">{{ stats.get('publicados', 0) }}</h3>
-        <small class="text-muted">Publicados</small>
+      <div class="stat-card text-center">
+        <div class="stat-value">{{ stats.get('publicados', 0) }}</div>
+        <div class="stat-label">Publicados</div>
       </div>
     </div>
     <div class="col-6 col-md-2">
-      <div class="card border-0 shadow-sm text-center p-3 bg-light">
-        <h3 class="mb-0 text-warning">{{ stats.get('borradores', 0) }}</h3>
-        <small class="text-muted">Borradores</small>
+      <div class="stat-card text-center">
+        <div class="stat-value">{{ stats.get('borradores', 0) }}</div>
+        <div class="stat-label">Borradores</div>
       </div>
     </div>
     <div class="col-6 col-md-2">
-      <div class="card border-0 shadow-sm text-center p-3 bg-light">
-        <h3 class="mb-0 text-info">{{ stats.get('programados', 0) }}</h3>
-        <small class="text-muted">Programados</small>
+      <div class="stat-card text-center">
+        <div class="stat-value">{{ stats.get('programados', 0) }}</div>
+        <div class="stat-label">Programados</div>
       </div>
     </div>
     <div class="col-6 col-md-2">
-      <div class="card border-0 shadow-sm text-center p-3 bg-light">
-        <h3 class="mb-0 text-secondary">{{ stats.get('pdfs', 0) }}</h3>
-        <small class="text-muted">Documentos</small>
+      <div class="stat-card text-center">
+        <div class="stat-value">{{ stats.get('pdfs', 0) }}</div>
+        <div class="stat-label">Documentos</div>
       </div>
     </div>
     <div class="col-6 col-md-2">
-      <div class="card border-0 shadow-sm text-center p-3 bg-light">
-        <h3 class="mb-0 text-danger">{{ stats.get('videos', 0) }}</h3>
-        <small class="text-muted">Videos</small>
+      <div class="stat-card text-center">
+        <div class="stat-value">{{ stats.get('videos', 0) }}</div>
+        <div class="stat-label">Videos</div>
       </div>
     </div>
-  </section>
+  </div>
 
   <!-- DRAG & DROP -->
   <section class="mb-4">
@@ -76,14 +66,17 @@
   </section>
 
   <!-- FILTROS -->
-  <section class="mb-4">
-    <div class="row g-3 align-items-end">
-      <div class="col-md-3">
-        <label for="filtroBusqueda" class="form-label"><i class="bi bi-search"></i> Buscar</label>
+  <h2>Filtros</h2>
+  <div class="row mb-4">
+    <div class="col-md-3 mb-3 mb-md-0">
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
         <input type="text" id="filtroBusqueda" class="form-control" placeholder="Buscar por t&iacute;tulo, tema...">
       </div>
-      <div class="col-md-2">
-        <label for="filtroTipo" class="form-label">Tipo</label>
+    </div>
+    <div class="col-md-2 mb-3 mb-md-0">
+      <div class="input-group">
+        <label class="input-group-text" for="filtroTipo">Tipo</label>
         <select id="filtroTipo" class="form-select">
           <option value="">Todos</option>
           <option value="apunte">Apunte</option>
@@ -96,8 +89,10 @@
           <option value="otro">Otro</option>
         </select>
       </div>
-      <div class="col-md-2">
-        <label for="filtroEstado" class="form-label">Estado</label>
+    </div>
+    <div class="col-md-2 mb-3 mb-md-0">
+      <div class="input-group">
+        <label class="input-group-text" for="filtroEstado">Estado</label>
         <select id="filtroEstado" class="form-select">
           <option value="">Todos</option>
           <option value="borrador">Borrador</option>
@@ -106,8 +101,10 @@
           <option value="archivado">Archivado</option>
         </select>
       </div>
-      <div class="col-md-2">
-        <label for="filtroCurso" class="form-label">Curso</label>
+    </div>
+    <div class="col-md-2 mb-3 mb-md-0">
+      <div class="input-group">
+        <label class="input-group-text" for="filtroCurso">Curso</label>
         <select id="filtroCurso" class="form-select">
           <option value="">Todos</option>
           {% for curso in cursos %}
@@ -115,125 +112,120 @@
           {% endfor %}
         </select>
       </div>
-      <div class="col-md-3">
-        <span class="form-label d-block">&nbsp;</span>
-        <span class="badge bg-light text-dark p-2"><i class="bi bi-files"></i> Total: <span id="totalMateriales">{{ total }}</span></span>
+    </div>
+    <div class="col-md-1">
+      <div class="d-flex align-items-center h-100">
+        <span class="badge bg-light text-dark p-2 w-100"><i class="bi bi-files"></i> <span id="totalMateriales">{{ total }}</span></span>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- TABLA DE MATERIALES -->
-  <section>
-    <div class="table-responsive">
-      <table class="table align-middle" id="tablaMateriales">
-        <thead>
-          <tr>
-            <th class="sortable" data-order="titulo">
-              <div class="header-content">
-                T&iacute;tulo <i class="bi bi-arrow-down-up"></i>
-              </div>
-            </th>
-            <th class="sortable" data-order="tipo_material">
-              <div class="header-content">
-                Tipo <i class="bi bi-arrow-down-up"></i>
-              </div>
-            </th>
-            <th class="sortable" data-order="tema">
-              Tema <i class="bi bi-arrow-down-up text-muted"></i>
-            </th>
-            <th class="sortable" data-order="fecha_material">
-              <div class="header-content">
-                Fecha <i class="bi bi-arrow-down-up"></i>
-              </div>
-            </th>
-            <th class="sortable" data-order="estado">
-              <div class="header-content">
-                Estado <i class="bi bi-arrow-down-up"></i>
-              </div>
-            </th>
-            <th>Subido por</th>
-            <th class="text-center">Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="cuerpoTabla">
-          {% set ns = namespace(current_tema=None, has_items=False) %}
-          {% for m in materiales %}
-          {% set ns.has_items = True %}
-          {% set m_tema = m.tema if m.tema else "Sin tema" %}
-          {% if ns.current_tema != m_tema %}
-          {% set ns.current_tema = m_tema %}
-          <tr class="table-secondary">
-            <td colspan="7" class="py-2">
-              <strong><i class="bi bi-folder2-open me-1"></i> {{ m_tema }}</strong>
-            </td>
-          </tr>
-          {% endif %}
-          <tr class="fila-material" data-material='{{ m|tojson }}'>
-            <td>
-              <a href="#" class="text-decoration-none fw-semibold" data-detalles-id="{{ m.id_material }}">
-                {% if m.tipo_archivo in ('pdf',) %}<i class="bi bi-filetype-pdf text-danger me-1"></i>
-                {% elif m.tipo_archivo in ('jpg','jpeg','png','gif') %}<i class="bi bi-filetype-jpg text-success me-1"></i>
-                {% elif m.tipo_archivo in ('mp4','mov','avi') %}<i class="bi bi-filetype-mp4 text-info me-1"></i>
-                {% elif m.tipo_material == 'video' %}<i class="bi bi-camera-video text-info me-1"></i>
-                {% elif m.tipo_material == 'imagen' %}<i class="bi bi-image text-success me-1"></i>
-                {% elif m.tipo_material == 'bibliografia' %}<i class="bi bi-book text-warning me-1"></i>
-                {% elif m.es_externo %}<i class="bi bi-link-45deg text-primary me-1"></i>
-                {% else %}<i class="bi bi-file-earmark text-secondary me-1"></i>{% endif %}
-                {{ m.titulo }}
+  <!-- TABLA -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="titulo-tabla mb-0">Materiales registrados</h3>
+    <button class="btn btn-crear" data-bs-toggle="modal" data-bs-target="#modalSubirMaterial">
+      <i class="bi bi-plus-lg"></i> Subir Material
+    </button>
+  </div>
+  <div class="table-responsive">
+    <table class="table align-middle" id="tablaMateriales">
+      <thead>
+        <tr>
+          <th style="width:25%" class="sortable" data-order="titulo">
+            <div class="header-content">T&iacute;tulo <i class="bi bi-arrow-down-up"></i></div>
+          </th>
+          <th style="width:12%" class="sortable" data-order="tipo_material">
+            <div class="header-content">Tipo <i class="bi bi-arrow-down-up"></i></div>
+          </th>
+          <th style="width:15%" class="sortable" data-order="tema">Tema <i class="bi bi-arrow-down-up text-muted"></i></th>
+          <th style="width:12%" class="sortable" data-order="fecha_material">
+            <div class="header-content">Fecha <i class="bi bi-arrow-down-up"></i></div>
+          </th>
+          <th style="width:12%" class="sortable" data-order="estado">
+            <div class="header-content">Estado <i class="bi bi-arrow-down-up"></i></div>
+          </th>
+          <th style="width:12%">Subido por</th>
+          <th style="width:12%" class="text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="cuerpoTabla">
+        {% set ns = namespace(current_tema=None, has_items=False) %}
+        {% for m in materiales %}
+        {% set ns.has_items = True %}
+        {% set m_tema = m.tema if m.tema else "Sin tema" %}
+        {% if ns.current_tema != m_tema %}
+        {% set ns.current_tema = m_tema %}
+        <tr class="table-secondary">
+          <td colspan="7" class="py-2">
+            <strong><i class="bi bi-folder2-open me-1"></i> {{ m_tema }}</strong>
+          </td>
+        </tr>
+        {% endif %}
+        <tr class="fila-material" data-material='{{ m|tojson }}'>
+          <td>
+            <a href="#" class="text-decoration-none fw-semibold" data-detalles-id="{{ m.id_material }}">
+              {% if m.tipo_archivo in ('pdf',) %}<i class="bi bi-filetype-pdf text-danger me-1"></i>
+              {% elif m.tipo_archivo in ('jpg','jpeg','png','gif') %}<i class="bi bi-filetype-jpg text-success me-1"></i>
+              {% elif m.tipo_archivo in ('mp4','mov','avi') %}<i class="bi bi-filetype-mp4 text-info me-1"></i>
+              {% elif m.tipo_material == 'video' %}<i class="bi bi-camera-video text-info me-1"></i>
+              {% elif m.tipo_material == 'imagen' %}<i class="bi bi-image text-success me-1"></i>
+              {% elif m.tipo_material == 'bibliografia' %}<i class="bi bi-book text-warning me-1"></i>
+              {% elif m.es_externo %}<i class="bi bi-link-45deg text-primary me-1"></i>
+              {% else %}<i class="bi bi-file-earmark text-secondary me-1"></i>{% endif %}
+              {{ m.titulo }}
+            </a>
+          </td>
+          <td><span class="badge bg-secondary bg-opacity-10 text-secondary">{{ m.tipo_material }}</span></td>
+          <td><span class="badge bg-info bg-opacity-10 text-info">{{ m.tema or '-' }}</span></td>
+          <td class="small">
+            {% if m.fecha_material %}
+            <span title="{{ m.fecha_material }}">{{ m.fecha_material }}</span>
+            {% else %}-{% endif %}
+          </td>
+          <td>
+            {% if m.estado == 'publicado' %}
+            <span class="badge bg-success" data-bs-toggle="tooltip" title="Visible para alumnos"><i class="bi bi-check-circle"></i> Publicado</span>
+            {% elif m.estado == 'borrador' %}
+            <span class="badge bg-warning text-dark" data-bs-toggle="tooltip" title="Solo visible para vos"><i class="bi bi-pencil"></i> Borrador</span>
+            {% elif m.estado == 'programado' %}
+            <span class="badge bg-info" data-bs-toggle="tooltip" title="Programado para publicaci&oacute;n"><i class="bi bi-clock"></i> Programado</span>
+            {% else %}
+            <span class="badge bg-secondary" data-bs-toggle="tooltip" title="Archivado"><i class="bi bi-archive"></i> Archivado</span>
+            {% endif %}
+          </td>
+          <td class="small text-muted">
+            {% if m.profesor_nombre %}
+            <i class="bi bi-person"></i> {{ m.profesor_nombre }}
+            {% else %}
+            <span class="text-muted">-</span>
+            {% endif %}
+          </td>
+          <td class="text-center">
+            <div class="d-flex justify-content-center gap-1">
+              <button class="btn btn-sm btn-outline-primary btn-editar" data-bs-toggle="tooltip" title="Editar material" data-id="{{ m.id_material }}">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <a href="/material/{{ m.id_material }}/descargar" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" title="Descargar material">
+                <i class="bi bi-download"></i>
               </a>
-            </td>
-            <td><span class="badge bg-secondary bg-opacity-10 text-secondary">{{ m.tipo_material }}</span></td>
-            <td><span class="badge bg-info bg-opacity-10 text-info">{{ m.tema or '-' }}</span></td>
-            <td class="small">
-              {% if m.fecha_material %}
-              <span title="{{ m.fecha_material }}">{{ m.fecha_material }}</span>
-              {% else %}-{% endif %}
-            </td>
-            <td>
-              {% if m.estado == 'publicado' %}
-              <span class="badge bg-success" data-bs-toggle="tooltip" title="Visible para alumnos"><i class="bi bi-check-circle"></i> Publicado</span>
-              {% elif m.estado == 'borrador' %}
-              <span class="badge bg-warning text-dark" data-bs-toggle="tooltip" title="Solo visible para vos"><i class="bi bi-pencil"></i> Borrador</span>
-              {% elif m.estado == 'programado' %}
-              <span class="badge bg-info" data-bs-toggle="tooltip" title="Programado para publicaci&oacute;n"><i class="bi bi-clock"></i> Programado</span>
-              {% else %}
-              <span class="badge bg-secondary" data-bs-toggle="tooltip" title="Archivado"><i class="bi bi-archive"></i> Archivado</span>
-              {% endif %}
-            </td>
-            <td class="small text-muted">
-              {% if m.profesor_nombre %}
-              <i class="bi bi-person"></i> {{ m.profesor_nombre }}
-              {% else %}
-              <span class="text-muted">-</span>
-              {% endif %}
-            </td>
-            <td class="text-center">
-              <div class="d-flex justify-content-center gap-1">
-                <button class="btn btn-sm btn-outline-primary btn-editar" data-bs-toggle="tooltip" title="Editar material" data-id="{{ m.id_material }}">
-                  <i class="bi bi-pencil"></i>
-                </button>
-                <a href="/material/{{ m.id_material }}/descargar" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" title="Descargar material">
-                  <i class="bi bi-download"></i>
-                </a>
-                <button class="btn btn-sm btn-outline-danger btn-eliminar" data-bs-toggle="tooltip" title="Eliminar material" data-id="{{ m.id_material }}">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-          {% if not ns.has_items %}
-          <tr id="filaVacia">
-            <td colspan="7" class="text-center py-5">
-              <i class="bi bi-inbox icon-empty"></i>
-              <p class="text-muted mt-2">No hay materiales registrados.</p>
-            </td>
-          </tr>
-          {% endif %}
-        </tbody>
-      </table>
-    </div>
-  </section>
+              <button class="btn btn-sm btn-outline-danger btn-eliminar" data-bs-toggle="tooltip" title="Eliminar material" data-id="{{ m.id_material }}">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not ns.has_items %}
+        <tr id="filaVacia">
+          <td colspan="7" class="text-center py-5">
+            <i class="bi bi-inbox icon-empty"></i>
+            <p class="text-muted mt-2">No hay materiales registrados.</p>
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
 
   <!-- PAGINACION -->
   {% if paginas_totales > 1 %}
@@ -253,7 +245,7 @@
     </ul>
   </nav>
   {% endif %}
-</main>
+</div>
 
 <!-- MODAL SUBIR MATERIAL -->
 <div class="modal fade" id="modalSubirMaterial" tabindex="-1">
@@ -475,6 +467,5 @@
     </div>
   </div>
 </div>
-
 
 {% endblock %}

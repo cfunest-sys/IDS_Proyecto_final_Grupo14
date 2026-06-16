@@ -1,56 +1,44 @@
 {% extends "base.html" %}
 {% block title %}Gestión de Evaluaciones | Campus FIUBA{% endblock %}
 {% block content %}
-<main class="container-fluid py-4 px-lg-5">
+<div class="container mt-5 mb-5">
 
-  <!-- HEADER -->
-  <section class="row mb-4 align-items-center">
-    <div class="col-lg-7">
-      <h1 class="page-title">Gestión de Evaluaciones</h1>
-      <p>Administrar parciales, trabajos prácticos y parcialitos del curso.</p>
-    </div>
-    {% if rol == "profesor" %}
-    <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
-      <button class="btn btn-campus" data-bs-toggle="modal" data-bs-target="#modalNuevaEvaluacion">
-        <i class="bi bi-plus-lg"></i> Nueva Evaluación
-      </button>
-    </div>
-    {% endif %}
-  </section>
+  <h1 class="page-title">Gestión de Evaluaciones</h1>
 
   <!-- ESTADISTICAS -->
-  <section class="row g-3 mb-4" id="statsSection">
+  <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
-      <div class="card border-0 shadow-sm text-center p-3 bg-light">
-        <h3 class="mb-0 text-primary">{{ stats.total }}</h3>
-        <small class="text-muted">Totales</small>
+      <div class="stat-card text-center">
+        <div class="stat-value">{{ stats.total }}</div>
+        <div class="stat-label">Totales</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card border-0 shadow-sm text-center p-3 bg-light">
-        <h3 class="mb-0 text-info">{{ stats.parcial }}</h3>
-        <small class="text-muted">Parciales</small>
+      <div class="stat-card text-center">
+        <div class="stat-value">{{ stats.parcial }}</div>
+        <div class="stat-label">Parciales</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card border-0 shadow-sm text-center p-3 bg-light">
-        <h3 class="mb-0 text-warning">{{ stats.tp }}</h3>
-        <small class="text-muted">Trabajos Prácticos</small>
+      <div class="stat-card text-center">
+        <div class="stat-value">{{ stats.tp }}</div>
+        <div class="stat-label">Trabajos Prácticos</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card border-0 shadow-sm text-center p-3 bg-light">
-        <h3 class="mb-0 text-success">{{ stats.parcialito }}</h3>
-        <small class="text-muted">Parcialitos</small>
+      <div class="stat-card text-center">
+        <div class="stat-value">{{ stats.parcialito }}</div>
+        <div class="stat-label">Parcialitos</div>
       </div>
     </div>
-  </section>
+  </div>
 
   <!-- FILTROS -->
-  <section class="mb-4">
-    <div class="row g-3 align-items-end">
-      <div class="col-md-4">
-        <label for="filtroTipo" class="form-label">Tipo</label>
+  <h2>Filtros</h2>
+  <div class="row mb-4">
+    <div class="col-md-5 mb-3 mb-md-0">
+      <div class="input-group">
+        <label class="input-group-text" for="filtroTipo">Tipo</label>
         <select id="filtroTipo" class="form-select">
           <option value="">Todos</option>
           <option value="Parcial">Parcial</option>
@@ -58,8 +46,10 @@
           <option value="Parcialito">Parcialito</option>
         </select>
       </div>
-      <div class="col-md-4">
-        <label for="filtroCurso" class="form-label">Curso</label>
+    </div>
+    <div class="col-md-5 mb-3 mb-md-0">
+      <div class="input-group">
+        <label class="input-group-text" for="filtroCurso">Curso</label>
         <select id="filtroCurso" class="form-select">
           <option value="">Todos</option>
           {% for curso in cursos %}
@@ -67,76 +57,80 @@
           {% endfor %}
         </select>
       </div>
-      <div class="col-md-4">
-        <span class="form-label d-block">&nbsp;</span>
-        <span class="badge bg-light text-dark p-2"><i class="bi bi-files"></i> Total: <span id="totalEvaluaciones">{{ evas|length }}</span></span>
+    </div>
+    <div class="col-md-2">
+      <div class="d-flex align-items-center h-100">
+        <span class="badge bg-light text-dark p-2 w-100"><i class="bi bi-files"></i> Total: <span id="totalEvaluaciones">{{ evas|length }}</span></span>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- TABLA DE EVALUACIONES -->
-  <section>
-    <div class="table-responsive">
-      <table class="table align-middle" id="tablaEvaluaciones">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Tipo</th>
-            <th>Fecha</th>
-            <th>Curso</th>
-            <th class="text-center">Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="cuerpoTabla">
-          {% for eva in evas %}
-          <tr data-id="{{ eva.id }}" data-nombre="{{ eva.nombre }}" data-tipo="{{ eva.tipo }}" data-fecha="{{ eva.fecha }}" data-curso="{{ eva.curso }}">
-            <td class="fw-semibold">{{ eva.nombre }}</td>
-            <td>
-              {% if eva.tipo == "Parcial" %}
-              <span class="badge bg-info">{{ eva.tipo }}</span>
-              {% elif eva.tipo == "TP" %}
-              <span class="badge bg-warning text-dark">{{ eva.tipo }}</span>
-              {% elif eva.tipo == "Parcialito" %}
-              <span class="badge bg-success">{{ eva.tipo }}</span>
-              {% else %}
-              <span class="badge bg-secondary">{{ eva.tipo }}</span>
-              {% endif %}
-            </td>
-            <td class="small">{{ eva.fecha }}</td>
-            <td class="small text-muted">
-              {% for c in cursos %}
-                {% if c.id_curso == eva.curso %}{{ c.nombre_curso }}{% endif %}
-              {% endfor %}
-            </td>
-            <td class="text-center">
-              <div class="d-flex justify-content-center gap-1">
-                <button type="button" class="btn btn-sm btn-outline-primary btn-editar-eva" data-bs-toggle="tooltip" title="Editar evaluación">
-                  <i class="bi bi-pencil"></i>
-                </button>
-                <form action="/evaluaciones/eliminar" method="POST" class="d-inline">
-                  <input name="method" value="delete" type="hidden">
-                  <input value="{{ eva.id }}" type="hidden" name="id_evaluacion">
-                  <button type="submit" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Eliminar evaluación">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                </form>
-              </div>
-            </td>
-          </tr>
+  <!-- TABLA -->
+  {% if rol == "profesor" %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="titulo-tabla mb-0">Evaluaciones registradas</h3>
+    <button class="btn btn-crear" data-bs-toggle="modal" data-bs-target="#modalNuevaEvaluacion">
+      <i class="bi bi-plus-lg"></i> Nueva Evaluación
+    </button>
+  </div>
+  {% endif %}
+  <table class="table" id="tablaEvaluaciones">
+    <thead>
+      <tr>
+        <th style="width:30%">Nombre</th>
+        <th style="width:15%">Tipo</th>
+        <th style="width:15%">Fecha</th>
+        <th style="width:25%">Curso</th>
+        <th style="width:15%" class="text-center">Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="cuerpoTabla">
+      {% for eva in evas %}
+      <tr data-id="{{ eva.id }}" data-nombre="{{ eva.nombre }}" data-tipo="{{ eva.tipo }}" data-fecha="{{ eva.fecha }}" data-curso="{{ eva.curso }}">
+        <td class="fw-semibold">{{ eva.nombre }}</td>
+        <td>
+          {% if eva.tipo == "Parcial" %}
+          <span class="badge bg-info">{{ eva.tipo }}</span>
+          {% elif eva.tipo == "TP" %}
+          <span class="badge bg-warning text-dark">{{ eva.tipo }}</span>
+          {% elif eva.tipo == "Parcialito" %}
+          <span class="badge bg-success">{{ eva.tipo }}</span>
           {% else %}
-          <tr id="filaVacia">
-            <td colspan="5" class="text-center py-5">
-              <i class="bi bi-inbox icon-empty"></i>
-              <p class="text-muted mt-2">No hay evaluaciones registradas.</p>
-            </td>
-          </tr>
+          <span class="badge bg-secondary">{{ eva.tipo }}</span>
+          {% endif %}
+        </td>
+        <td class="small">{{ eva.fecha }}</td>
+        <td class="small text-muted">
+          {% for c in cursos %}
+            {% if c.id_curso == eva.curso %}{{ c.nombre_curso }}{% endif %}
           {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-</main>
+        </td>
+        <td class="text-center">
+          <div class="d-flex justify-content-center gap-1">
+            <button type="button" class="btn btn-sm btn-outline-primary btn-editar-eva" data-bs-toggle="tooltip" title="Editar evaluación">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <form action="/evaluaciones/eliminar" method="POST" class="d-inline">
+              <input name="method" value="delete" type="hidden">
+              <input value="{{ eva.id }}" type="hidden" name="id_evaluacion">
+              <button type="submit" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Eliminar evaluación">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr id="filaVacia">
+        <td colspan="5" class="tabla-vacia">
+          <i class="bi bi-inbox icon-empty"></i>
+          <p class="text-muted mt-2">No hay evaluaciones registradas.</p>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
 <!-- MODAL NUEVA EVALUACION -->
 <div class="modal fade" id="modalNuevaEvaluacion" tabindex="-1">
@@ -215,7 +209,7 @@
             <label for="edit_curso" class="form-label">Curso *</label>
             <select id="edit_curso" name="curso" class="form-select" required>
               {% for c in cursos %}
-              <option value="{{ c.id_curso }}">{{ c.nombre }}</option>
+              <option value="{{ c.id_curso }}">{{ c.nombre_curso }}</option>
               {% endfor %}
             </select>
           </div>
@@ -256,7 +250,6 @@ document.addEventListener('DOMContentLoaded', function() {
   filtroTipo.addEventListener('change', filtrar);
   filtroCurso.addEventListener('change', filtrar);
 
-  // Editar evaluacion - abrir modal con datos
   document.querySelectorAll('.btn-editar-eva').forEach(function(btn) {
     btn.addEventListener('click', function() {
       const tr = btn.closest('tr');

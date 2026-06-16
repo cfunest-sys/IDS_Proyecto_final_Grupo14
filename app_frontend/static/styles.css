@@ -126,20 +126,18 @@ main {
 /* BOTONES */
 
 .btn-campus {
-  background-color: #1f0f9b;
-  color: white;
-  border-radius: 20px;
-
+  background-color: #e8f5e9;
+  border-color: #0f9621;
+  border-width: 2px;
   padding: 15px 40px;
-
+  color: #0f9621;
   font-weight: bold;
-  border: none;
-
+  border-radius: 20px;
   transition: 0.3s;
 }
 
 .btn-campus:hover {
-  background-color: #14096d;
+  background-color: #0f9621;
   color: white;
 }
 
@@ -206,9 +204,11 @@ main {
 }
 
 .btn.btn-crear {
+    background-color: #e8f5e9;
     border-color: #0f9621;
-    border-width: 2px;
+    border-width: 1px;
     padding: 7px 70px;
+    color: #0f9621;
 }
 
 .btn.btn-crear:hover {
@@ -218,7 +218,7 @@ main {
 
 .btn.btn-modificar-equipo {
   border-color: #ac7d1a;
-  border-width: 2px;
+  border-width: 1px;
   padding: 7px 70px;
 }
 
@@ -229,8 +229,12 @@ main {
 
 .btn.btn-eliminar {
     border-color: #b31b1b;
-    border-width: 2px;
+    border-width: 1px;
     padding: 7px 70px;
+}
+
+.btn.btn-eliminar.btn-sm {
+    padding: 0.25rem 0.5rem;
 }
 
 .btn.btn-eliminar:hover {
@@ -1397,4 +1401,230 @@ h3 {
     background-color: #1d2554;
     border-color: #1d2554;
     color: white;
+}
+
+/* === CALENDARIO === */
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.cal-grid--header {
+    margin-bottom: 0;
+}
+
+.cal-dia-header {
+    background-color: #1d2554;
+    color: white;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 8px 4px;
+    text-transform: uppercase;
+}
+
+.cal-dia {
+    background-color: #f2f2f2;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 6px;
+    min-height: 80px;
+    font-size: 0.8rem;
+}
+
+.cal-dia--vacio {
+    background: transparent;
+    border: none;
+    min-height: 80px;
+}
+
+.cal-numero {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #1d2554;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.cal-evento {
+    font-size: 0.7rem;
+    padding: 2px 4px;
+    border-radius: 3px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: default;
+}
+
+.cal-evento--parcial {
+    background: #fee2e2;
+    color: #991b1b;
+    border-left: 3px solid #dc2626;
+}
+
+.cal-evento--tp {
+    background: #dbeafe;
+    color: #1e40af;
+    border-left: 3px solid #2563eb;
+}
+
+.cal-evento--parcialito {
+    background: #fef3c7;
+    color: #92400e;
+    border-left: 3px solid #d97706;
+}
+
+.cal-evento--default {
+    background: #e8f5e9;
+    color: #166534;
+    border-left: 3px solid #16a34a;
+}
+
+.titulo-mes {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.cal-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .cal-grid {
+        overflow-x: auto;
+        min-width: 700px;
+    }
+}
+
+/* ============================================================
+   ALUMNOS
+   ============================================================ */
+.gestion-alumnos-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.alumnos-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.stat-item strong {
+    font-weight: 700;
+}
+
+.stat-activos {
+    color: #166534;
+}
+
+.stat-inactivos {
+    color: #991b1b;
+}
+
+.alumnos-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.alumnos-toolbar .form-control {
+    max-width: 360px;
+}
+
+@media (min-width: 1200px) {
+    .alumnos-toolbar .form-control {
+        max-width: 480px;
+    }
+}
+
+.tabla-alumnos-container {
+    width: 100%;
+}
+
+.tabla-alumnos-wrapper {
+    overflow-y: auto;
+    max-height: 600px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+}
+
+.tabla-alumnos {
+    margin-bottom: 0;
+    font-size: 0.85rem;
+}
+
+.tabla-alumnos thead th {
+    position: sticky;
+    top: 0;
+    background-color: #1d2554;
+    color: white;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 10px 12px;
+    border-bottom: none;
+    z-index: 2;
+}
+
+.tabla-alumnos tbody td {
+    padding: 8px 12px;
+    vertical-align: middle;
+}
+
+.tabla-alumnos tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.tabla-alumnos tbody tr:hover {
+    background-color: #e8f0fe;
+}
+
+.col-acciones {
+    width: 120px;
+    text-align: center;
+}
+
+.estado-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 100px;
+}
+
+.estado-activo {
+    background: #16a34a;
+    color: white;
+}
+
+.estado-inactivo {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.importar-alumnos {
+    margin-top: 32px;
+    border-top: 1px solid #dee2e6;
+    padding-top: 24px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.drop-zone-content p {
+    margin: 0;
 }

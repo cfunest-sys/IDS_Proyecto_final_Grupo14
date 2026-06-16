@@ -8,8 +8,8 @@ Calendario - Campus FIUBA
 
 <section class="container py-5">
 	<div class="card shadow-sm card-custom p-4">
-		<h2 class="text-center">Calendario</h2>
-		<div class="d-flex flex-row">
+		<h1 class="page-title text-center">Calendario</h1>
+		<div class="cal-nav">
 			<nav class="mt-4 px-3" aria-label="Page navigation example">
 			  <ul class="pagination">
 			    <li class="page-item">
@@ -45,25 +45,36 @@ Calendario - Campus FIUBA
 				<div class="container py-3 mes-contenedor" data-mes="{{mes}}" 
 					data-año="{{año}}" style="display:none;">
 				{% endif %}
-			    	<h3> Mes: {{mes_nombre[mes - 1]}}</h3> 
-				    <div class="row justify-content-center">
-				    <!--dias es una lista de numeros-->
-			    	{% for i in range(1, dias[mes - 1] + 1) %}	
-				    	<div class="col bg-primary-subtle border border-secondary">
-				    		<div class="w-25"> {{i}}:</div>
-				    		{% for evento in eventos %}	
-					    		{% if evento["fecha"][-2:]|int == i and 
+			    	<h3 class="titulo-mes">{{ mes_nombre[mes - 1] }}</h3>
+			    	{% set t = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4] %}
+			    	{% set y_ajustado = año if mes > 2 else año - 1 %}
+			    	{% set dow = (y_ajustado + (y_ajustado//4) - (y_ajustado//100) + (y_ajustado//400) + t[mes-1] + 1) % 7 %}
+				    <div class="cal-grid cal-grid--header">
+				    	<div class="cal-dia-header">Dom</div>
+				    	<div class="cal-dia-header">Lun</div>
+				    	<div class="cal-dia-header">Mar</div>
+				    	<div class="cal-dia-header">Mié</div>
+				    	<div class="cal-dia-header">Jue</div>
+				    	<div class="cal-dia-header">Vie</div>
+				    	<div class="cal-dia-header">Sáb</div>
+				    </div>
+				    <div class="cal-grid">
+			    	{% for _ in range(dow) %}
+			    		<div class="cal-dia cal-dia--vacio"></div>
+			    	{% endfor %}
+			    	{% for i in range(1, dias[mes - 1] + 1) %}
+				    	<div class="cal-dia">
+				    		<span class="cal-numero">{{ i }}</span>
+				    		{% for evento in eventos %}
+					    		{% if evento["fecha"][-2:]|int == i and
 					    			evento["fecha"][-5:-3]|int == mes and
 					    			evento["fecha"][:4]|int == año %}
-					    			<div class="evento" data-curso="{{evento['curso']}}">
+					    			<div class="evento cal-evento cal-evento--{{ evento['tipo'] | lower }}" data-curso="{{evento['curso']}}">
 					    				{{evento["nombre"]}}
 					    			</div>
 					    		{% endif %}
-		    				{% endfor %}
+				    		{% endfor %}
 				    	</div>
-				    	{% if i % 4 == 0 %}
-						<div class="w-100"></div>
-						{% endif %}
 			        {% endfor %}
 			 		</div>
 			    </div>

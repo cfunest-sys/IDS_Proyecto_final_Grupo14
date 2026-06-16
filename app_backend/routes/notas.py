@@ -121,7 +121,7 @@ def resumen_promedios(current_user):
                 LOWER(e.tipo) AS tipo_evaluacion,
                 n.calificacion AS nota,
                 c.id_curso,
-                c.nombre_curso AS nombre_curso
+                c.nombre AS nombre_curso
             FROM notas n
             INNER JOIN alumnos a      ON n.legajo_alumno  = a.legajo
             INNER JOIN evaluaciones e ON n.id_evaluacion  = e.id_evaluacion
@@ -135,7 +135,7 @@ def resumen_promedios(current_user):
             parametros.append(anio)
 
         if cuatrimestre:
-            condiciones.append("c.cuatrimestre = %s")
+            condiciones.append("c.semestre = %s")
             parametros.append(cuatrimestre)
 
         if id_curso:
@@ -250,11 +250,11 @@ def listar_periodos(current_user):
         conn = get_connection()
         cur  = conn.cursor(dictionary=True)
         cur.execute("""
-            SELECT DISTINCT c.anio, c.cuatrimestre
+            SELECT DISTINCT c.anio, c.semestre
             FROM cursos c
             INNER JOIN evaluaciones e ON e.id_curso = c.id_curso
             INNER JOIN notas n ON n.id_evaluacion = e.id_evaluacion
-            ORDER BY c.anio DESC, c.cuatrimestre ASC
+            ORDER BY c.anio DESC, c.semestre ASC
         """)
         return jsonify(cur.fetchall()), 200
     except Exception as e:

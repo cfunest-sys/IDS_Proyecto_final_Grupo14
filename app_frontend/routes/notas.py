@@ -17,7 +17,7 @@ def ver_notas():
     semestre_default = "1" if mes_actual <= 7 else "2"
 
     anio_activo     = request.args.get("anio",     str(año_actual))      # ← default: año actual
-    semestre_activo = request.args.get("semestre", semestre_default)      # ← default: cuatrimestre actual
+    semestre_activo = request.args.get("cuatrimestre", semestre_default)      # ← default: cuatrimestre actual
 
     años_disponibles = list(range(año_actual - 5, año_actual + 3))
     try:
