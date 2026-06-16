@@ -58,7 +58,7 @@ def listar_cursos_filtrados(current_user):
             except (ValueError, TypeError):
                 return jsonify({"error": "El cuatrimestre debe ser un número entero válido"}), 400
 
-        lista_cursos = get_cursos_filtrados(id_curso_int, anio_int, cuatrimestre_int, pag, por_pag)
+        lista_cursos = get_cursos_filtrados(id_curso=id_curso_int, anio=anio_int, cuatrimestre=cuatrimestre_int, pag=pag, por_pag=por_pag)
 
         if not lista_cursos:
             return jsonify([]), 200
@@ -122,7 +122,7 @@ def crear_cursos(current_user):
         if curso_existente:
             return jsonify({"error": "El curso ya existe dentro del cuatrimestre elegido"}), 409
 
-        insertar_curso(anio_int, cuatrimestre_int, id_profesor)
+        insertar_curso(f"{anio_int} - {cuatrimestre_int}° Cuatrimestre", anio_int, cuatrimestre_int, id_profesor)
         return jsonify({"mensaje": "Curso creado con éxito"}), 201
    
     except Exception as e:

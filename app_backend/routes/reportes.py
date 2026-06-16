@@ -167,7 +167,7 @@ def reporte_estadisticas():
         cur.execute("""
             SELECT DISTINCT
                 anio,
-                cuatrimestre
+                semestre
             FROM cursos
             ORDER BY
                 anio,
@@ -197,7 +197,7 @@ def reporte_estadisticas():
                 SELECT COUNT(*)
                 FROM cursos
                 WHERE anio = %s
-                AND cuatrimestre = %s
+                AND semestre = %s
             """, (anio, cuatrimestre))
 
             filas.append(
@@ -210,7 +210,7 @@ def reporte_estadisticas():
                 INNER JOIN cursos c
                     ON e.id_curso = c.id_curso
                 WHERE c.anio = %s
-                AND c.cuatrimestre = %s
+                AND c.semestre = %s
             """, (anio, cuatrimestre))
 
             filas.append(
@@ -223,7 +223,7 @@ def reporte_estadisticas():
                 INNER JOIN cursos c
                     ON e.id_curso = c.id_curso
                 WHERE c.anio = %s
-                AND c.cuatrimestre = %s
+                AND c.semestre = %s
             """, (anio, cuatrimestre))
 
             filas.append(
@@ -276,15 +276,15 @@ def reporte_equipos():
             SELECT
                 e.id_equipo,
                 e.nombre_equipo,
-                c.nombre_curso,
+                c.nombre,
                 c.anio,
-                c.cuatrimestre
+                c.semestre
             FROM equipos e
             LEFT JOIN cursos c
                 ON e.id_curso = c.id_curso
             ORDER BY
                 c.anio,
-                c.cuatrimestre,
+                c.semestre,
                 e.nombre_equipo
         """)
 

@@ -1599,7 +1599,7 @@ def get_cursos_filtrados(id_curso=None, nombre_curso=None, anio=None, cuatrimest
             parametros.append(id_curso)
 
         if nombre_curso:
-            condiciones.append("c.nombre_curso LIKE %s")
+            condiciones.append("c.nombre LIKE %s")
             parametros.append(f"%{nombre_curso}%")
 
         if anio:
@@ -1607,7 +1607,7 @@ def get_cursos_filtrados(id_curso=None, nombre_curso=None, anio=None, cuatrimest
             parametros.append(anio)
 
         if cuatrimestre:
-            condiciones.append("c.cuatrimestre = %s")
+            condiciones.append("c.semestre = %s")
             parametros.append(cuatrimestre)
 
         if id_profesor:
@@ -1647,7 +1647,7 @@ def insertar_curso(nombre_curso, anio, cuatrimestre, id_profesor):
         conexion = get_connection()
         cursor = conexion.cursor(dictionary=True)
 
-        cursor.execute("INSERT INTO cursos (nombre_curso, anio, cuatrimestre) VALUES (%s, %s, %s)", (nombre_curso, anio, cuatrimestre))
+        cursor.execute("INSERT INTO cursos (nombre, anio, semestre) VALUES (%s, %s, %s)", (nombre_curso, anio, cuatrimestre))
         conexion.commit()
 
         id_curso = cursor.lastrowid
@@ -1699,6 +1699,37 @@ def delete_curso(id_curso, id_profesor):
         print(f"Error al intentar eliminar el curso: {e}")
         raise e
     
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
+
+
+def modificar_curso_query(cuatrimestre, anio, id_curso):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        query_modificar = """
+            UPDATE cursos
+            SET semestre = %s, anio = %s
+            WHERE id_curso = %s
+        """
+        cursor.execute(query_modificar, (cuatrimestre, anio, id_curso,))
+        conexion.commit()
+
+        return True
+
+    except Exception as e:
+        if conexion:
+            conexion.rollback()
+        print(f"Error al intentar modificar el curso: {e}")
+        raise e
+
     finally:
         if cursor:
             cursor.close()
