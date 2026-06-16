@@ -11,6 +11,7 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 10s
       retries: 10
+
   backend:
     build:
       context: .
@@ -29,6 +30,7 @@ services:
     volumes:
       - uploads_data:/app/backend/uploads
       - flask_sessions:/app/backend/flask_session
+
   frontend:
     build:
       context: .
@@ -39,6 +41,14 @@ services:
       - backend
     ports:
       - "8080:8080"
+
+  ngrok-tunnel:
+    image: ngrok/ngrok:latest
+    restart: unless-stopped
+    environment:
+      NGROK_AUTHTOKEN: "3FEiBq6ISfYZtS8iuOMOYcCtWFS_3nRRXXJRZ3pz72a8E5g49"
+    command: "http frontend:8080 --url=national-unlit-unseated.ngrok-free.dev"
+
 volumes:
   mysql_data:
   uploads_data:
