@@ -29,7 +29,6 @@ app.register_blueprint(equipos_bp)
 app.register_blueprint(perfil_bp)
 app.register_blueprint(cursos_bp)
 app.register_blueprint(asistencia_bp)
-app.register_blueprint(dashboard_alumno_bp)
 
 
 

@@ -1420,7 +1420,7 @@ def obtener_detalles_alumno(id_usuario):
             alumno["evaluaciones"] = cur.fetchall()
 
             query_equipos = """
-                SELECT eq.nombre_equipo, c.nombre AS curso_nombre, c.anio, c.semestre
+                SELECT eq.nombre_equipo, c.anio, c.cuatrimestre
                 FROM miembros_equipo me
                 INNER JOIN equipos eq ON me.id_equipo = eq.id_equipo
                 INNER JOIN cursos c ON eq.id_curso = c.id_curso
@@ -1454,7 +1454,7 @@ def obtener_detalles_profesor(id_usuario):
         if profesor:
 
             query_cursos = """
-                SELECT cursos.id_curso, cursos.nombre AS nombre_curso, cursos.anio, cursos.semestre AS cuatrimestre
+                SELECT cursos.id_curso, cursos.nombre AS nombre_curso, cursos.anio, cursos.cuatrimestre AS cuatrimestre
                 FROM profesor_curso
                 INNER JOIN cursos ON profesor_curso.id_curso = cursos.id_curso
                 WHERE profesor_curso.id_profesor = %s
@@ -1599,7 +1599,7 @@ def get_cursos_filtrados(id_curso=None, nombre_curso=None, anio=None, cuatrimest
             parametros.append(id_curso)
 
         if nombre_curso:
-            condiciones.append("c.nombre LIKE %s")
+            condiciones.append("c.nombre_curso LIKE %s")
             parametros.append(f"%{nombre_curso}%")
 
         if anio:
@@ -1607,7 +1607,7 @@ def get_cursos_filtrados(id_curso=None, nombre_curso=None, anio=None, cuatrimest
             parametros.append(anio)
 
         if cuatrimestre:
-            condiciones.append("c.semestre = %s")
+            condiciones.append("c.cuatrimestre = %s")
             parametros.append(cuatrimestre)
 
         if id_profesor:
@@ -1639,7 +1639,7 @@ def get_cursos_filtrados(id_curso=None, nombre_curso=None, anio=None, cuatrimest
             conexion.close()
 
 
-def insertar_curso(nombre_curso, anio, cuatrimestre, id_profesor):
+def insertar_curso(anio, cuatrimestre, id_profesor):
     conexion = None
     cursor = None
 
@@ -1647,7 +1647,7 @@ def insertar_curso(nombre_curso, anio, cuatrimestre, id_profesor):
         conexion = get_connection()
         cursor = conexion.cursor(dictionary=True)
 
-        cursor.execute("INSERT INTO cursos (nombre, anio, semestre) VALUES (%s, %s, %s)", (nombre_curso, anio, cuatrimestre))
+        cursor.execute("INSERT INTO cursos (anio, cuatrimestre) VALUES (%s, %s)", (anio, cuatrimestre))
         conexion.commit()
 
         id_curso = cursor.lastrowid
@@ -1716,7 +1716,7 @@ def modificar_curso_query(cuatrimestre, anio, id_curso):
 
         query_modificar = """
             UPDATE cursos
-            SET semestre = %s, anio = %s
+            SET cuatrimestre = %s, anio = %s
             WHERE id_curso = %s
         """
         cursor.execute(query_modificar, (cuatrimestre, anio, id_curso,))

@@ -116,13 +116,13 @@ def crear_cursos(current_user):
             return jsonify({"error": "No se encontró un perfil de profesor asociado"}), 404
         
         id_profesor = perfil_profe["id_profesor"]
-
+        
         curso_existente = get_cursos_filtrados(anio=anio_int, cuatrimestre=cuatrimestre_int)
 
         if curso_existente:
             return jsonify({"error": "El curso ya existe dentro del cuatrimestre elegido"}), 409
 
-        insertar_curso(f"{anio_int} - {cuatrimestre_int}° Cuatrimestre", anio_int, cuatrimestre_int, id_profesor)
+        insertar_curso(anio_int, cuatrimestre_int, id_profesor)
         return jsonify({"mensaje": "Curso creado con éxito"}), 201
    
     except Exception as e:

@@ -49,12 +49,13 @@ CREATE TABLE alumnos (
     apellido TEXT NOT NULL,
     dni VARCHAR(20) NOT NULL UNIQUE,
     email TEXT,
-    curso TEXT,
+    curso int NOT NULL,
     anio INTEGER,
     cuatrimestre INTEGER, 
     estado TEXT NOT NULL,
     id_usuario INTEGER,
-    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario),
+    FOREIGN KEY (curso) REFERENCES cursos(id_curso)
 );
 CREATE TABLE profesores (
     id_profesor INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -223,8 +224,8 @@ VALUES (
     'Juan',
     'Pérez',
     '40123456',
-    '75.40',
-    2,
+    1,
+    2025,
     1,
     'activo',
     3
