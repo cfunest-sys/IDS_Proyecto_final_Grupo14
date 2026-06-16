@@ -1588,7 +1588,7 @@ def get_cursos_filtrados(id_curso=None, nombre_curso=None, anio=None, cuatrimest
         cursor = conexion.cursor(dictionary=True)
 
         query = """
-            SELECT c.* FROM cursos c
+            SELECT DISTINCT c.* FROM cursos c
             JOIN profesor_curso pc ON c.id_curso = pc.id_curso
         """
         parametros = []
