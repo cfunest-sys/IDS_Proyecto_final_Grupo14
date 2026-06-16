@@ -281,7 +281,7 @@
               <select id="id_curso" name="id_curso" class="form-select" required>
                 <option value="">Seleccionar curso</option>
                 {% for curso in cursos %}
-                <option value="{{ curso.id_curso }}">{{ curso.nombre }}</option>
+                <option value="{{ curso.id_curso }}">{{ curso.nombre_curso }}</option>
                 {% endfor %}
               </select>
             </div>
