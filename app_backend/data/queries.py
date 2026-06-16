@@ -1547,38 +1547,6 @@ def crear_alumno(alumno):
             conn.close()
 
 
-def get_curso_profesor(id_profesor, pag, por_pag):
-    conexion = None
-    cursor = None
-
-    try:
-        conexion = get_connection()
-        cursor = conexion.cursor(dictionary=True)
-
-        offset = (pag - 1) * por_pag
-
-        query = """
-            SELECT c.* FROM cursos c
-            JOIN profesor_curso pc ON c.id_curso = pc.id_curso
-            WHERE pc.id_profesor = %s
-            LIMIT %s OFFSET %s
-        """
-        cursor.execute(query, (id_profesor, por_pag, offset))
-        lista_cursos = cursor.fetchall()  
-        
-        return lista_cursos
-
-    except Exception as e:
-        print(f"Error en la obtención de los cursos: {e}")
-        raise e
-
-    finally:
-        if cursor:
-            cursor.close()
-        if conexion:
-            conexion.close()
-
-
 def get_cursos_filtrados(id_curso=None, nombre_curso=None, anio=None, cuatrimestre=None, id_profesor=None, pag = None, por_pag = None):
     conexion = None
     cursor = None
