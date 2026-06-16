@@ -32,8 +32,14 @@ def generar_qr():
                 data = respuesta.json()
                 if respuesta.status_code == 200:
                     codigo = data.get("qr_code")
-                    ip = obtener_ip_local()
-                    qr_generado = (f"http://{ip}:8080/" f"registrar-asistencia?qr={codigo}")
+                    public_url = current_app.config["PUBLIC_URL"]
+                    if public_url:
+                           base_url = public_url.rstrip("/")
+                    else:
+                           #EN CASO DE QUE NO HAYA UNA URL PUBLICA GENERAMOS LA RUTA CON LA IP
+                           ip = obtener_ip_local()
+                           base_url = f"http://{ip}:8080"
+                    qr_generado = f"{base_url}/registrar-asistencia?qr={codigo}"
                 else:
                     mensaje = data.get("error")
             except Exception as e:

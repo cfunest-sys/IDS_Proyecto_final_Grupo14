@@ -19,6 +19,7 @@ app = Flask(__name__)
 app.secret_key = "six_seven"
 
 app.config["BACKEND_URL"] = os.getenv("BACKEND_URL", "http://127.0.0.1:5001")
+app.config["PUBLIC_URL"] = os.getenv("PUBLIC_URL", "")
 
 app.register_blueprint(inicio)
 app.register_blueprint(evaluaciones_blueprint, url_prefix="/evaluaciones")

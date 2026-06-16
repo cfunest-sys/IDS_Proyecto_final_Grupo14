@@ -33,18 +33,17 @@ Asistencia
 
         {% if qr_generado %}
 
-        <div class="alert alert-success mt-4">
+        <div class="alert alert-success mt-4 text-center">
 
             <h5 class="mb-2">
                 QR generado correctamente
             </h5>
 
-            <div class="d-flex justify-content-center"
-                    
-            id="qrcode"
-                    
-            data-qr="{{ qr_generado }}">
-         
+            <div class="d-flex justify-content-center align-items-center mt-3">
+                <div 
+                 id="qrcode" 
+                 data-qr="{{ qr_generado }}">
+                </div>
             </div>
 
 
@@ -101,7 +100,7 @@ Asistencia
 </div> 
 {% endif %}
 
-<!--LIBRERIA PARA PODER GENERAR EL QR DESDE EL FORNT CON JAVA-->
+<!--LIBRERIA PARA PODER GENERAR LA QR DESDE EL FORNT CON JAVA-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 {% endblock %}
