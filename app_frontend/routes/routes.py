@@ -354,7 +354,7 @@ def forgot_password():
             return render_template("olvido_contraseña.html", error="Error de conexión con el servidor")
 
         if response.status_code == 200:
-            flash("Token generado. Revise la consola del backend.", "success")
+            flash("Token generado. Revise su correo electrónico.", "success")
             # Redirigimos al formulario donde pondra el token y la nueva contraseña
             return redirect("/reset-password")
         
