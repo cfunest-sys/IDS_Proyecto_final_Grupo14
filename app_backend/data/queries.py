@@ -1452,35 +1452,40 @@ def obtener_detalles_profesor(id_usuario):
         profesor = cur.fetchone()
 
         if profesor:
-
             query_cursos = """
-                SELECT cursos.id_curso, cursos.nombre_curso, cursos.anio, cursos.cuatrimestre
+                SELECT 
+                    cursos.id_curso, 
+                    cursos.nombre AS curso_nombre, 
+                    cursos.semestre, 
+                    cursos.anio
                 FROM profesor_curso
                 INNER JOIN cursos ON profesor_curso.id_curso = cursos.id_curso
                 WHERE profesor_curso.id_profesor = %s
             """
             cur.execute(query_cursos, (profesor["id_profesor"],))
             profesor["cursos_asignados"] = cur.fetchall()
+            
             query_evaluaciones = """
                 SELECT 
                     e.nombre AS evaluacion_nombre,
                     e.tipo AS evaluacion_tipo,
-                    e.fecha,
+                    DATE_FORMAT(e.fecha, '%Y-%m-%d') AS fecha,
                     CASE 
-                        WHEN COUNT(n.id) > 0 THEN 'corregida'
+                        WHEN COUNT(n.id_evaluacion) > 0 THEN 'corregida'
                         ELSE 'pendiente'
                     END AS estado_evaluacion
                 FROM evaluaciones e
-                INNER JOIN cursos c ON e.id_curso = c.id_curso
-                INNER JOIN profesor_curso pc ON c.id_curso = pc.id_curso
+                INNER JOIN profesor_curso pc ON e.id_curso = pc.id_curso
                 LEFT JOIN notas n ON e.id_evaluacion = n.id_evaluacion
                 WHERE pc.id_profesor = %s
-                GROUP BY e.id_evaluacion
+                GROUP BY e.id_evaluacion, e.nombre, e.tipo, e.fecha
+                ORDER BY e.fecha DESC
             """
             cur.execute(query_evaluaciones, (profesor["id_profesor"],))
             profesor["evaluaciones"] = cur.fetchall()
 
         return profesor
+
     except Exception as e:
         print(f"Error en profesor: {e}")
         return None
