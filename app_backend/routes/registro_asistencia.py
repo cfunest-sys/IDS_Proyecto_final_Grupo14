@@ -1,12 +1,14 @@
 from flask import Blueprint, request, jsonify
 from database.db import get_connection
+from utils.auth import token_required, rol_required
 from datetime import datetime, timedelta
 import secrets
 
 asistencia_bp = Blueprint("asistencia", __name__)
 #GENERAR QR
 @asistencia_bp.route("/generar-qr", methods=["POST"])
-def generar_qr():
+@token_required
+def generar_qr(current_user):
 
     try:
 

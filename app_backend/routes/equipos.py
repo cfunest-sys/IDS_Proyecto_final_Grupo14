@@ -11,6 +11,7 @@ from data.queries import (
     insertar_miembro,
     delete_miembro,
     existe_equipo,
+    existe_curso,
 )
 
 equipos_bp = Blueprint('equipos', __name__)
@@ -117,7 +118,9 @@ def crear_equipo(current_user):
             
         except (ValueError, TypeError):
             return jsonify({"error": "El ID del curso debe ser un número entero válido"}), 400
-
+        if not existe_curso(id_curso_int):
+            return jsonify({"error": "El curso asociado no existe"}), 404
+        
         equipo_existente = existe_equipo(nombre_equipo, id_curso_int)
 
         if equipo_existente:

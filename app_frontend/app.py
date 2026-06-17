@@ -32,7 +32,10 @@ app.register_blueprint(asistencia_bp)
 @app.route("/alumnos")
 def mostrar_alumnos():
     try:
-        resp = requests.get(f"{app.config['BACKEND_URL']}/api/alumnos/", timeout=5)
+        token = session.get("token", "")
+        auth_headers = {'Authorization': 'Bearer ' + token}
+        resp = requests.get(f"{app.config['BACKEND_URL']}/api/alumnos/", 
+            timeout=5, headers=auth_headers)
         if resp.ok:
             alumnos = resp.json()
         else:
@@ -47,8 +50,10 @@ def desactivar_alumno():
         legajo = request.form.get("legajo", "")
         estado = request.form.get("estado", "")
         data = {"legajo":legajo, "estado":estado}
+        token = session.get("token", "")
+        auth_headers = {'Authorization': 'Bearer ' + token}
         resp = requests.put(f"{app.config['BACKEND_URL']}/api/alumnos/actualizar/desactivar", 
-            timeout=5, json=data)
+            timeout=5, json=data, headers=auth_headers)
     except requests.exceptions.RequestException:
         flash("Error de conexión con el servidor", "danger")
 

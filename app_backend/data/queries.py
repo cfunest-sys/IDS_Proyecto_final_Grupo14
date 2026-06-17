@@ -384,6 +384,28 @@ def get_equipo_id(id_equipo):
         if conexion:
             conexion.close()
 
+def existe_curso(id_curso):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor()
+
+        cursor.execute("SELECT id_curso FROM cursos WHERE id_curso = %s", (id_curso,))
+        resultado = cursor.fetchone()
+
+        return resultado is not None
+
+    except Exception as e:
+        print(f"Error al verificar existencia del curso: {e}")
+        raise e
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
 
 def insertar_equipo(nombre_equipo, id_curso):
     conexion = None

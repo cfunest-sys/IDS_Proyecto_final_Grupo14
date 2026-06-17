@@ -1,4 +1,7 @@
 from flask import Blueprint, request, jsonify
+from datetime import datetime
+from utils.auth import token_required, rol_required
+from data.queries import get_connection
 from data.queries import (
     get_user_profile,
     get_evaluacion_profesor,
@@ -11,9 +14,9 @@ from data.queries import (
 evaluaciones_bp = Blueprint('evaluaciones', __name__)
 
 
-
 @evaluaciones_bp.route('/usuario', methods=['GET', 'POST'])
-def obtener_eva_usuario():
+@token_required
+def obtener_eva_usuario(current_user):
     data = request.get_json(silent=True)
     if not data:
         return jsonify({"error": "No se enviaron datos"}), 400
@@ -48,7 +51,8 @@ def obtener_eva_usuario():
 
 
 @evaluaciones_bp.route('/crear', methods=['POST'])
-def crear_eva():
+@token_required
+def crear_eva(current_user):
     data = request.get_json()
     campos = ["nombre", "tipo", "fecha", "curso_id"]
     if not data:
@@ -60,7 +64,8 @@ def crear_eva():
     return resultado
 
 @evaluaciones_bp.route('/actualizar/', methods=['PUT'])
-def actualizar_eva():                              # ← typo corregido: "actualiar" → "actualizar"
+@token_required
+def actualizar_eva(current_user):                             
     data = request.get_json()
     campos = ["id", "nombre", "tipo", "fecha", "curso_id"]
     if not data:
@@ -72,7 +77,8 @@ def actualizar_eva():                              # ← typo corregido: "actual
     return resultado
 
 @evaluaciones_bp.route('/destruir/<int:id>', methods=['DELETE'])
-def destruir_eva(id):
+@token_required
+def destruir_eva(current_user, id):
     resultado = eliminar_evaluacion(id)
     if (resultado == False):
         return jsonify({"body": {"estado": resultado}, "status": 400})
