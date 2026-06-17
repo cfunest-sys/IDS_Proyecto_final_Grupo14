@@ -104,7 +104,10 @@ def crear_evaluacion():
         data["tipo"] = request.form.get("tipo")
         data["fecha"] = request.form.get("fecha")
         data["curso_id"] = request.form.get("curso")
-        response = requests.post(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/crear", json=data)
+        token = session.get("token", "")
+        auth_headers = {"Authorization": "Bearer " + token}
+        response = requests.post(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/crear", 
+            json=data, headers=auth_headers)
         if not response.ok:
             err = response.json().get("error", "Error desconocido")
             flash(f"Error al crear evaluación: {err}", "danger")
@@ -129,8 +132,11 @@ def actualizar_evaluacion():
         data["tipo"] = request.form.get("tipo")
         data["fecha"] = request.form.get("fecha")
         data["curso_id"] = request.form.get("curso")
+        token = session.get("token", "")
+        auth_headers = {"Authorization": "Bearer " + token}
         response = requests.put(
-            f"{current_app.config['BACKEND_URL']}/api/evaluaciones/actualizar/", json=data, timeout=5
+            f"{current_app.config['BACKEND_URL']}/api/evaluaciones/actualizar/", 
+            json=data, timeout=5, headers=auth_headers
         )
         if response.ok:
             flash("Evaluación actualizada con éxito", "success")
@@ -156,7 +162,9 @@ def eliminar_evaluacion():
             # data = {"rol": "profesor", "user_id": 2}  #--para probar--
             # data = {"rol": "alumno", "user_id": 2}  #--para probar--
         data["id"] = request.form.get("id_evaluacion", "")
-        response = requests.delete(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/destruir/{str(data['id'])}")
+        token = session.get("token", "")
+        auth_headers = {"Authorization": "Bearer " + token}
+        response = requests.delete(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/destruir/{str(data['id'])}", headers=auth_headers)
         if response.ok:
             if response.json().get("body", "") != "":
                 json = response.json().get("body", "")

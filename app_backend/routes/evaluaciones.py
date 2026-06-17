@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime
+from utils.auth import token_required, rol_required
 from data.queries import get_connection
 from data.queries import (
     get_connection,
@@ -16,19 +17,22 @@ from data.queries import (
 evaluaciones_bp = Blueprint('evaluaciones', __name__)
 
 @evaluaciones_bp.route('/<int:id>', methods=['GET'])
-def obtener_eva(id):
+@token_required
+def obtener_eva(current_user, id):
     evaluacion = get_evaluacion(id)
     return evaluacion
 
 @evaluaciones_bp.route('/curso/<int:id_curso>', methods=['GET'])
-def obtener_evas_curso(id_curso):
+@token_required
+def obtener_evas_curso(current_user, id_curso):
     evaluacion = get_evaluacion_por_curso(id_curso)
     if not evaluacion or len(evaluacion) <= 0:
         return evaluacion
     return evaluacion
 
 @evaluaciones_bp.route('/usuario', methods=['GET', 'POST'])
-def obtener_eva_usuario():
+@token_required
+def obtener_eva_usuario(current_user):
     data = request.get_json(silent=True)
     if not data:
         return jsonify({"error": "No se enviaron datos"}), 400
@@ -61,7 +65,8 @@ def obtener_eva_usuario():
     return jsonify({"body": evaluacion_formateada}), 200
 
 @evaluaciones_bp.route('/todas', methods=['GET'])
-def obtener_evas_todas():
+@token_required
+def obtener_evas_todas(current_user):
     evaluacion = get_evaluacion_todas()
     if (len(evaluacion) <= 0 or evaluacion == None):
         return jsonify({"body":[], "status":204})
@@ -74,7 +79,8 @@ def obtener_evas_todas():
 
 
 @evaluaciones_bp.route('/crear', methods=['POST'])
-def crear_eva():
+@token_required
+def crear_eva(current_user):
     data = request.get_json()
     campos = ["nombre", "tipo", "fecha", "curso_id"]
     if not data:
@@ -86,7 +92,8 @@ def crear_eva():
     return resultado
 
 @evaluaciones_bp.route('/actualizar/', methods=['PUT'])
-def actualizar_eva():                              # ← typo corregido: "actualiar" → "actualizar"
+@token_required
+def actualizar_eva(current_user):                             
     data = request.get_json()
     campos = ["id", "nombre", "tipo", "fecha", "curso_id"]
     if not data:
@@ -98,7 +105,8 @@ def actualizar_eva():                              # ← typo corregido: "actual
     return resultado
 
 @evaluaciones_bp.route('/destruir/<int:id>', methods=['DELETE'])
-def destruir_eva(id):
+@token_required
+def destruir_eva(current_user, id):
     resultado = eliminar_evaluacion(id)
     if (resultado == False):
         return jsonify({"body": {"estado": resultado}, "status": 400})
