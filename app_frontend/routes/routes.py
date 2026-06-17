@@ -28,6 +28,8 @@ def descargar_reporte(tipo):
 
 @inicio.route("/register", methods=["GET", "POST"])
 def register():
+    if session.get("rol") != "admin":
+        return redirect("/")
 
     if request.method == "POST":
 
