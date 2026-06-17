@@ -83,13 +83,13 @@ Gestión de equipos
                                 <td>{{ equipo.nombre_equipo }}</td>
                                 <td class="text-center">{{ equipo.id_curso }}</td>
                                 <td class="text-center">
-                                    <button class="btn btn-alumnos" data-bs-toggle="modal" data-bs-target="#modal_alumnos" data-id="{{ equipo.id_equipo }}">
+                                    <button class="btn btn-alumnos" data-bs-toggle="modal" data-bs-target="#modal_alumnos_{{ equipo.id_equipo }}" title="Ver alumnos">
                                         Alumnos
                                     </button>
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-1">
-                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"  data-bs-target="#modal_modificar_equipo" data-id="{{ equipo.id_equipo }}" title="Modificar equipo">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"  data-bs-target="#modal_modificar_equipo" data-id="{{ equipo.id_equipo }}" data-nombre="{{ equipo.nombre_equipo }}" data-curso="{{ equipo.id_curso }}"title="Modificar equipo">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                         <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"  data-bs-target="#modal_eliminar_equipo" data-id="{{ equipo.id_equipo }}" title="ELiminar equipo">
@@ -98,6 +98,7 @@ Gestión de equipos
                                     </div>
                                 </td>
                             </tr>
+                            
                         {% else %}
                             <tr>
                                 <td colspan="4" class="tabla-vacia">
@@ -142,7 +143,8 @@ Gestión de equipos
 </div>
 
 <!--Código de los modales-->
-<div class="modal fade" id="modal_alumnos" tabindex="-1">
+{% for equipo in equipos %}
+<div class="modal fade" id="modal_alumnos_{{ equipo.id_equipo }}" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered"> 
         <div class="modal-content">
             <div class="modal-header">
@@ -151,12 +153,26 @@ Gestión de equipos
             </div>
         
             <div class="modal-body">
-                <h6 class="texto-indicacion-modal mb-3" id="titulo_alumnos_modal">Alumnos asignados:</h6>
-                <ul class="list-group mb-3" id="grupo_lista_alumnos"></ul>
+                <h6 class="texto-indicacion-modal mb-3">Alumnos asignados:</h6>
+                <ul class="list-group mb-3">
+                    {% if equipo.alumnos and equipo.alumnos|length > 0 %}
+                        {% for alumno in equipo.alumnos %}
+                            <li class="listado-alumnos-equipos d-flex justify-content-between align-items-center mb-2">
+                                <span class="contenido-modal">Padrón: {{ alumno.legajo_alumno }}</span>
+                                <form action="/equipos/eliminar-alumno" method="post" class="m-0">
+                                    <input type="hidden" name="id_miembro" value="{{ alumno.id_miembro }}">
+                                    <button type="submit" class="btn btn-sm btn-eliminar-alumno">Eliminar</button>
+                                </form>
+                            </li> 
+                        {% endfor %}
+                    {% else %}
+                        <li class="listado-alumnos-equipos">Este equipo no tiene integrantes asignados</li>
+                    {% endif %}
+                </ul>
                 <hr>
                 <h6 class="texto-indicacion-modal mb-2">Asignar nuevo alumno:</h6>
                 <form action="/equipos/agregar-alumno" method="post" class="d-flex gap-2">
-                    <input type="hidden" name="id_equipo" id="modal_alumnos_id_equipo"> 
+                    <input type="hidden" name="id_equipo" value="{{ equipo.id_equipo }}"> 
                     <div class="input-group">
                         <span class="input-group-text">Padrón</span>
                         <input type="number" name="legajo_alumno" class="form-control" placeholder="Ej: 104432" required>
@@ -167,28 +183,8 @@ Gestión de equipos
             </div>
         </div>
     </div>
-    <template id="molde_cargando">
-        <li class="listado-alumnos-equipos">Cargando integrantes...</li>
-    </template>
-
-    <template id="molde_vacio">
-        <li class="listado-alumnos-equipos">Este equipo no tiene integrantes asignados</li>
-    </template>
-
-    <template id="molde_alumno_fila">
-        <li class="listado-alumnos-equipos">
-            <span class="contenido-modal txt-legajo"></span>
-            <form action="/equipos/eliminar-alumno" method="post">
-                <input type="hidden" name="id_miembro" class="input-id-miembro">
-                <button type="submit" class="btn btn-eliminar-alumno">Eliminar</button>
-            </form>
-        </li> 
-    </template>
-
-    <template id="molde_error">
-        <li class="listado-alumnos-equipos">Error al cargar los datos</li>
-    </template>
 </div>
+{% endfor %} 
 
 <div class="modal fade" id="modal_crear_equipo" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">

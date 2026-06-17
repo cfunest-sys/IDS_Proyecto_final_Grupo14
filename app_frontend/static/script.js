@@ -155,87 +155,20 @@ if (formulario) {
 
 
 // Modificar equipo
-const modalModificar = document.getElementById('modal_modificar_equipo');
+const modalModificarEquipo = document.getElementById('modal_modificar_equipo');
 
-if (modalModificar) {
-    modalModificar.addEventListener('show.bs.modal', function (event) {
+if (modalModificarEquipo) {
+    modalModificarEquipo.addEventListener('show.bs.modal', function (event) {
         const boton = event.relatedTarget;
         const idEquipo = boton.getAttribute('data-id');
-        const inputId = modalModificar.querySelector("#modificar_id_equipo");
-        const inputNombre = modalModificar.querySelector("#modificar_nombre_equipo");
-        const inputCurso = modalModificar.querySelector("#modificar_id_curso");
+        const nombreEquipo = boton.getAttribute('data-nombre');
+        const idCurso = boton.getAttribute('data-curso');
 
-        inputId.value = idEquipo;
-
-        fetch(`/equipos/datos/${idEquipo}`)
-            .then(response => {
-                if (!response.ok) throw new Error("Error al recuperar datos");
-                return response.json();
-            })
-            .then(equipo => {
-                inputNombre.value = equipo.nombre_equipo;
-                inputCurso.value = equipo.id_curso;
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                inputNombre.value = "";
-                inputCurso.value = "";
-                alert("Error al cargar los datos del equipo");
-            });
+        modalModificarEquipo.querySelector("#modificar_id_equipo").value = idEquipo;
+        modalModificarEquipo.querySelector("#modificar_nombre_equipo").value = nombreEquipo;
+        modalModificarEquipo.querySelector("#modificar_id_curso").value = idCurso;
     });
 }
-
-// Modificar alumnos de equipos
-const modalAlumnos = document.getElementById('modal_alumnos');
-
-if (modalAlumnos) {
-    modalAlumnos.addEventListener('show.bs.modal', function (event) {
-        const botonElemento = event.relatedTarget;
-        const idEquipo = botonElemento.getAttribute('data-id');
-        const inputHiddenEquipo = document.getElementById('modal_alumnos_id_equipo');
-        const tituloModal = document.getElementById('titulo_alumnos_modal');
-        const grupoLista = document.getElementById('grupo_lista_alumnos');
-
-        inputHiddenEquipo.value = idEquipo;
-        tituloModal.innerText = `Alumnos asignados al Equipo ${idEquipo}:`;
-
-        grupoLista.innerHTML = "";
-        const moldeCargando = document.getElementById('molde_cargando').content.cloneNode(true);
-        grupoLista.appendChild(moldeCargando);
-
-        fetch(`/equipos/datos/${idEquipo}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Error del servidor");
-                }
-                return response.json();
-            })
-            .then(equipo => {
-                grupoLista.innerHTML = "";
-
-                if (!equipo.alumnos || equipo.alumnos.length === 0) {
-                    const moldeVacio = document.getElementById('molde_vacio').content.cloneNode(true);
-                    grupoLista.appendChild(moldeVacio);
-                    return;
-                }
-
-                equipo.alumnos.forEach(alumno => {
-                    const moldeFila = document.getElementById('molde_alumno_fila').content.cloneNode(true);
-                    
-                    moldeFila.querySelector('.txt-legajo').innerText = `Padrón: ${alumno.legajo_alumno}`;
-                    moldeFila.querySelector('.input-id-miembro').value = alumno.id_miembro;
-                    
-                    grupoLista.appendChild(moldeFila);
-                });
-            })
-            .catch(error => {
-                console.error(error);
-                grupoLista.innerHTML = '';
-                const moldeError = document.getElementById('molde_error').content.cloneNode(true);
-                grupoLista.appendChild(moldeError);
-            });
-    });
-} 
 
 // Eliminar equipos
 const modalEliminar = document.getElementById('modal_eliminar_equipo');

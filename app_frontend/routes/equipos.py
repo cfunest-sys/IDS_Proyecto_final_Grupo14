@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, request, flash, jsonify, current_app, session
+from flask import Blueprint, redirect, render_template, request, flash, current_app, session
 import requests
 
 equipos_bp = Blueprint("equipos_bp",__name__)
@@ -47,7 +47,19 @@ def ver_equipos():
         ) 
 
         if response_filtrada.status_code == 200:
-            lista_equipos = response_filtrada.json()
+            equipos = response_filtrada.json()
+            
+            for equipo in equipos:
+                id_eq = equipo.get("id_equipo")
+                response_detalle = requests.get(
+                    f"{current_app.config['BACKEND_URL']}/api/equipos/{id_eq}", 
+                    headers=headers
+                )
+                if response_detalle.status_code == 200:
+                    lista_equipos.append(response_detalle.json())
+                else:
+                    equipo["alumnos"] = []
+                    lista_equipos.append(equipo)
                 
     except Exception as e:
         print(f"Error al traer los equipos: {e}")
@@ -226,21 +238,3 @@ def eliminar_alumno_equipo():
         flash("Error al eliminar el alumno", "danger")
 
     return redirect("/equipos")
-
-
-#Ruta auxiliar para los datos que necesita js
-@equipos_bp.route("/equipos/datos/<id_equipo>", methods=['GET'])
-def obtener_datos_equipos(id_equipo):
-    if session.get("rol") != "profesor":
-        return jsonify({"error": "No tienes permisos para acceder a estos datos"}), 403
-    
-    try:
-        token = session.get("token") 
-        headers = {"Authorization": f"Bearer {token}"} if token else {}
-
-        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/equipos/{id_equipo}", headers=headers)
-        
-        return jsonify(response.json()), response.status_code
-    except Exception as e:
-        print(f"Error en la ruta auxiliar: {e}")
-        return jsonify({"error": "No se pudo conectar con el servidor"}), 500
