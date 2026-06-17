@@ -275,7 +275,7 @@ def login():
                 return redirect("/dashboard/profesor")
 
             return redirect("/")
-
+        flash("Email o contraseña incorrectos", "warning")
         return render_template("login.html", error="No se pudo iniciar sesión")
 
     return render_template("login.html")
