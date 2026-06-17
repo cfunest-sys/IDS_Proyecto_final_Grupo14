@@ -95,12 +95,10 @@ def reporte_alumnos(current_user):
                 a.legajo,
                 CONCAT(a.nombre, ' ', a.apellido),
                 a.estado,
-                u.email,
+                a.email,
                 a.anio,
                 a.cuatrimestre
             FROM alumnos a
-            LEFT JOIN usuarios u
-                ON a.id_usuario = u.id_usuario
             ORDER BY
                 a.anio,
                 a.cuatrimestre,
