@@ -58,7 +58,7 @@ def listar_cursos_filtrados(current_user):
             except (ValueError, TypeError):
                 return jsonify({"error": "El cuatrimestre debe ser un número entero válido"}), 400
 
-        lista_cursos = get_cursos_filtrados(id_curso_int, anio_int, cuatrimestre_int, pag, por_pag)
+        lista_cursos = get_cursos_filtrados(id_curso=id_curso_int, anio=anio_int, cuatrimestre=cuatrimestre_int, pag=pag, por_pag=por_pag)
 
         if not lista_cursos:
             return jsonify([]), 200

@@ -6,7 +6,6 @@ from flask import jsonify
 import csv
 import io
 import traceback
-from utils.auth import hash_password
 
 # def crear_base_datos():
 #     connection = get_connection()
@@ -75,15 +74,6 @@ def get_user_profile(usuario):
                 FROM profesores p
                 WHERE p.id_usuario = %s
             """
-        elif rol == "alumno":
-            query = """
-                SELECT
-                    a.curso,
-                    a.nombre,
-                    a.legajo
-                FROM alumnos a
-                WHERE a.id_usuario = %s
-            """
         else:
             return None
 
@@ -99,35 +89,6 @@ def get_user_profile(usuario):
 
 
 
-def get_alumno(nombre, contrasenia):
-    """Obtiene un alumno por su nombre y contraseña."""
-    if not nombre or not contrasenia:
-        raise ValueError("Todos los campos son obligatorios")
-
-    conn = None
-    cur = None
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        query = """
-            SELECT *
-            FROM usuarios u
-            INNER JOIN alumnos a
-                ON u.id_usuario = a.id_usuario
-            WHERE u.email = %s
-            AND u.contrasenia = %s
-            """
-        cur.execute(query, (nombre, contrasenia))
-        return cur.fetchone()
-    except Exception as e:
-        raise Exception(f"Error obteniendo alumno: {e}")
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
-
-
 def get_alumnos():
     """Obtiene todos los alumnos."""
     conn = None
@@ -139,9 +100,7 @@ def get_alumnos():
 
         query = """
             SELECT *
-            FROM usuarios u
-            INNER JOIN alumnos a
-                ON u.id_usuario = a.id_usuario
+            FROM alumnos a
         """
 
         cur.execute(query)
@@ -157,65 +116,7 @@ def get_alumnos():
             conn.close()
 
 
-def cargar_alumno(nombre, contrasenia, email, created_at, estado, rol):
-    """Carga un nuevo alumno en la base de datos."""
-    if not nombre or not contrasenia or not email or not created_at or estado is None or not rol:
-        raise ValueError("Todos los campos son obligatorios")
 
-    conn = None
-    cur = None
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        query = """
-            INSERT INTO usuarios (email, contrasenia, created_at, rol)
-            VALUES (%s, %s, %s, %s)
-            """
-        cur.execute(query, (email, contrasenia, created_at, rol))
-        id_usuario = cur.lastrowid
-
-        query_alumno = """
-            INSERT INTO alumnos (id_usuario, nombre, estado)
-            VALUES (%s, %s, %s)
-            """
-        cur.execute(query_alumno, (id_usuario, nombre, estado))
-
-        return id_usuario
-    except Exception as e:
-        raise Exception(f"Error cargando alumno: {e}")
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
-
-
-def actualizar_alumno(legajo, nombre, contrasenia, email, created_at, estado, rol):
-    """Actualiza un alumno existente en la base de datos."""
-    if not legajo or not nombre or not contrasenia or not email or not created_at or estado is None or not rol:
-        raise ValueError("Todos los campos son obligatorios")
-
-    conn = None
-    cur = None
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        query = """
-            UPDATE usuarios u
-            INNER JOIN alumnos a ON u.id_usuario = a.id_usuario
-            SET u.email = %s, u.contrasenia = %s, u.created_at = %s, u.rol = %s,
-                a.nombre = %s, a.estado = %s
-            WHERE a.legajo = %s
-            """
-        cur.execute(query, (email, contrasenia, created_at, rol, nombre, estado, legajo))
-        return cur.rowcount > 0
-    except Exception as e:
-        raise Exception(f"Error actualizando alumno: {e}")
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
 
 def desactivar_alumno_query(legajo, estado):
     if not legajo or not estado:
@@ -227,15 +128,13 @@ def desactivar_alumno_query(legajo, estado):
         cur = conn.cursor()
         if (estado == "activo"):
             query = """
-                UPDATE usuarios u
-                INNER JOIN alumnos a ON u.id_usuario = a.id_usuario
+                UPDATE alumnos a 
                 SET a.estado = "inactivo"
                 WHERE a.legajo = %s
                 """
         if (estado == "inactivo"):
             query = """
-                UPDATE usuarios u
-                INNER JOIN alumnos a ON u.id_usuario = a.id_usuario
+                UPDATE alumnos a
                 SET a.estado = "activo"
                 WHERE a.legajo = %s
                 """
@@ -250,32 +149,6 @@ def desactivar_alumno_query(legajo, estado):
         if conn:
             conn.close()
 
-
-def eliminar_alumno(legajo):
-    """Elimina un alumno de la base de datos."""
-    if not legajo:
-        raise ValueError("El legajo es obligatorio")
-
-    conn = None
-    cur = None
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        query = """
-            DELETE u, a
-            FROM usuarios u
-            INNER JOIN alumnos a ON u.id_usuario = a.id_usuario
-            WHERE a.legajo = %s
-            """
-        cur.execute(query, (legajo,))
-        return cur.rowcount > 0
-    except Exception as e:
-        raise Exception(f"Error eliminando alumno: {e}")
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
 
 
 def get_evaluacion(id):
@@ -1239,7 +1112,6 @@ def cargar_alumnos_csv(archivo_csv):
                     agregar_error(numero_fila, f"Email {email} ya registrado")
                     continue
 
-                id_usuario = cur.lastrowid
                 # Crear alumnos
 
                 cur.execute(
@@ -1253,17 +1125,15 @@ def cargar_alumnos_csv(archivo_csv):
                         curso,
                         anio,
                         cuatrimestre,
-                        estado,
-                        id_usuario
+                        estado
                     )
                     VALUES (
                         %s, %s, %s, %s,
                         %s, %s, %s, %s,
-                        'activo',
-                        %s
+                        'activo'
                     )
                     """,
-                    (legajo, nombre, apellido, dni, email, curso, anio, cuatrimestre, id_usuario),
+                    (legajo, nombre, apellido, dni, email, curso, anio, cuatrimestre),
                 )
 
                 exitosos += 1
@@ -1291,7 +1161,7 @@ def cargar_alumnos_csv(archivo_csv):
 
 # -------------------Perfil-------------------------#
 
-
+# desactivar_alumno_query
 def obtener_usuario_por_id(id_usuario):
     conn = None
     cur = None

@@ -83,9 +83,9 @@ def listar_evaluaciones():
 
 # 2. RUTA DEL CALENDARIO: http://127.0.0.1:8080/evaluaciones/calendario
 # Redirige a la ruta principal /calendario en app.py
-@evaluaciones_blueprint.route("/calendario", methods=["GET"])
+"""@evaluaciones_blueprint.route("/calendario", methods=["GET"])
 def calendario_evaluaciones():
-    return redirect(url_for("mostrar_calendario"))
+    return redirect(url_for("inicio.mostrar_calendario"))"""
 
 
 # 3. RUTA CREAR EVALUACION: http://127.0.0.1:8080/evaluaciones/crear

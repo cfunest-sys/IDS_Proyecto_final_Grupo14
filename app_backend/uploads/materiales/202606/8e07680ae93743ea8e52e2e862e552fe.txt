@@ -1,0 +1,19 @@
+Hola, tengo que estudiar para un exámen teórico de la materia universitaria en la que estoy aprendiendo desarrollo de software. Los temas son la terminal de linux, desarrollo backend, SQL, Git y metoddologías ágiles.
+
+Se subieron las preguntas en las imágenes como modelo de examen sobre backend y temas teóricos. También dijeron que para terminal hay algún ejercicio en el que tendremos que ordenar el código desordenado de un script que hace algo. 
+
+Anteriormente, en el canal de consultas del espacio de comunicación de la materia, un alumno preguntó esto: 
+
+"Buenas tardes, como se va a tomar el parcial? osea, mas de desarrollo o programacion, entiendo que ambas claro pero a que le tendria que dar mas enfoque para el estudio?" 
+
+Y un profesor de la cátedra respondió esto: 
+
+"¡Buenas Marcos! ¿Cómo va? A priori, para lo que respecta este parcial, van a haber ciertos temas en donde se les harán preguntas abiertas o bien serán multiple choice; es decir, el apartado teórico. Potencialmente los temas son Git, Metodologías Agiles y Bash 
+
+En lo que respecta a práctica, nosotros solemos proveer un código de Python, al cual pueden faltarle ciertas partes esenciales, para que funcione; del lado de SQL, te podemos presentar un script, y podemos hacerte ciertas preguntas sobre el mismo. También, podemos presentarte un código de bash que está desordenado, y tengas que acomodarlo, de modo que sea coherente y funcione correctamente. Acá, lo importante es haber practicado, y esta practica se da, con proyectos de bash y de backend; por eso insistimos en que hagan los proyectos, ya que les va a dar la práctica suficiente para afrontar estos puntos."
+
+Además, en la última clase antes del parcial aclararon varias cosas sobre la esctructura y la corrección del exámen. La primera es que el parcial solo va a tener tres puntos. Uno práctico de backend + SQL, uno teórico y uno de bash. Cada ejercicio tiene una cantidad de incisos de tal forma que suman 10 incisos en todo el exámen. Lo segundo es que la nota se calcula usando una función lineal f(x) = 3/2 * x -5, donde x es la cantidad de ejercicios resueltos correctamente y f(x) es la nota. Y por último, no van a tachar una respuesta como incorrecta por errores menores de sintaxis, sino que se enfocan en que el código esté correctamente planteado. También que se aprueba con nota 4 aunque mi objetivo es llegar al 7 como mínimo. Has entendido todo?
+
+Haz un modelo de parcial sabiendo el formato de los ejercicios claramente. (Ten cuidado de no mandar uno casi exactamente igual al que envié)
+
+Luego me vas a corregir siguiendo los lineamientos que mencioné.
