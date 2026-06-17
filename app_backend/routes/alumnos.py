@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
 from data.queries import (
-    crear_alumno,
     get_alumno,
     get_alumnos,
     cargar_alumno,
@@ -12,44 +11,6 @@ from data.queries import (
 from utils.auth import token_required, rol_required
 
 alumnos_bp = Blueprint("alumnos", __name__)
-
-
-@alumnos_bp.route("/login", methods=["POST"])
-def login():
-    # Hace falta agregar la lógica para el inicio de sesión
-    return "Inicio de sesión exitoso"
-
-
-@alumnos_bp.route("/register", methods=["POST"])
-def register():
-
-    try:
-
-        data = request.json
-
-        print(data)
-
-        nombre = data.get("nombre")
-        email = data.get("email")
-        password = data.get("password")
-
-        print(nombre, email)
-
-        if not nombre or not email or not password:
-
-            return jsonify({"error": "Faltan datos obligatorios"}), 400
-
-        alumno = {"nombre": nombre, "email": email, "password": password}
-
-        legajo = crear_alumno(alumno)
-
-        return jsonify({"mensaje": "Alumno registrado correctamente", "legajo": legajo}), 201
-
-    except Exception as e:
-
-        print(e)
-
-        return jsonify({"error": str(e)}), 500
 
 
 @alumnos_bp.route("/<int:id>", methods=["GET"])
@@ -122,7 +83,7 @@ def eliminar_alumno(id):
 @alumnos_bp.route("/cargar-csv", methods=["POST"])
 @token_required
 @rol_required("profesor")
-def cargar_usuarios_alumnos(current_user):
+def cargar_alumnos(current_user):
     if "archivo" not in request.files:
         return jsonify({"error": "No se envio archivo"}), 400
     archivo = request.files["archivo"]

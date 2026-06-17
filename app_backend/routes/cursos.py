@@ -58,7 +58,7 @@ def listar_cursos_filtrados(current_user):
             except (ValueError, TypeError):
                 return jsonify({"error": "El cuatrimestre debe ser un número entero válido"}), 400
 
-        lista_cursos = get_cursos_filtrados(id_curso=id_curso_int, anio=anio_int, cuatrimestre=cuatrimestre_int, pag=pag, por_pag=por_pag)
+        lista_cursos = get_cursos_filtrados(id_curso_int, anio_int, cuatrimestre_int, pag, por_pag)
 
         if not lista_cursos:
             return jsonify([]), 200
@@ -116,7 +116,7 @@ def crear_cursos(current_user):
             return jsonify({"error": "No se encontró un perfil de profesor asociado"}), 404
         
         id_profesor = perfil_profe["id_profesor"]
-        
+
         curso_existente = get_cursos_filtrados(anio=anio_int, cuatrimestre=cuatrimestre_int)
 
         if curso_existente:
@@ -142,9 +142,8 @@ def borrar_cursos(current_user, id_curso):
 
         if not curso_existente or len(curso_existente) == 0:
             return jsonify({"error":"Curso no encontrado"}), 404
-
+    
         delete_curso(id_curso)
-
         return "", 204
         
     except Exception as e:

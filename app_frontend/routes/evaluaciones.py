@@ -10,8 +10,6 @@ evaluaciones_blueprint = Blueprint("evaluaciones", __name__)
 # Acá se muestra el listado/gestión de evaluaciones
 @evaluaciones_blueprint.route("/", methods=["GET"])
 def listar_evaluaciones():
-    if session.get("rol") == "alumno":
-        return redirect(url_for("evaluaciones.calendario_evaluaciones"))
 
     evaluaciones = []
     rol = ""
@@ -87,7 +85,7 @@ def listar_evaluaciones():
 # Redirige a la ruta principal /calendario en app.py
 @evaluaciones_blueprint.route("/calendario", methods=["GET"])
 def calendario_evaluaciones():
-    return redirect(url_for("inicio.mostrar_calendario"))
+    return redirect(url_for("mostrar_calendario"))
 
 
 # 3. RUTA CREAR EVALUACION: http://127.0.0.1:8080/evaluaciones/crear

@@ -217,8 +217,8 @@ def borrar_material(current_user, id_material):
 
 
 #Función auxiliar para obtener los cursos
-@materiales_bp.route("/cursos-profesor", methods=["GET"])
+'''@materiales_bp.route("/cursos-profesor", methods=["GET"])
 @token_required
 @rol_required("profesor")
 def obtener_cursos_profesor(current_user):
-    id_profesor = current_user["id"]
+    id_profesor = current_user["id"]'''
