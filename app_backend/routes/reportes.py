@@ -11,6 +11,7 @@ from reportlab.platypus import (
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
+from utils.auth import token_required, rol_required
 import tempfile
 
 reportes_bp = Blueprint("reportes", __name__)
@@ -80,7 +81,8 @@ def crear_pdf_por_cuatrimestre(titulo, encabezados, datos_agrupados):
 
 
 @reportes_bp.route("/api/reportes/alumnos", methods=["GET"])
-def reporte_alumnos():
+@token_required
+def reporte_alumnos(current_user):
     conn = None
     cur = None
 
@@ -154,7 +156,8 @@ def reporte_alumnos():
 
 
 @reportes_bp.route("/api/reportes/estadisticas", methods=["GET"])
-def reporte_estadisticas():
+@token_required
+def reporte_estadisticas(current_user):
     conn = None
     cur = None
 
@@ -264,7 +267,8 @@ def reporte_estadisticas():
 
 
 @reportes_bp.route("/api/reportes/equipos", methods=["GET"])
-def reporte_equipos():
+@token_required
+def reporte_equipos(current_user):
     conn = None
     cur = None
 

@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+from utils.auth import token_required, rol_required
 from database.db import get_connection
 
 dashboard_bp = Blueprint(
@@ -7,7 +8,8 @@ dashboard_bp = Blueprint(
 )
 
 @dashboard_bp.route("/api/dashboard/resumen")
-def resumen_dashboard():
+@token_required
+def resumen_dashboard(current_user):
 
     conn = get_connection()
     cur = conn.cursor()
@@ -59,7 +61,8 @@ def resumen_dashboard():
 
 
 @dashboard_bp.route("/api/dashboard/alumno/<int:legajo>")
-def dashboard_alumno(legajo):
+@token_required
+def dashboard_alumno(current_user, legajo):
     conn = get_connection()
     cur = conn.cursor()
 

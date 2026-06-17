@@ -18,8 +18,10 @@ def reportes():
 @inicio.route("/reportes/<tipo>")
 def descargar_reporte(tipo):
     try:
+        token = session.get("token", "")
+        auth_headers = {"Authorization": "Bearer " + token}
         url = f"{current_app.config['BACKEND_URL']}/api/reportes/{tipo}"
-        resp = requests.get(url, timeout=30)
+        resp = requests.get(url, timeout=30, headers=auth_headers)
         return resp.content, resp.status_code, {"Content-Type": resp.headers.get("Content-Type", "application/pdf")}
     except requests.exceptions.RequestException:
         flash("Error al descargar el reporte", "danger")

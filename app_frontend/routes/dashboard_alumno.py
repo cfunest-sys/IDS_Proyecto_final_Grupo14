@@ -15,9 +15,11 @@ def dashboard_alumno():
 
     try:
         legajo = session.get("legajo")
-
+        token = session.get("token", "")
+        auth_headers = {"Authorization": "Bearer " + token}
         response = requests.get(
-            f"{current_app.config['BACKEND_URL']}/api/dashboard/alumno/{legajo}", timeout=5)
+            f"{current_app.config['BACKEND_URL']}/api/dashboard/alumno/{legajo}", 
+            timeout=5, headers=auth_headers)
 
         if response.ok:
             resumen = response.json()

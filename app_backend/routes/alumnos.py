@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from utils.auth import token_required, rol_required
 from data.queries import (
     crear_alumno,
     get_alumno,
@@ -53,19 +54,22 @@ def register():
 
 
 @alumnos_bp.route("/<int:id>", methods=["GET"])
-def obtener_alumno(id):
+@token_required
+def obtener_alumno(current_user, id):
     alumno = get_alumno(id)
     return jsonify(alumno)
 
 
 @alumnos_bp.route("/", methods=["GET"])
-def obtener_alumnos():
+@token_required
+def obtener_alumnos(current_user):
     alumnos = get_alumnos()
     return jsonify(alumnos)
 
 
 @alumnos_bp.route("/cargar", methods=["POST"])
-def cargar_alumno_route():
+@token_required
+def cargar_alumno_route(current_user):
     data = request.get_json()
     campo = ["nombre", "contrasenia", "email", "created_at", "estado", "rol"]
     if not data:
@@ -80,7 +84,8 @@ def cargar_alumno_route():
 
 
 @alumnos_bp.route("/actualizar/<int:id>", methods=["PUT"])
-def actualizar_alumno(id):
+@token_required
+def actualizar_alumno(current_user, id):
     data = request.get_json()
     campo = ["nombre", "contrasenia", "email", "created_at", "estado", "rol"]
     if not data:
@@ -94,7 +99,8 @@ def actualizar_alumno(id):
     return jsonify({"message": "Alumno actualizado exitosamente", "id": resultado})
 
 @alumnos_bp.route("/actualizar/desactivar", methods=["PUT"])
-def desactivar_alumno():
+@token_required
+def desactivar_alumno(current_user):
     try:
         data = request.get_json()
 
@@ -114,7 +120,8 @@ def desactivar_alumno():
 
 
 @alumnos_bp.route("/eliminar/<int:id>", methods=["DELETE"])
-def eliminar_alumno(id):
+@token_required
+def eliminar_alumno(current_user, id):
     resultado = eliminar_alumno(id)
     return jsonify({"message": "Alumno eliminado exitosamente", "id": resultado})
 

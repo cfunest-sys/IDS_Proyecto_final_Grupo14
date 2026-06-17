@@ -28,7 +28,10 @@ def generar_qr():
     if request.method == "POST":
         if rol == "profesor":
             try:
-                respuesta = requests.post(f"{current_app.config['BACKEND_URL']}/api/asistencia/generar-qr", timeout=15)
+                token = session.get("token", "")
+                auth_headers = {"Authorization": "Bearer " + token}
+                respuesta = requests.post(f"{current_app.config['BACKEND_URL']}/api/asistencia/generar-qr", 
+                    timeout=15, headers=auth_headers)
                 data = respuesta.json()
                 if respuesta.status_code == 200:
                     codigo = data.get("qr_code")
