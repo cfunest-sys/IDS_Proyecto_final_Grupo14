@@ -14,6 +14,7 @@ DROP TABLE IF EXISTS profesores;
 DROP TABLE IF EXISTS cursos;
 DROP TABLE IF EXISTS evaluaciones;
 DROP TABLE IF EXISTS usuarios;
+DROP TABLE IF EXISTS temas;
 DROP TABLE IF EXISTS qr_asistencia;
 DROP TABLE IF EXISTS asistencia;
 
