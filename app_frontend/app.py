@@ -1,6 +1,6 @@
 from datetime import datetime
 import calendar
-from flask import Flask, render_template, session, flash
+from flask import Flask, render_template, session, flash, request, redirect
 from routes.routes import inicio
 from routes.equipos import equipos_bp
 from routes.evaluaciones import evaluaciones_blueprint
@@ -30,8 +30,6 @@ app.register_blueprint(perfil_bp)
 app.register_blueprint(cursos_bp)
 app.register_blueprint(asistencia_bp)
 
-
-
 @app.route("/alumnos")
 def mostrar_alumnos():
     try:
@@ -43,6 +41,22 @@ def mostrar_alumnos():
     except Exception:
         alumnos = []
     return render_template("alumnos.html", alumnos=alumnos)
+
+@app.route("/alumnos/desactivar", methods=["POST"])
+def desactivar_alumno():
+    try:
+        legajo = request.form.get("legajo", "")
+        estado = request.form.get("estado", "")
+        data = {"legajo":legajo, "estado":estado}
+        resp = requests.put(f"{app.config['BACKEND_URL']}/api/alumnos/actualizar/desactivar", 
+            timeout=5, json=data)
+    except requests.exceptions.RequestException:
+        flash("Error de conexión con el servidor", "danger")
+
+    if resp.ok:
+        flash("Estado cambiado con éxito", "success")
+    return redirect("/alumnos") 
+
 
 
 @app.route("/calendario")

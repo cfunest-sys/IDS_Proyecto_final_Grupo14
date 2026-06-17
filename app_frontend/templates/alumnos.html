@@ -57,9 +57,17 @@ Gestión de Alumnos - Campus FIUBA
                   <td>{{ a.apellido }}, {{ a.nombre }}</td>
                   <td><span class="badge estado-badge estado-{{ a.estado }}">{{ a.estado }}</span></td>
                   <td>
-                <button class="btn btn-sm btn-outline-primary btn-ver" title="Ver alumno">
-                  <i class="bi bi-eye"></i>
-                </button>
+                  <button class="btn btn-sm btn-outline-primary btn-ver" title="Ver alumno">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  <form action="/alumnos/desactivar" method="POST" class="d-inline">
+                    <input name="method" value="put" type="hidden">
+                    <input value="{{ a.legajo }}" type="hidden" name="legajo">
+                    <input value="{{ a.estado }}" type="hidden" name="estado">
+                    <button type="submit" class="btn btn-sm btn-outline-primary btn-editar-eva" data-bs-toggle="tooltip" title="Cambiar estado alumno">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                  </form>
                   </td>
                 </tr>
                 {% endfor %}

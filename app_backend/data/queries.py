@@ -262,6 +262,39 @@ def actualizar_alumno(legajo, nombre, contrasenia, email, created_at, estado, ro
         if conn:
             conn.close()
 
+def desactivar_alumno_query(legajo, estado):
+    if not legajo or not estado:
+        raise ValueError("Todos los campos son obligatorios")
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        if (estado == "activo"):
+            query = """
+                UPDATE usuarios u
+                INNER JOIN alumnos a ON u.id_usuario = a.id_usuario
+                SET a.estado = "inactivo"
+                WHERE a.legajo = %s
+                """
+        if (estado == "inactivo"):
+            query = """
+                UPDATE usuarios u
+                INNER JOIN alumnos a ON u.id_usuario = a.id_usuario
+                SET a.estado = "activo"
+                WHERE a.legajo = %s
+                """
+        cur.execute(query, (legajo,))
+        conn.commit()
+        return cur.rowcount > 0
+    except Exception as e:
+        raise Exception(f"Error actualizando alumno: {e}")
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
 
 def eliminar_alumno(legajo):
     """Elimina un alumno de la base de datos."""

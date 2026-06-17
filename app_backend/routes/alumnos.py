@@ -7,6 +7,7 @@ from data.queries import (
     actualizar_alumno,
     eliminar_alumno,
     cargar_alumnos_csv,
+    desactivar_alumno_query,
 )
 from utils.auth import token_required, rol_required
 
@@ -91,6 +92,25 @@ def actualizar_alumno(id):
         id, data["nombre"], data["contrasenia"], data["email"], data["created_at"], data["estado"], data["rol"]
     )
     return jsonify({"message": "Alumno actualizado exitosamente", "id": resultado})
+
+@alumnos_bp.route("/actualizar/desactivar", methods=["PUT"])
+def desactivar_alumno():
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({"error": "Body vacío"}), 400
+
+        legajo = data.get("legajo", "")
+        estado = data.get("estado", "")
+
+        resultado = desactivar_alumno_query(legajo, estado)
+    except Exception as e:
+        print(f"Error en desactivar alumno: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
+    if not resultado:
+        return jsonify({"message": "No se pudo actualizar el alumno"}), 500
+    return jsonify({"message": "Alumno actualizado exitosamente"}), 200
 
 
 @alumnos_bp.route("/eliminar/<int:id>", methods=["DELETE"])
