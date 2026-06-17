@@ -6,3 +6,4 @@ app_backend/.env
 app_frontend/static/css/
 app_frontend/static/js/
 flask_session/
+uploads/
