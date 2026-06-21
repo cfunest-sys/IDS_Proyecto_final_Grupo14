@@ -1611,8 +1611,8 @@ def get_curso_profesor(id_profesor, pag, por_pag):
         if conexion:
             conexion.close()
 
-
-def get_cursos_filtrados(id_curso=None, nombre_curso=None, anio=None, cuatrimestre=None, id_profesor=None, pag = None, por_pag = None):
+#Queries de cursos
+def get_cursos_filtrados(id_curso=None, anio=None, cuatrimestre=None, pag = None, por_pag = None):
     conexion = None
     cursor = None
 
@@ -1621,31 +1621,22 @@ def get_cursos_filtrados(id_curso=None, nombre_curso=None, anio=None, cuatrimest
         cursor = conexion.cursor(dictionary=True)
 
         query = """
-            SELECT DISTINCT c.* FROM cursos c
-            JOIN profesor_curso pc ON c.id_curso = pc.id_curso
+            SELECT * FROM cursos
         """
         parametros = []
         condiciones = []
 
         if id_curso:
-            condiciones.append("c.id_curso = %s")
+            condiciones.append("id_curso = %s")
             parametros.append(id_curso)
 
-        if nombre_curso:
-            condiciones.append("c.nombre_curso LIKE %s")
-            parametros.append(f"%{nombre_curso}%")
-
         if anio:
-            condiciones.append("c.anio = %s")
+            condiciones.append("anio = %s")
             parametros.append(anio)
 
         if cuatrimestre:
-            condiciones.append("c.cuatrimestre = %s")
+            condiciones.append("cuatrimestre = %s")
             parametros.append(cuatrimestre)
-
-        if id_profesor:
-            condiciones.append("pc.id_profesor = %s")
-            parametros.append(id_profesor)
 
         if condiciones:
             query += " WHERE " + " AND ".join(condiciones)
@@ -1707,21 +1698,8 @@ def delete_curso(id_curso):
         conexion = get_connection()
         cursor = conexion.cursor(dictionary=True)
 
-        query_desvincular = """
-            DELETE FROM profesor_curso 
-            WHERE id_curso = %s
-        """
-        cursor.execute(query_desvincular, (id_curso,))
-        
-        query_curso_vinculado = """
-            SELECT COUNT(*) as total FROM profesor_curso WHERE id_curso = %s
-        """
-        cursor.execute(query_curso_vinculado, (id_curso,))
-        resultado = cursor.fetchone()
-
-        if resultado and resultado["total"] == 0:
-            query_borrar_curso = "DELETE FROM cursos WHERE id_curso = %s"
-            cursor.execute(query_borrar_curso, (id_curso,))
+        borrar_curso = "DELETE FROM cursos WHERE id_curso = %s"
+        cursor.execute(borrar_curso, (id_curso,))
   
         conexion.commit()
         return True
@@ -1737,7 +1715,7 @@ def delete_curso(id_curso):
             cursor.close()
         if conexion:
             conexion.close()
-
+            
 
 def modificar_curso_query(cuatrimestre, anio, id_curso):
     conexion = None
