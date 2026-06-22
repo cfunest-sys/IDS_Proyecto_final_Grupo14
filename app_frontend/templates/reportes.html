@@ -22,12 +22,70 @@ Reportes
 
     </div>
 
+    <!-- FILTRO -->
 
-    <!-- CARDS REPORTES -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form method="GET" action="/reportes">
+
+                <div class="row">
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Curso
+                        </label>
+
+                        <select
+                            class="form-select"
+                            name="id_curso">
+
+                            <option value="">
+                                Todos
+                            </option>
+
+                            {% for curso in cursos %}
+
+                            <option
+                                value="{{ curso.id_curso }}"
+                                {% if id_curso|string == curso.id_curso|string %}
+                                selected
+                                {% endif %}
+                            >
+                                {{ curso.anio }} - {{ curso.cuatrimestre }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100">
+
+                            Filtrar
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- REPORTES -->
 
     <div class="row g-4">
-
-        <!-- REPORTE ALUMNOS -->
 
         <div class="col-md-4">
 
@@ -40,14 +98,13 @@ Reportes
                     </h3>
 
                     <p class="card-text">
-                        Descarga el PDF con el listado
-                        completo de alumnos registrados.
+                        Descarga el PDF con el listado completo de alumnos registrados.
                     </p>
 
                     <a
-                        href="/reportes/alumnos"
+                        href="/reportes/alumnos?id_curso={{ id_curso or '' }}"
                         target="_blank"
-                        class="btn btn-primary mt-auto btn-reporte btn-descargar">
+                        class="btn btn-primary mt-auto">
 
                         Descargar PDF
 
@@ -58,9 +115,6 @@ Reportes
             </div>
 
         </div>
-
-
-        <!-- REPORTE ESTADÍSTICAS -->
 
         <div class="col-md-4">
 
@@ -73,14 +127,13 @@ Reportes
                     </h3>
 
                     <p class="card-text">
-                        Descarga el PDF con las
-                        estadísticas académicas.
+                        Descarga el PDF con las estadísticas académicas.
                     </p>
 
                     <a
-                        href="/reportes/estadisticas"
+                        href="/reportes/estadisticas?id_curso={{ id_curso or '' }}"
                         target="_blank"
-                        class="btn btn-success mt-auto btn-reporte btn-descargar">
+                        class="btn btn-success mt-auto">
 
                         Descargar PDF
 
@@ -91,9 +144,6 @@ Reportes
             </div>
 
         </div>
-
-
-        <!-- REPORTE EQUIPOS -->
 
         <div class="col-md-4">
 
@@ -106,14 +156,13 @@ Reportes
                     </h3>
 
                     <p class="card-text">
-                        Descarga el PDF con
-                        los equipos registrados.
+                        Descarga el PDF con los equipos registrados.
                     </p>
 
                     <a
-                        href="/reportes/equipos"
+                        href="/reportes/equipos?id_curso={{ id_curso or '' }}"
                         target="_blank"
-                        class="btn btn-dark mt-auto btn-reporte btn-descargar">
+                        class="btn btn-dark mt-auto">
 
                         Descargar PDF
 
