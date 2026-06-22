@@ -125,17 +125,17 @@ def resumen_promedios(current_user):
             FROM notas n
             INNER JOIN evaluaciones e ON n.id_evaluacion  = e.id_evaluacion
             INNER JOIN alumnos a      ON n.legajo_alumno  = a.legajo
-            INNER JOIN cursos c       ON e.id_curso       = c.id_curso;
+            INNER JOIN cursos c       ON e.id_curso       = c.id_curso
         """
         condiciones = []
         parametros  = []
 
         if anio:
-            condiciones.append("c.anio = %s")
+            condiciones.append("a.anio = %s")
             parametros.append(anio)
 
         if cuatrimestre:
-            condiciones.append("c.cuatrimestre = %s")
+            condiciones.append("a.cuatrimestre = %s")
             parametros.append(cuatrimestre)
 
         if id_curso:

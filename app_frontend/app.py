@@ -9,6 +9,7 @@ from routes.dashboard_profesor import dashboard_bp
 from routes.perfil import perfil_bp
 from routes.cursos import cursos_bp
 from routes.asistencia import asistencia_bp
+from routes.alumnos import alumnos_bp
 import os
 import requests
 
@@ -28,40 +29,7 @@ app.register_blueprint(equipos_bp)
 app.register_blueprint(perfil_bp)
 app.register_blueprint(cursos_bp)
 app.register_blueprint(asistencia_bp)
-
-@app.route("/alumnos")
-def mostrar_alumnos():
-    try:
-        token = session.get("token", "")
-        auth_headers = {'Authorization': 'Bearer ' + token}
-        resp = requests.get(f"{app.config['BACKEND_URL']}/api/alumnos/", 
-            timeout=5, headers=auth_headers)
-        if resp.ok:
-            alumnos = resp.json()
-        else:
-            alumnos = []
-    except Exception:
-        alumnos = []
-    return render_template("alumnos.html", alumnos=alumnos)
-
-@app.route("/alumnos/desactivar", methods=["POST"])
-def desactivar_alumno():
-    try:
-        legajo = request.form.get("legajo", "")
-        estado = request.form.get("estado", "")
-        data = {"legajo":legajo, "estado":estado}
-        token = session.get("token", "")
-        auth_headers = {'Authorization': 'Bearer ' + token}
-        resp = requests.put(f"{app.config['BACKEND_URL']}/api/alumnos/actualizar/desactivar", 
-            timeout=5, json=data, headers=auth_headers)
-    except requests.exceptions.RequestException:
-        flash("Error de conexión con el servidor", "danger")
-
-    if resp.ok:
-        flash("Estado cambiado con éxito", "success")
-    return redirect("/alumnos") 
-
-
+app.register_blueprint(alumnos_bp)
 
 @app.route("/calendario")
 def mostrar_calendario():
@@ -80,7 +48,7 @@ def mostrar_calendario():
             }
             rol = data["rol"]
 
-            response = requests.post(
+            response = requests.get(
                 f"{app.config['BACKEND_URL']}/api/evaluaciones/usuario",
                 headers=auth_headers,
                 json=data,

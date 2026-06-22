@@ -35,8 +35,10 @@ def ver_notas():
 
         # 2. Resumen de promedios con filtros de período opcionales
         params_resumen = {}
-        if anio_activo:     params_resumen["anio"]     = anio_activo
-        if semestre_activo: params_resumen["cuatrimestre"] = semestre_activo
+        if anio_activo:     
+            params_resumen["anio"] = int(anio_activo)
+        if semestre_activo: 
+            params_resumen["cuatrimestre"] = int(semestre_activo)
 
         response = requests.get(
             f"{current_app.config['BACKEND_URL']}/api/notas/resumen-promedios",

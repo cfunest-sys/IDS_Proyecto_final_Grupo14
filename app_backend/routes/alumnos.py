@@ -4,6 +4,7 @@ from data.queries import (
     get_alumnos,
     cargar_alumnos_csv,
     desactivar_alumno_query,
+    get_alumnos_filtrados,
 )
 from utils.auth import token_required, rol_required
 
@@ -15,11 +16,11 @@ alumnos_bp = Blueprint("alumnos", __name__)
 @alumnos_bp.route("/", methods=["GET"])
 @token_required
 def obtener_alumnos(current_user):
-    alumnos = get_alumnos()
+    # alumnos = get_alumnos()
+    anio = request.args.get("anio")
+    cuatrimestre = request.args.get("cuatrimestre")
+    alumnos = get_alumnos_filtrados(anio=anio, cuatrimestre=cuatrimestre)
     return jsonify(alumnos)
-
-
-
 
 @alumnos_bp.route("/actualizar/desactivar", methods=["PUT"])
 @token_required

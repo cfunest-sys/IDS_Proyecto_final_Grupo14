@@ -20,6 +20,37 @@ Gestión de Alumnos - Campus FIUBA
       <span class="stat-item stat-inactivos">Inactivos: <strong>{{ inactivos }}</strong></span>
     </div>
 
+    <h2>Filtros de Período</h2>
+    <form action="/alumnos" method="GET" class="row mb-4">
+      <div class="col-md-4 mb-3 mb-md-0">
+        <div class="input-group">
+          <label class="input-group-text" for="filtroAnio">Año</label>
+          <select id="filtroAnio" name="anio" class="form-select">
+            <option value="">Todos</option>
+            {% for a in años_disponibles %}
+            <option value="{{ a }}" {{ 'selected' if a == anio | int }}>{{ a }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3 mb-md-0">
+        <div class="input-group">
+          <label class="input-group-text" for="filtroSemestre">Cuatrimestre</label>
+          <select id="filtroSemestre" name="cuatrimestre" class="form-select">
+            <option value="">Todos</option>
+            <option value="1" {{ 'selected' if cuatrimestre == '1' }}>1° Cuatrimestre</option>
+            <option value="2" {{ 'selected' if cuatrimestre == '2' }}>2° Cuatrimestre</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-2 mb-3 mb-md-0 d-grid">
+        <button type="submit" class="btn btn-filtrar"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+      </div>
+      <div class="col-md-2 mb-3 mb-md-0 d-grid">
+        <a href="/alumnos" class="btn btn-filtrar"><i class="bi bi-arrow-clockwise me-1"></i>Limpiar</a>
+      </div>
+    </form>
+
     <div class="row g-4">
       <div class="col-md-9">
         <div class="alumnos-toolbar">

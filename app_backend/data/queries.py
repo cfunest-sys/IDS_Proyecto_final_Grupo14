@@ -115,6 +115,50 @@ def get_alumnos():
         if conn:
             conn.close()
 
+def get_alumnos_filtrados(cuatrimestre=None, anio=None, pag = None, por_pag = None):
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        query = "SELECT * FROM alumnos "
+        parametros = []
+        condiciones = []
+
+        if cuatrimestre:
+            condiciones.append("cuatrimestre = %s")
+            parametros.append(cuatrimestre)
+
+        if anio:
+            condiciones.append("anio = %s")
+            parametros.append(anio)
+
+        if condiciones:
+            query += " WHERE " + " AND ".join(condiciones)
+
+        if pag and por_pag:
+            offset = (pag - 1) * por_pag
+            query += " LIMIT %s OFFSET %s"
+            parametros.append(por_pag)
+            parametros.append(offset)
+
+        cursor.execute(query, parametros)
+        alumnos = cursor.fetchall()
+
+        return alumnos
+
+    except Exception as e:
+        print(f"Error en la obtención del alumnado: {e}")
+        raise e
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
+
 
 
 
