@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, jsonify, send_file
+from flask import Blueprint, jsonify, send_file, request
 from database.db import get_connection
 from reportlab.platypus import (
     SimpleDocTemplate,
@@ -90,21 +90,44 @@ def reporte_alumnos(current_user):
         conn = get_connection()
         cur = conn.cursor()
 
-        cur.execute("""
-            SELECT
-                a.legajo,
-                CONCAT(a.nombre, ' ', a.apellido),
-                a.estado,
-                a.email,
-                a.anio,
-                a.cuatrimestre
-            FROM alumnos a
-            ORDER BY
-                a.anio,
-                a.cuatrimestre,
-                a.apellido,
-                a.nombre
-        """)
+        id_curso = request.args.get("id_curso", type=int)
+
+        if id_curso:
+
+            cur.execute("""
+                SELECT
+                    a.legajo,
+                    CONCAT(a.nombre, ' ', a.apellido),
+                    a.estado,
+                    a.email,
+                    a.anio,
+                    a.cuatrimestre
+                FROM alumnos a
+                WHERE a.curso = %s
+                ORDER BY
+                    a.anio,
+                    a.cuatrimestre,
+                    a.apellido,
+                    a.nombre
+            """, (id_curso,))
+        
+        else:
+        
+            cur.execute("""
+                SELECT
+                    a.legajo,
+                    CONCAT(a.nombre, ' ', a.apellido),
+                    a.estado,
+                    a.email,
+                    a.anio,
+                    a.cuatrimestre
+                FROM alumnos a
+                ORDER BY
+                    a.anio,
+                    a.cuatrimestre,
+                    a.apellido,
+                    a.nombre
+            """)
 
         resultado = cur.fetchall()
 
@@ -163,17 +186,29 @@ def reporte_estadisticas(current_user):
         conn = get_connection()
         cur = conn.cursor()
 
+        id_curso = request.args.get("id_curso", type=int)
 
+        if id_curso:
 
-        cur.execute("""
-            SELECT DISTINCT
-                anio,
-                cuatrimestre
-            FROM cursos
-            ORDER BY
-                anio,
-                cuatrimestre
-        """)
+            cur.execute("""
+                SELECT
+                    anio,
+                    cuatrimestre
+                FROM cursos
+                WHERE id_curso = %s
+            """, (id_curso,))
+        
+        else:
+        
+            cur.execute("""
+                SELECT DISTINCT
+                    anio,
+                    cuatrimestre
+                FROM cursos
+                ORDER BY
+                    anio,
+                    cuatrimestre
+            """)
 
         periodos = cur.fetchall()
 
@@ -274,21 +309,44 @@ def reporte_equipos(current_user):
         conn = get_connection()
         cur = conn.cursor()
 
-        cur.execute("""
-            SELECT
-                e.id_equipo,
-                e.nombre_equipo,
-                CONCAT(c.anio, ' ', c.cuatrimestre),
-                c.anio,
-                c.cuatrimestre
-            FROM equipos e
-            LEFT JOIN cursos c
-                ON e.id_curso = c.id_curso
-            ORDER BY
-                c.anio,
-                c.cuatrimestre,
-                e.nombre_equipo
-        """)
+        id_curso = request.args.get("id_curso", type=int)
+
+        if id_curso:
+
+            cur.execute("""
+                SELECT
+                    e.id_equipo,
+                    e.nombre_equipo,
+                    CONCAT(c.anio, ' ', c.cuatrimestre),
+                    c.anio,
+                    c.cuatrimestre
+                FROM equipos e
+                LEFT JOIN cursos c
+                    ON e.id_curso = c.id_curso
+                WHERE e.id_curso = %s
+                ORDER BY
+                    c.anio,
+                    c.cuatrimestre,
+                    e.nombre_equipo
+            """, (id_curso,))
+        
+        else:
+        
+            cur.execute("""
+                SELECT
+                    e.id_equipo,
+                    e.nombre_equipo,
+                    CONCAT(c.anio, ' ', c.cuatrimestre),
+                    c.anio,
+                    c.cuatrimestre
+                FROM equipos e
+                LEFT JOIN cursos c
+                    ON e.id_curso = c.id_curso
+                ORDER BY
+                    c.anio,
+                    c.cuatrimestre,
+                    e.nombre_equipo
+            """)
 
         resultado = cur.fetchall()
 
