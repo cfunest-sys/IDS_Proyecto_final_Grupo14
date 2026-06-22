@@ -18,8 +18,10 @@ def reportes():
 @inicio.route("/reportes/<tipo>")
 def descargar_reporte(tipo):
     try:
+        token = session.get("token", "")
+        auth_headers = {"Authorization": "Bearer " + token}
         url = f"{current_app.config['BACKEND_URL']}/api/reportes/{tipo}"
-        resp = requests.get(url, timeout=30)
+        resp = requests.get(url, timeout=30, headers=auth_headers)
         return resp.content, resp.status_code, {"Content-Type": resp.headers.get("Content-Type", "application/pdf")}
     except requests.exceptions.RequestException:
         flash("Error al descargar el reporte", "danger")
@@ -28,6 +30,8 @@ def descargar_reporte(tipo):
 
 @inicio.route("/register", methods=["GET", "POST"])
 def register():
+    if session.get("rol") != "admin":
+        return redirect("/")
 
     if request.method == "POST":
 
@@ -217,28 +221,6 @@ def eliminar_material(id_material):
     return redirect("/material")
 
 
-@inicio.route("/material/alumno")
-def material_alumno():
-    token = session.get("token", "")
-    headers = {"Authorization": f"Bearer {token}"}
-    pagina = request.args.get("pagina", 1, type=int)
-    limite = request.args.get("limite", 12, type=int)
-    order_by = request.args.get("order_by", "fecha_subida")
-    order_dir = request.args.get("order_dir", "DESC")
-    materiales = []
-    total = 0
-    paginas_totales = 1
-    try:
-        params = {"pagina": pagina, "limite": limite, "order_by": order_by, "order_dir": order_dir}
-        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/materiales", headers=headers, params=params, timeout=5)
-        if response.ok:
-            data = response.json()
-            materiales = data.get("materiales", [])
-            total = data.get("total", 0)
-            paginas_totales = data.get("paginas_totales", 1)
-    except requests.exceptions.RequestException:
-        flash("Error al cargar materiales", "danger")
-    return render_template("materiales_alumno.html", materiales=materiales, token=token, pagina=pagina, limite=limite, total=total, paginas_totales=paginas_totales, order_by=order_by, order_dir=order_dir)
 
 
 @inicio.route("/login", methods=["GET", "POST"])
@@ -275,21 +257,12 @@ def login():
                 return redirect("/dashboard/profesor")
 
             return redirect("/")
-
+        flash("Email o contraseña incorrectos", "warning")
         return render_template("login.html", error="No se pudo iniciar sesión")
 
     return render_template("login.html")
 
 
-@inicio.route("/sesion")
-def ver_sesion():
-
-    return {
-        "user_id": session.get("user_id"),
-        "email": session.get("email"),
-        "rol": session.get("rol"),
-        "nombre": session.get("nombre"),
-    }
 
 
 @inicio.route("/logout", methods=["GET"])

@@ -15,8 +15,10 @@ def dashboard_profesor():
     resumen = {}
 
     try:
-
-        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/dashboard/resumen", timeout=5)
+        token = session.get("token", "")
+        auth_headers = {"Authorization": "Bearer " + token}
+        response = requests.get(f"{current_app.config['BACKEND_URL']}/api/dashboard/resumen", 
+            timeout=5, headers=auth_headers)
 
         if response.ok:
             resumen = response.json()

@@ -1329,6 +1329,7 @@ h3 {
     padding: 6px;
     min-height: 80px;
     font-size: 0.8rem;
+    min-width: 0;
 }
 
 .cal-dia--vacio {
@@ -1396,9 +1397,17 @@ h3 {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .cal-grid {
+    .cal-scroll {
         overflow-x: auto;
-        min-width: 700px;
+        -webkit-overflow-scrolling: touch;
+    }
+    .cal-dia {
+        min-height: 60px;
+        padding: 4px;
+        font-size: 0.7rem;
+    }
+    .cal-evento {
+        font-size: 0.6rem;
     }
 }
 

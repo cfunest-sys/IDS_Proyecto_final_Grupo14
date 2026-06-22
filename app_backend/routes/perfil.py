@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, session
 from werkzeug.security import check_password_hash
 from utils.auth import token_required
-from data.queries import obtener_usuario_por_id, obtener_detalles_alumno, obtener_detalles_profesor, cambiar_contrasena, editar_perfil_alumno, editar_perfil_profesor, obtener_historial_alumno
+from data.queries import obtener_usuario_por_id, obtener_detalles_profesor, cambiar_contrasena, editar_perfil_profesor
 
 perfil_bp = Blueprint('perfil', __name__)
 
@@ -31,12 +31,8 @@ def get_perfil(current_user):
            "detalles": None
        }
 
-       if user_data['rol'] == 'alumno':
-           alumno_data = obtener_detalles_alumno(user_id)
-           if alumno_data:
-               response_data["detalles"] = alumno_data
 
-       elif user_data['rol'] == 'profesor':
+       if user_data['rol'] == 'profesor':
            profesor_data = obtener_detalles_profesor(user_id)
            if profesor_data:
                response_data["detalles"] = profesor_data
@@ -98,14 +94,7 @@ def put_editar_perfil(current_user):
 
        data = request.get_json()
 
-       if rol == 'alumno':
-           resultado = editar_perfil_alumno(
-               user_id,
-               data.get('nombre'),
-               data.get('apellido'),
-               data.get('email')
-           )
-       elif rol == 'profesor':
+       if rol == 'profesor':
            resultado = editar_perfil_profesor(
                user_id,
                data.get('nombre'),
@@ -124,24 +113,3 @@ def put_editar_perfil(current_user):
        return jsonify({"error": "Error interno", "detalles": str(e)}), 500
 
 
-@perfil_bp.route('/historial', methods=['GET'])
-@token_required
-def get_historial(current_user):
-   try:
-       user_id = current_user.get("id")
-       if user_id == "id_usuario" or not user_id:
-           user_id = session.get("user_id")
-       else:
-           user_id = int(user_id)
-           
-       if not user_id:
-           return jsonify({'error': 'Usuario no autenticado'}), 401
-
-       historial = obtener_historial_alumno(user_id)
-       if historial is None:
-           return jsonify({'error': 'No se encontró el alumno'}), 404
-
-       return jsonify(historial), 200
-
-   except Exception as e:
-       return jsonify({"error": "Error interno", "detalles": str(e)}), 500

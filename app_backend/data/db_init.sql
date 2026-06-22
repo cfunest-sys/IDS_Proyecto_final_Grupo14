@@ -4,6 +4,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS miembros_equipo;
 DROP TABLE IF EXISTS logs_login;
 DROP TABLE IF EXISTS materiales;
+DROP TABLE IF EXISTS temas;
 DROP TABLE IF EXISTS equipos;
 DROP TABLE IF EXISTS evaluaciones;
 DROP TABLE IF EXISTS notas;
@@ -14,6 +15,7 @@ DROP TABLE IF EXISTS profesores;
 DROP TABLE IF EXISTS cursos;
 DROP TABLE IF EXISTS evaluaciones;
 DROP TABLE IF EXISTS usuarios;
+DROP TABLE IF EXISTS temas;
 DROP TABLE IF EXISTS qr_asistencia;
 DROP TABLE IF EXISTS asistencia;
 
@@ -53,8 +55,6 @@ CREATE TABLE alumnos (
     anio INTEGER,
     cuatrimestre INTEGER, 
     estado TEXT NOT NULL,
-    id_usuario INTEGER,
-    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario),
     FOREIGN KEY (curso) REFERENCES cursos(id_curso)
 );
 CREATE TABLE profesores (
@@ -216,8 +216,7 @@ INSERT INTO alumnos (
     curso,
     anio,
     cuatrimestre,
-    estado,
-    id_usuario
+    estado
 )
 VALUES (
     115598,
@@ -227,8 +226,7 @@ VALUES (
     1,
     2025,
     1,
-    'activo',
-    3
+    'activo'
 );
 INSERT INTO cursos (anio, cuatrimestre)
 VALUES

@@ -10,8 +10,6 @@ evaluaciones_blueprint = Blueprint("evaluaciones", __name__)
 # Acá se muestra el listado/gestión de evaluaciones
 @evaluaciones_blueprint.route("/", methods=["GET"])
 def listar_evaluaciones():
-    if session.get("rol") == "alumno":
-        return redirect(url_for("evaluaciones.calendario_evaluaciones"))
 
     evaluaciones = []
     rol = ""
@@ -85,9 +83,9 @@ def listar_evaluaciones():
 
 # 2. RUTA DEL CALENDARIO: http://127.0.0.1:8080/evaluaciones/calendario
 # Redirige a la ruta principal /calendario en app.py
-@evaluaciones_blueprint.route("/calendario", methods=["GET"])
+"""@evaluaciones_blueprint.route("/calendario", methods=["GET"])
 def calendario_evaluaciones():
-    return redirect(url_for("inicio.mostrar_calendario"))
+    return redirect(url_for("inicio.mostrar_calendario"))"""
 
 
 # 3. RUTA CREAR EVALUACION: http://127.0.0.1:8080/evaluaciones/crear
@@ -104,7 +102,10 @@ def crear_evaluacion():
         data["tipo"] = request.form.get("tipo")
         data["fecha"] = request.form.get("fecha")
         data["curso_id"] = request.form.get("curso")
-        response = requests.post(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/crear", json=data)
+        token = session.get("token", "")
+        auth_headers = {"Authorization": "Bearer " + token}
+        response = requests.post(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/crear", 
+            json=data, headers=auth_headers)
         if not response.ok:
             err = response.json().get("error", "Error desconocido")
             flash(f"Error al crear evaluación: {err}", "danger")
@@ -129,8 +130,11 @@ def actualizar_evaluacion():
         data["tipo"] = request.form.get("tipo")
         data["fecha"] = request.form.get("fecha")
         data["curso_id"] = request.form.get("curso")
+        token = session.get("token", "")
+        auth_headers = {"Authorization": "Bearer " + token}
         response = requests.put(
-            f"{current_app.config['BACKEND_URL']}/api/evaluaciones/actualizar/", json=data, timeout=5
+            f"{current_app.config['BACKEND_URL']}/api/evaluaciones/actualizar/", 
+            json=data, timeout=5, headers=auth_headers
         )
         if response.ok:
             flash("Evaluación actualizada con éxito", "success")
@@ -156,7 +160,9 @@ def eliminar_evaluacion():
             # data = {"rol": "profesor", "user_id": 2}  #--para probar--
             # data = {"rol": "alumno", "user_id": 2}  #--para probar--
         data["id"] = request.form.get("id_evaluacion", "")
-        response = requests.delete(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/destruir/{str(data['id'])}")
+        token = session.get("token", "")
+        auth_headers = {"Authorization": "Bearer " + token}
+        response = requests.delete(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/destruir/{str(data['id'])}", headers=auth_headers)
         if response.ok:
             if response.json().get("body", "") != "":
                 json = response.json().get("body", "")
