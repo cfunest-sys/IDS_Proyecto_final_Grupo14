@@ -12,19 +12,72 @@ def index():
 
 @inicio.route("/reportes")
 def reportes():
-    return render_template("reportes.html")
+    token = session.get("token", "")
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    id_curso = request.args.get("id_curso")
+    cursos = []
+
+    try:
+        response = requests.get(
+            f"{current_app.config['BACKEND_URL']}/api/cursos",
+            headers=headers,
+            timeout=5
+        )
+        if response.ok:
+            cursos = response.json()
+
+    except requests.exceptions.RequestException:
+        pass
+
+    return render_template(
+        "reportes.html",
+        cursos=cursos,
+        id_curso=id_curso
+    )
 
 
 @inicio.route("/reportes/<tipo>")
 def descargar_reporte(tipo):
     try:
         token = session.get("token", "")
-        auth_headers = {"Authorization": "Bearer " + token}
+        auth_headers = {
+            "Authorization": "Bearer " + token
+        }
+        id_curso = request.args.get("id_curso")
         url = f"{current_app.config['BACKEND_URL']}/api/reportes/{tipo}"
-        resp = requests.get(url, timeout=30, headers=auth_headers)
-        return resp.content, resp.status_code, {"Content-Type": resp.headers.get("Content-Type", "application/pdf")}
+        params = {}
+        if id_curso:
+            params["id_curso"] = id_curso
+
+        resp = requests.get(
+            url,
+            params=params,
+            timeout=30,
+            headers=auth_headers
+        )
+
+        return (
+            resp.content,
+            resp.status_code,
+            {
+                "Content-Type": resp.headers.get(
+                    "Content-Type",
+                    "application/pdf"
+                )
+            }
+        )
+
     except requests.exceptions.RequestException:
-        flash("Error al descargar el reporte", "danger")
+
+        flash(
+            "Error al descargar el reporte",
+            "danger"
+        )
+
         return redirect("/reportes")
 
 
