@@ -1363,7 +1363,6 @@ def insertar_curso(anio, cuatrimestre, id_profesor):
 def delete_curso(id_curso):
     conexion = None
     cursor = None
-# cargar_alumnos_csv
     try:
         conexion = get_connection()
         cursor = conexion.cursor(dictionary=True)
@@ -1385,10 +1384,7 @@ def delete_curso(id_curso):
             cursor.close()
         if conexion:
             conexion.close()
-<<<<<<< HEAD
             
-=======
->>>>>>> 0b54c63fecd15abff7849a2cfb0841184408c23f
 
 def modificar_curso_query(cuatrimestre, anio, id_curso):
     conexion = None

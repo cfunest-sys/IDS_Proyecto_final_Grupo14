@@ -10,7 +10,6 @@ def ver_equipos():
         return redirect("/")
 
     id_curso = request.args.get("id_curso")
-    id_equipo = request.args.get("id_equipo")
     nombre_equipo = request.args.get("nombre_equipo")
     pag = request.args.get("pag", default=1, type=int)
 
@@ -18,27 +17,21 @@ def ver_equipos():
 
     if id_curso:
         params["id_curso"] = int(id_curso)
-        
-    if id_equipo:
-        params["id_equipo"] = int(id_equipo)
-        
+
     if nombre_equipo:
         params["nombre_equipo"] = nombre_equipo
 
     lista_equipos = []
-    lista_cursos = []
 
     try:
         token = session.get("token") 
         headers = {"Authorization": f"Bearer {token}"} if token else {}
 
-        response_todo = requests.get(f"{current_app.config['BACKEND_URL']}/api/equipos", headers=headers)
-        if response_todo.status_code == 200:
-            equipos_todos = response_todo.json()
-
-            for equipo in equipos_todos:
-                if equipo.get("id_curso") not in lista_cursos:
-                    lista_cursos.append(equipo.get("id_curso"))
+        response_cursos = requests.get(f"{current_app.config['BACKEND_URL']}/api/cursos/", headers=headers)
+        if response_cursos.status_code == 200:
+            lista_cursos = response_cursos.json()
+        else:
+            lista_cursos = []
 
         response_filtrada = requests.get(
             f"{current_app.config['BACKEND_URL']}/api/equipos",
@@ -64,8 +57,6 @@ def ver_equipos():
     except Exception as e:
         print(f"Error al traer los equipos: {e}")
         flash("No se pudieron cargar los equipos del servidor", "danger")
-    
-    lista_cursos.sort()
 
     return render_template("equipos.html", equipos=lista_equipos, cursos=lista_cursos, pag=pag)
 

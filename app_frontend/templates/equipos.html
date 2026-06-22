@@ -17,40 +17,35 @@ Gestión de equipos
             Filtros
             </h2>
             <div class="row mb-4">
-                <div class="col-md-5">
+                <div class="col-md-6">
                     <div class="input-group">
-                        <label class="input-group-text" for="inputGroupSelect01">ID curso</label>
+                        <label class="input-group-text" for="inputGroupSelect01">Curso</label>
                         <select class="form-select" id="inputGroupSelect01" name="id_curso">
-                            <option value="" {% if not request.args.get('id_curso') %}selected{% endif %}>Elegir ID del curso</option>
+                            <option value="" {% if not request.args.get('id_curso') %}selected{% endif %}>Elegir curso</option>
                             {% for curso in cursos %}
-                                <option value="{{ curso }}" {% if request.args.get('id_curso')|string == curso|string %}selected{% endif %}>Curso {{ curso }}</option>
+                                <option value="{{ curso.id_curso }}" {% if request.args.get('id_curso')|string == curso.id_curso|string %}selected{% endif %}>
+                                    {{ curso.anio }} -  {{ curso.cuatrimestre }}° Cuatrimestre
+                                </option>
                             {% endfor %}
                         </select>
                     </div>
                 </div>
                 
-                <div class="col-md-5">
-                    <div class="input-group">
-                        <span class="input-group-text" id="inputGroup-sizing-default">ID equipo</span>
-                        <input type="text" class="form-control" name="id_equipo" value="{{ request.args.get('id_equipo', '') }}">
-                    </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-filtrar w-100">Filtrar</button>
                 </div>
 
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-filtrar w-100">Filtrar</button>
+                <div class="col-md-3">
+                    <a href="/equipos" class="btn btn-filtrar w-100">Reestablecer</a>
                 </div>
             </div>
             
             <div class="row mb-4">
-                <div class="col-md-10">
+                <div class="col-md-12">
                     <div class="input-group">
                         <span class="input-group-text" id="inputGroup-sizing-default">Nombre equipo</span>
                         <input type="text" class="form-control" name="nombre_equipo" value="{{ request.args.get('nombre_equipo', '') }}">
                     </div>
-                </div>
-
-                <div class="col-md-2">
-                    <a href="/equipos" class="btn btn-filtrar w-100">Reestablecer</a>
                 </div>
             </div>
         </form>   
@@ -69,9 +64,8 @@ Gestión de equipos
                 <table class="table">
                     <thead>
                         <tr>
-                            <th style="width: 10%;" class="text-center">ID equipo</th>
                             <th style="width: 50%;">Nombre del equipo</th>
-                            <th style="width: 10%;" class="text-center">ID curso</th>
+                            <th style="width: 20%;" class="text-center">Curso</th>
                             <th style="width: 15%;" class="text-center">Integrantes</th>
                             <th style="width: 15%;" class="text-center">Acciones</th>
                         </tr>
@@ -79,9 +73,14 @@ Gestión de equipos
                     <tbody>
                         {% for equipo in equipos %}
                             <tr>
-                                <th scope="row" class="text-center">{{ equipo.id_equipo }}</th>
                                 <td>{{ equipo.nombre_equipo }}</td>
-                                <td class="text-center">{{ equipo.id_curso }}</td>
+                                <td class="text-center">
+                                    {% for curso in cursos %}
+                                        {% if curso.id_curso == equipo.id_curso %}
+                                            {{ curso.anio }} - {{ curso.cuatrimestre }}° Cuatrimestre
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
                                 <td class="text-center">
                                     <button class="btn btn-alumnos" data-bs-toggle="modal" data-bs-target="#modal_alumnos_{{ equipo.id_equipo }}" title="Ver alumnos">
                                         Alumnos
@@ -89,7 +88,7 @@ Gestión de equipos
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-1">
-                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"  data-bs-target="#modal_modificar_equipo" data-id="{{ equipo.id_equipo }}" data-nombre="{{ equipo.nombre_equipo }}" data-curso="{{ equipo.id_curso }}"title="Modificar equipo">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"  data-bs-target="#modal_modificar_equipo" data-id="{{ equipo.id_equipo }}" data-nombre="{{ equipo.nombre_equipo }}" data-curso="{{ equipo.id_curso }}" title="Modificar equipo">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                         <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"  data-bs-target="#modal_eliminar_equipo" data-id="{{ equipo.id_equipo }}" title="ELiminar equipo">
@@ -116,7 +115,7 @@ Gestión de equipos
         <nav>
             <ul class="pagination justify-content-center">
                 <li class="page-item {% if pag <= 1 %}disabled{% endif %}">
-                    <a class="page-link" href="?pag={{ pag - 1 }}&id_curso={{ request.args.get('id_curso', '') }}&id_equipo={{ request.args.get('id_equipo', '') }}&nombre_equipo={{ request.args.get('nombre_equipo', '') }}">
+                    <a class="page-link" href="?pag={{ pag - 1 }}&id_curso={{ request.args.get('id_curso', '') }}&nombre_equipo={{ request.args.get('nombre_equipo', '') }}">
                         <span>&laquo;</span>
                     </a>
                 </li>
@@ -126,14 +125,14 @@ Gestión de equipos
 
                 {% if cursos|length == 15 %}
                     <li class="page-item">
-                        <a class="page-link" href="?pag={{ pag + 1 }}&id_curso={{ request.args.get('id_curso', '') }}&id_equipo={{ request.args.get('id_equipo', '') }}&nombre_equipo={{ request.args.get('nombre_equipo', '') }}">
+                        <a class="page-link" href="?pag={{ pag + 1 }}&id_curso={{ request.args.get('id_curso', '') }}&nombre_equipo={{ request.args.get('nombre_equipo', '') }}">
                             {{ pag + 1 }}
                         </a>
                     </li>
                 {% endif %}
                 
                 <li class="page-item {% if cursos|length < 15 %}disabled{% endif %}">
-                    <a class="page-link" href="?pag={{ pag + 1 }}&id_curso={{ request.args.get('id_curso', '') }}&id_equipo={{ request.args.get('id_equipo', '') }}&nombre_equipo={{ request.args.get('nombre_equipo', '') }}">
+                    <a class="page-link" href="?pag={{ pag + 1 }}&id_curso={{ request.args.get('id_curso', '') }}&nombre_equipo={{ request.args.get('nombre_equipo', '') }}">
                         &raquo;
                     </a>
                 </li>
@@ -203,10 +202,17 @@ Gestión de equipos
                     </div>
 
                     <div class="input-group mb-4">
-                        <span class="input-group-text">id_curso</span>
-                        <input type="number" name="id_curso" class="form-control" placeholder="Ej: 104432" required>
+                        <label class="input-group-text">Curso</label>
+                        <select class="form-select" name="id_curso" required>
+                            <option value="" {% if not request.args.get('id_curso') %}selected{% endif %}>Elegir curso</option>
+                            {% for curso in cursos %}
+                                <option value="{{ curso.id_curso }}" {% if request.args.get('id_curso')|string == curso.id_curso|string %}selected{% endif %}>
+                                    {{ curso.anio }} - {{ curso.cuatrimestre }}° Cuatrimestre
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div> 
-                    
+
                     <div class="d-flex justify-content-center mt-2">
                         <button type="submit" class="btn btn-crear">Crear</button>
                     </div>
@@ -236,9 +242,16 @@ Gestión de equipos
                     </div>
 
                     <div class="input-group mb-4">
-                        <span class="input-group-text">id_curso</span>
-                        <input type="number" id="modificar_id_curso" name="id_curso" class="form-control" placeholder="Ej: 104432" required>
+                        <span class="input-group-text">Curso</span>
+                        <select class="form-select" id="modificar_id_curso" name="id_curso" required>
+                            {% for curso in cursos %}
+                                <option value="{{ curso.id_curso }}">
+                                    {{ curso.anio }} - {{ curso.cuatrimestre }}° Cuatrimestre
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div> 
+                    
                     
                     <div class="d-flex justify-content-center mt-2">
                         <button type="submit" class="btn btn-modificar-equipo">Modificar</button>
