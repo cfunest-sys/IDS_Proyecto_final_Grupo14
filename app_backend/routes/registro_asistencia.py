@@ -275,7 +275,7 @@ def generar_reporte(current_user):
 
      elementos.append(
         Paragraph(
-            f"Curso: Año {curso['anio']} - Semestre {curso['semestre']}",
+            f"Curso: Año {curso['anio']} - Semestre {curso['cuatrimestre']}",
             styles["Normal"]
         )
     )
