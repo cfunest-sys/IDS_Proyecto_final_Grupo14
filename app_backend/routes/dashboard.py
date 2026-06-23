@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from utils.auth import token_required, rol_required
 from database.db import get_connection
 
@@ -16,40 +16,122 @@ def resumen_dashboard(current_user):
 
     try:
 
-        cur.execute(
-            "SELECT COUNT(*) FROM alumnos"
-        )
-        total_alumnos = cur.fetchone()[0]
+        curso_id = request.args.get("curso", type=int)
 
-        cur.execute(
-            "SELECT COUNT(*) FROM evaluaciones"
-        )
-        total_evaluaciones = cur.fetchone()[0]
+        # Si no vino un curso seleccionado, buscar el curso asociado al profesor
+        if curso_id is None:
+            
+            cur.execute("""
+                SELECT pc.id_curso
+                FROM profesor_curso pc
+                JOIN profesores p
+                    ON p.id_profesor = pc.id_profesor
+                WHERE p.id_usuario = %s
+                LIMIT 1
+            """, (current_user["id"],))
 
-        cur.execute(
-            "SELECT COUNT(*) FROM cursos"
-        )
-        total_cursos = cur.fetchone()[0]
+            resultado = cur.fetchone()
 
-        cur.execute(
-            "SELECT COUNT(*) FROM alumnos WHERE estado = 'activo'"
-        )
-        total_alumnos_activos = cur.fetchone()[0]
+            if resultado:
+                curso_id = resultado[0]
 
-        cur.execute(
-            "SELECT COUNT(*) FROM alumnos WHERE estado = 'inactivo'"
-        )
-        total_alumnos_inactivos = cur.fetchone()[0]
+        # -------------------------
+        # Modo filtrado por curso
+        # -------------------------
 
-        cur.execute(
-            "SELECT COUNT(*) FROM equipos"
-        )
-        total_equipos = cur.fetchone()[0]
+        if curso_id is not None:
+
+            cur.execute("""
+                SELECT anio, cuatrimestre
+                FROM cursos
+                WHERE id_curso = %s
+            """, (curso_id,))
+
+            curso = cur.fetchone()
+
+            if curso:
+                curso_actual = f"{curso[0]} - {curso[1]}C"
+            else:
+                curso_actual = "Desconocido"
+
+            cur.execute("""
+                SELECT COUNT(*)
+                FROM alumnos
+                WHERE curso = %s
+            """, (curso_id,))
+            total_alumnos = cur.fetchone()[0]
+
+            cur.execute("""
+                SELECT COUNT(*)
+                FROM evaluaciones
+                WHERE id_curso = %s
+            """, (curso_id,))
+            total_evaluaciones = cur.fetchone()[0]
+
+            cur.execute("""
+                SELECT COUNT(*)
+                FROM alumnos
+                WHERE curso = %s
+                AND estado = 'activo'
+            """, (curso_id,))
+            total_alumnos_activos = cur.fetchone()[0]
+
+            cur.execute("""
+                SELECT COUNT(*)
+                FROM alumnos
+                WHERE curso = %s
+                AND estado = 'inactivo'
+            """, (curso_id,))
+            total_alumnos_inactivos = cur.fetchone()[0]
+
+            cur.execute("""
+                SELECT COUNT(*)
+                FROM equipos
+                WHERE id_curso = %s
+            """, (curso_id,))
+            total_equipos = cur.fetchone()[0]
+
+        # -------------------------
+        # Modo todos los cursos
+        # -------------------------
+
+        else:
+
+            curso_actual = "Todos"
+
+            cur.execute(
+                "SELECT COUNT(*) FROM alumnos"
+            )
+            total_alumnos = cur.fetchone()[0]
+
+            cur.execute(
+                "SELECT COUNT(*) FROM evaluaciones"
+            )
+            total_evaluaciones = cur.fetchone()[0]
+
+            cur.execute("""
+                SELECT COUNT(*)
+                FROM alumnos
+                WHERE estado = 'activo'
+            """)
+            total_alumnos_activos = cur.fetchone()[0]
+
+            cur.execute("""
+                SELECT COUNT(*)
+                FROM alumnos
+                WHERE estado = 'inactivo'
+            """)
+            total_alumnos_inactivos = cur.fetchone()[0]
+
+            cur.execute(
+                "SELECT COUNT(*) FROM equipos"
+            )
+            total_equipos = cur.fetchone()[0]
 
         return jsonify({
             "alumnos": total_alumnos,
             "evaluaciones": total_evaluaciones,
-            "cursos": total_cursos,
+            "curso_actual": curso_actual,
             "alumnos_activos": total_alumnos_activos,
             "alumnos_inactivos": total_alumnos_inactivos,
             "equipos": total_equipos

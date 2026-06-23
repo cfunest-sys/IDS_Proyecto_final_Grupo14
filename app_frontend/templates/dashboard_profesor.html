@@ -15,7 +15,26 @@ Dashboard Profesor
         Profesor del Campus FIUBA
     </p>
     <div class="row mb-5">
+    <form method="GET" class="mb-4">
+        <div class="row align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Curso</label>
+                <select name="curso" class="form-select" onchange="this.form.submit()">
+                    <option value="">Todos los cursos</option>
 
+                    {% for curso in cursos %}
+                        <option value="{{ curso.id_curso }}"
+                            {% if curso.id_curso == curso_seleccionado %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ curso.anio }} - {{ curso.cuatrimestre }}° Cuatrimestre
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
     <div class="col-md-4">
 
         <div class="card shadow text-center">
@@ -58,11 +77,8 @@ Dashboard Profesor
 
             <div class="card-body">
 
-                <h5>Cursos</h5>
-
-                <h2>
-                    {{ resumen.cursos }}
-                </h2>
+                <h5>Curso</h5>
+                    <h2>{{ resumen.curso_actual }}</h2>
 
             </div>
 

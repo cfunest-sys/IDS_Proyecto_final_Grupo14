@@ -559,11 +559,23 @@ def crear_profesor(profesor):
 
         cur.execute(query_profesor, (profesor["nombre"], profesor["departamento"], id_usuario))
 
+        id_profesor = cur.lastrowid
+
+        query_profesor_curso = """
+            INSERT INTO profesor_curso (
+                id_profesor,
+                id_curso
+            )
+            VALUES (%s, %s)
+        """
+
+        cur.execute(query_profesor_curso, (id_profesor, 1))
+
+
         conn.commit()
-        print(profesor)
         enviar_mail_bienvenida(profesor["email"], profesor["nombre"], profesor["password"])
 
-        return cur.lastrowid
+        return id_profesor
 
     finally:
 
