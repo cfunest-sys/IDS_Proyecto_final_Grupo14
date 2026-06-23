@@ -230,8 +230,8 @@ VALUES (
 );
 INSERT INTO cursos (anio, cuatrimestre)
 VALUES
- (2024, 1),
- (2024, 2);
+ (2026, 1),
+ (2024, 1);
 
 INSERT INTO evaluaciones (nombre, tipo, fecha, id_curso)
 VALUES 
@@ -256,7 +256,6 @@ VALUES
     (1, 115598);
 INSERT INTO profesor_curso (id_profesor, id_curso)
 VALUES
- (2, 1),
- (2, 2),
- (1, 1);
+ (1, 1),
+ (2, 2);
 SET FOREIGN_KEY_CHECKS = 1;

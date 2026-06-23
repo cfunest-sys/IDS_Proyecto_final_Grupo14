@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask import Blueprint
 from utils.auth import token_required, rol_required
+from datetime import datetime
 from data.queries import (
     get_user_profile,
     get_cursos_filtrados,
@@ -121,6 +122,15 @@ def crear_cursos(current_user):
 
         if curso_existente:
             return jsonify({"error": "El curso ya existe dentro del cuatrimestre elegido"}), 409
+        
+        hoy = datetime.now()
+        cuatri_actual = 1 if hoy.month <= 6 else 2
+        anio_actual = hoy.year
+
+        es_futuro = (anio_int > anio_actual) or (anio_int == anio_actual and cuatrimestre_int > cuatri_actual)
+
+        if es_futuro:
+            return jsonify({"error": "No podés crear un curso fuera del ciclo lectivo actual"}), 400
 
         insertar_curso(anio_int, cuatrimestre_int, id_profesor)
         return jsonify({"mensaje": "Curso creado con éxito"}), 201

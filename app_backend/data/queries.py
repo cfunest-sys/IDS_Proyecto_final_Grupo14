@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash
 from utils.mail_service import enviar_mail_bienvenida
 from database.db import get_connection
 from flask import jsonify
+from datetime import datetime
 import csv
 import io
 import traceback
@@ -1260,15 +1261,31 @@ def obtener_detalles_profesor(id_usuario):
         profesor = cur.fetchone()
 
         if profesor:
-
             query_cursos = """
-                SELECT cursos.id_curso, CONCAT(cursos.anio, ' ', cursos.cuatrimestre) AS nombre_curso, cursos.anio, cursos.cuatrimestre AS cuatrimestre
+                SELECT cursos.id_curso,
+                       CONCAT(cursos.anio, ' - ', cursos.cuatrimestre, '° Cuatrimestre') AS curso_nombre,
+                       cursos.anio,
+                       cursos.cuatrimestre AS semestre
                 FROM profesor_curso
                 INNER JOIN cursos ON profesor_curso.id_curso = cursos.id_curso
                 WHERE profesor_curso.id_profesor = %s
             """
             cur.execute(query_cursos, (profesor["id_profesor"],))
-            profesor["cursos_asignados"] = cur.fetchall()
+            cursos = cur.fetchall()
+
+            hoy = datetime.now()
+            cuatri_actual = 1 if hoy.month <= 6 else 2
+            anio_actual = hoy.year
+
+            for curso in cursos:
+                curso["activo"] = (
+                    curso["anio"] == anio_actual and
+                    curso["semestre"] == cuatri_actual
+                )
+
+            cursos.sort(key=lambda x: (not x["activo"], -x["anio"], -x["semestre"]))
+            profesor["cursos_asignados"] = cursos
+
             query_evaluaciones = """
                 SELECT 
                     e.nombre AS evaluacion_nombre,
@@ -1293,10 +1310,8 @@ def obtener_detalles_profesor(id_usuario):
         print(f"Error en profesor: {e}")
         return None
     finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
+        if cur: cur.close()
+        if conn: conn.close()
 
 
 def registrar_login(id_usuario, email, resultado, ip):

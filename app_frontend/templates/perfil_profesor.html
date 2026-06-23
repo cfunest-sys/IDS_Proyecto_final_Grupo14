@@ -49,8 +49,12 @@
                 <div class="contenedor-equipo">
                     {% for curso in detalle.cursos_asignados %}
                         <div>
-                            <span class="subetiqueta-equipo text-profesor">Cátedra activa:</span>
-                            <h4 class="nombre-equipo">{{ curso.curso_nombre }}</h4>
+                            {% if curso.activo %}
+                                <span class="badge bg-success mb-1">Curso actual</span>
+                            {% else %}
+                                <span class="badge bg-secondary mb-1">Curso anterior</span>
+                            {% endif %}
+                                <h4 class="nombre-equipo">{{ curso.curso_nombre }}</h4>
                         </div>
                         <div class="footer-equipo">
                             <p>Período: <span class="destaque-texto">{{ curso.semestre }}° Cuatrimestre</span></p>

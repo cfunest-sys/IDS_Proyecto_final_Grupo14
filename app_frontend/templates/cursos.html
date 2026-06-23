@@ -21,9 +21,15 @@ Gestión de cursos
                     <div class="input-group">
                         <label class="input-group-text" for="inputGroupSelect01">ID curso</label>
                         <select class="form-select" id="inputGroupSelect01" name="id_curso">
-                            <option value="" >Elegir ID del curso</option>
+                            <option value="">Elegir ID del curso</option>
                             {% for curso in cursos_todos %}
-                                <option value="{{ curso.id_curso }}" {{'selected' if curso.id_curso | int == id_curso | int}}>Curso {{ curso.id_curso }}</option>
+                                <option value="{{ curso.id_curso }}" {{ 'selected' if curso.id_curso | int == id_curso | int }}>
+                                    {% if curso.activo %}
+                                        Curso actual
+                                    {% else %}
+                                        Curso {{ curso.id_curso }}
+                                    {% endif %}
+                                </option>
                             {% endfor %}
                         </select>
                     </div>
@@ -38,9 +44,13 @@ Gestión de cursos
 
                 <div class="col-md-4">
                     <div class="input-group">
-                        <span class="input-group-text" id="inputGroup-sizing-default">Cuatrimestre</span>
-                        <input type="number" value="{{ cuatrimestre }}" class="form-control" name="cuatrimestre" placeholder="1 o 2" min="1" max="2">
-                    </div>
+                        <label class="input-group-text" for="selectCuatri">Cuatrimestre</label>
+                        <select class="form-select" id="selectCuatri" name="cuatrimestre">
+                            <option value="">Todos</option>
+                            <option value="1" {{ 'selected' if cuatrimestre == '1' }}>1°</option>
+                            <option value="2" {{ 'selected' if cuatrimestre == '2' }}>2°</option>
+                        </select>
+                     </div>
                 </div>
             </div>
             <div class="row mb-4 position-relative">
@@ -81,7 +91,14 @@ Gestión de cursos
                             <tr class="text-center" data-id="{{curso.id_curso}}" data-anio="{{ curso.anio }}" data-cuatri="{{ curso.cuatrimestre }}">
                                 <th scope="row">{{ curso.id_curso }}</th>
                                 <td>{{ curso.anio }}</td>
-                                <td>{{ curso.cuatrimestre }}°</td>
+                                <td>
+                                    {{ curso.cuatrimestre }}°
+                                    {% if curso.activo %}
+                                        <span class="badge bg-success ms-1">Actual</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary ms-1">Anterior</span>
+                                    {% endif %}
+                                </td>
                                 <td> 
                                     <div class="d-flex justify-content-center gap-1">
                                     <div class="col-auto">

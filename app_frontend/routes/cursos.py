@@ -1,4 +1,5 @@
 from flask import Blueprint, redirect, render_template, request, flash, current_app, session
+from datetime import datetime
 import requests
 
 cursos_bp = Blueprint("cursos_bp",__name__)
@@ -61,8 +62,22 @@ def ver_cursos():
         print(f"Error al traer los cursos: {e}")
         flash("No se pudieron cargar los cursos del servidor", "danger")
     
-    if isinstance(lista_cursos, list) and len(lista_cursos) > 0:
-        lista_cursos.sort(key=lambda x: x.get("id_curso", 0) if isinstance(x, dict) else 0)
+    hoy = datetime.now()
+    cuatri_actual = 1 if hoy.month <= 6 else 2
+    anio_actual = hoy.year
+
+    for curso in lista_cursos:
+        curso["activo"] = (
+            curso.get("anio") == anio_actual and
+            curso.get("cuatrimestre") == cuatri_actual
+        )
+    lista_cursos.sort(key=lambda x: (not x["activo"], -x.get("anio", 0), -x.get("cuatrimestre", 0)))
+
+    for curso in lista_cursos_todos:
+        curso["activo"] = (
+            curso.get("anio") == anio_actual and
+            curso.get("cuatrimestre") == cuatri_actual
+        )
 
     return render_template("cursos.html", cursos=lista_cursos, cursos_todos=lista_cursos_todos, pag=pag,
         id_curso=id_curso, anio=anio, cuatrimestre=cuatrimestre)
