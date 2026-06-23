@@ -100,16 +100,28 @@ def reporte_alumnos(current_user):
                     CONCAT(a.nombre, ' ', a.apellido),
                     a.estado,
                     a.email,
+                    ROUND(AVG(n.calificacion), 2) AS promedio,
                     a.anio,
                     a.cuatrimestre
                 FROM alumnos a
+                LEFT JOIN notas n
+                    ON a.legajo = n.legajo_alumno
                 WHERE a.curso = %s
+                GROUP BY
+                    a.legajo,
+                    a.nombre,
+                    a.apellido,
+                    a.estado,
+                    a.email,
+                    a.anio,
+                    a.cuatrimestre
                 ORDER BY
                     a.anio,
                     a.cuatrimestre,
                     a.apellido,
                     a.nombre
             """, (id_curso,))
+        
         
         else:
         
@@ -119,9 +131,20 @@ def reporte_alumnos(current_user):
                     CONCAT(a.nombre, ' ', a.apellido),
                     a.estado,
                     a.email,
+                    ROUND(AVG(n.calificacion), 2) AS promedio,
                     a.anio,
                     a.cuatrimestre
                 FROM alumnos a
+                LEFT JOIN notas n
+                    ON a.legajo = n.legajo_alumno
+                GROUP BY
+                    a.legajo,
+                    a.nombre,
+                    a.apellido,
+                    a.estado,
+                    a.email,
+                    a.anio,
+                    a.cuatrimestre
                 ORDER BY
                     a.anio,
                     a.cuatrimestre,
@@ -135,8 +158,8 @@ def reporte_alumnos(current_user):
 
         for fila in resultado:
 
-            anio = fila[4]
-            cuatrimestre = fila[5]
+            anio = fila[5]
+            cuatrimestre = fila[6]
 
             clave = (anio, cuatrimestre)
 
@@ -144,12 +167,18 @@ def reporte_alumnos(current_user):
                 datos_agrupados[clave] = []
 
             datos_agrupados[clave].append(
-                fila[:4]
+                (
+                    fila[0],
+                    fila[1],
+                    fila[2],
+                    fila[3],
+                    fila[4] if fila[4] is not None else "-"
+                )
             )
 
         ruta = crear_pdf_por_cuatrimestre(
             "Reporte de Alumnos",
-            ["Legajo", "Nombre", "Estado", "Email"],
+            ["Legajo", "Nombre", "Estado", "Email", "Promedio"],
             datos_agrupados
         )
         
