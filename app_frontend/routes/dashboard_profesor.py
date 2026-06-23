@@ -40,6 +40,7 @@ def dashboard_profesor():
         )
 
         cursos = response_cursos.json() if response_cursos.ok else []
+        curso_seleccionado=int(curso) if curso and curso != "todos" else None
     except Exception:
         pass
 
@@ -48,7 +49,7 @@ def dashboard_profesor():
         nombre=session.get("nombre"),
         resumen=resumen,
         cursos=cursos,
-        curso_seleccionado=curso
+        curso_seleccionado=curso_seleccionado
     )
     
   

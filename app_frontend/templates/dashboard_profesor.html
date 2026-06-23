@@ -20,7 +20,7 @@ Dashboard Profesor
             <div class="col-md-4">
                 <label class="form-label">Curso</label>
                 <select name="curso" class="form-select" onchange="this.form.submit()">
-                    <option value="">Todos los cursos</option>
+                    <option value="todos">Todos</option>
 
                     {% for curso in cursos %}
                         <option value="{{ curso.id_curso }}"
