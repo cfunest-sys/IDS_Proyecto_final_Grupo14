@@ -5,7 +5,7 @@ import config
 
 
 def get_connection():
-    connection = mysql.connector.connect(host=config.DB_HOST, user=config.DB_USER, password="2026", charset="utf8mb4")
+    connection = mysql.connector.connect(host=config.DB_HOST, user=config.DB_USER, password=config.DB_PASSWORD, charset="utf8mb4")
     cursor = connection.cursor()
     cursor.execute(f"CREATE DATABASE IF NOT EXISTS {config.DB_NAME};")
     connection.commit()
@@ -13,5 +13,5 @@ def get_connection():
     connection.close()
     return mysql.connector.connect(
         charset="utf8mb4",
-        host=config.DB_HOST, user=config.DB_USER, password="2026", database=config.DB_NAME
+        host=config.DB_HOST, user=config.DB_USER, password=config.DB_PASSWORD, database=config.DB_NAME
     )
