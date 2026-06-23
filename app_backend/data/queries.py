@@ -721,6 +721,7 @@ def insertar_material(
     fecha_material=None,
     es_libre=False,
     estado="publicado",
+    nombre_original=None,
 ):
     if estado not in ESTADOS_VALIDOS:
         raise ValueError(f"Estado inválido: {estado}")
@@ -733,8 +734,8 @@ def insertar_material(
             INSERT INTO materiales
             (id_curso, id_profesor, titulo, descripcion, tipo_material,
              tema, orden_material, archivo_ruta, es_externo, tipo_archivo,
-             tamano_bytes, fecha_material, es_libre, estado)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+             tamano_bytes, fecha_material, es_libre, estado, nombre_original)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(
             query,
@@ -753,6 +754,7 @@ def insertar_material(
                 fecha_material,
                 es_libre,
                 estado,
+                nombre_original,
             ),
         )
         conn.commit()

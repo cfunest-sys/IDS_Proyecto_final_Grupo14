@@ -142,6 +142,7 @@ CREATE TABLE materiales(
     tema VARCHAR(100),
     orden_material INT DEFAULT 0,
     archivo_ruta VARCHAR(500) NOT NULL,
+    nombre_original VARCHAR(255),
     es_externo BOOLEAN DEFAULT FALSE,
     tipo_archivo VARCHAR(50),
     tamano_bytes BIGINT,

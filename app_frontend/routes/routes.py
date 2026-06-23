@@ -211,7 +211,12 @@ def descargar_material(id_material):
             stream=True,
         )
         if resp.ok:
-            return resp.content, resp.status_code, {"Content-Type": resp.headers.get("Content-Type", "application/octet-stream")}
+            headers = {
+                "Content-Type": resp.headers.get("Content-Type", "application/octet-stream"),
+            }
+            if "Content-Disposition" in resp.headers:
+                headers["Content-Disposition"] = resp.headers["Content-Disposition"]
+            return resp.content, resp.status_code, headers
         flash("Error al descargar el material", "danger")
     except requests.exceptions.RequestException:
         flash("Error de conexión con el servidor", "danger")

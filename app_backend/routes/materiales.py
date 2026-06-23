@@ -73,6 +73,7 @@ def subir_material(current_user):
             carpeta = os.path.join(UPLOAD_FOLDER, fecha_carpeta)
             os.makedirs(carpeta, exist_ok=True)
             extension = archivo.filename.rsplit(".", 1)[1].lower()
+            nombre_original = archivo.filename
             nombre_uuid = f"{uuid.uuid4().hex}.{extension}"
             archivo.save(os.path.join(carpeta, nombre_uuid))
             archivo_ruta = os.path.join("materiales", fecha_carpeta, nombre_uuid)
@@ -94,6 +95,7 @@ def subir_material(current_user):
         fecha_material=fecha_material,
         es_libre=es_libre,
         estado=estado,
+        nombre_original=nombre_original if not es_externo else None,
     )
     if not id_material:
         return jsonify({"error": "Error al guardar el material"}), 500
@@ -163,7 +165,7 @@ def descargar_material(current_user, id_material):
     ruta_completa = os.path.join(UPLOAD_FOLDER, material["archivo_ruta"].replace("materiales/", ""))
     if not os.path.exists(ruta_completa):
         return jsonify({"error": "Archivo no encontrado en servidor"}), 404
-    return send_file(ruta_completa, as_attachment=True, download_name=material.get("titulo", "archivo"))
+    return send_file(ruta_completa, as_attachment=True, download_name=material.get("nombre_original", material.get("titulo", "archivo")))
 
 
 # PUT /api/materiales/<id>
