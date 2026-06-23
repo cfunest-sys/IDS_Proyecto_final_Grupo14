@@ -224,20 +224,70 @@ def reporte_estadisticas(current_user):
                 WHERE anio = %s
                 AND cuatrimestre = %s
             """, (anio, cuatrimestre))
-
+            
+            total_alumnos = cur.fetchone()[0]
+            
             filas.append(
-                ("Total de alumnos", cur.fetchone()[0])
+                ("Total de alumnos", total_alumnos)
             )
 
             cur.execute("""
                 SELECT COUNT(*)
-                FROM cursos
+                FROM alumnos
                 WHERE anio = %s
                 AND cuatrimestre = %s
+                AND estado = 'inactivo'
             """, (anio, cuatrimestre))
-
+            
+            inactivos = cur.fetchone()[0]
+            
+            porcentaje_inactivos = (
+                round((inactivos / total_alumnos) * 100, 2)
+                if total_alumnos > 0 else 0
+            )
+            
             filas.append(
-                ("Total de cursos", cur.fetchone()[0])
+                (
+                    "Alumnos inactivos",
+                    f"{inactivos} ({porcentaje_inactivos}%)"
+                )
+            )
+
+            cur.execute("""
+                SELECT
+                    COUNT(DISTINCT n.legajo_alumno)
+                FROM notas n
+                INNER JOIN alumnos a
+                    ON n.legajo_alumno = a.legajo
+                WHERE a.anio = %s
+                AND a.cuatrimestre = %s
+            """, (anio, cuatrimestre))
+            
+            alumnos_con_nota = cur.fetchone()[0]
+
+            cur.execute("""
+                SELECT
+                    COUNT(DISTINCT n.legajo_alumno)
+                FROM notas n
+                INNER JOIN alumnos a
+                    ON n.legajo_alumno = a.legajo
+                WHERE a.anio = %s
+                AND a.cuatrimestre = %s
+                AND n.calificacion >= 4
+            """, (anio, cuatrimestre))
+            
+            aprobados = cur.fetchone()[0]
+
+            porcentaje_aprobados = (
+                round((aprobados / alumnos_con_nota) * 100, 2)
+                if alumnos_con_nota > 0 else 0
+            )
+            
+            filas.append(
+                (
+                    "Alumnos aprobados",
+                    f"{aprobados} ({porcentaje_aprobados}%)"
+                )
             )
 
             cur.execute("""
