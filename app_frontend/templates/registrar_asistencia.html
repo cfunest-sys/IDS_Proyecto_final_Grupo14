@@ -52,15 +52,20 @@ Registrar Asistencia
 
         </form>
 
-        {% if mensaje %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+         {% if messages %}
 
-        <div class="alert alert-info mt-4">
+           {% for category, message in messages %}
 
-            {{ mensaje }}
+            <div class="alert alert-{{ category }} mt-4">
+                {{ message }}
+            </div>
 
-        </div>
-
-        {% endif %}
+           {% endfor %}
+           
+         {% endif %}
+        
+        {% endwith %}
 
     </div>
 

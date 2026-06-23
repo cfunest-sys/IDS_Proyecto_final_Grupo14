@@ -59,6 +59,48 @@ Asistencia
 
         {% endif %}
 
+        <hr class="my-5">
+        
+        <h3>Reporte de Asistencia</h3>
+        <form action="{{ url_for('asistencia.reporte_asistencia') }}" method="POST">
+            <div class="mb-3">
+                <label class="form-label">
+                    Fecha
+                </label>
+                <input
+                 type="date"
+                 name="fecha"
+                 class="form-control"
+                 required>
+
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">
+                 Curso
+                </label>
+                
+                <select
+                  name="curso"
+                  class="form-select"
+                  required>
+                  {% for curso in cursos %}
+                    <option value="{{ curso.id_curso }}"> Curso {{ curso.id_curso }} - Año {{ curso.anio }} - Semestre {{ curso.semestre }} </option>
+                  {% endfor %}
+
+                </select>
+
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg rounded-3 py-2" style="font-size: 1.1rem; background-color: #1d2554;">
+
+             Descargar PDF
+
+            </button>
+
+        </form>
+
+
         {% if mensaje %}
 
         <div class="alert alert-danger mt-4">
