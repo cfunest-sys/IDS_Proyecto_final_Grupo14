@@ -172,7 +172,7 @@ def reporte_alumnos(current_user):
                     fila[1],
                     fila[2],
                     fila[3],
-                    fila[4] if fila[4] is not None else "-"
+                    round(float(fila[4]), 2) if fila[4] is not None else "-"
                 )
             )
 
