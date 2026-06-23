@@ -304,6 +304,7 @@ def reporte_estadisticas(current_user):
 def reporte_equipos(current_user):
     conn = None
     cur = None
+    cur_miembros = None
 
     try:
         conn = get_connection()
@@ -352,19 +353,40 @@ def reporte_equipos(current_user):
 
         datos_agrupados = {}
 
-        for fila in resultado:
+        cur_miembros = conn.cursor()
 
+        for fila in resultado:
+            id_equipo = fila[0]
+            nombre_equipo = fila[1]
+            curso = fila[2]
             anio = fila[3]
             cuatrimestre = fila[4]
-
             clave = (anio, cuatrimestre)
-
+        
             if clave not in datos_agrupados:
                 datos_agrupados[clave] = []
-
+        
             datos_agrupados[clave].append(
-                fila[:3]
+                (id_equipo, nombre_equipo, curso)
             )
+
+            cur_miembros.execute("""
+                SELECT legajo_alumno
+                FROM miembros_equipo
+                WHERE id_equipo = %s
+                ORDER BY legajo_alumno
+            """, (id_equipo,))
+            
+            integrantes = cur_miembros.fetchall()
+        
+            for integrante in integrantes:
+                datos_agrupados[clave].append(
+                    (
+                        "Integrante",
+                        integrante[0],
+                        ""
+                    )
+                )
 
         ruta = crear_pdf_por_cuatrimestre(
             "Reporte de Equipos",
@@ -389,6 +411,8 @@ def reporte_equipos(current_user):
         }), 500
 
     finally:
+        if cur_miembros:
+            cur_miembros.close()
         if cur:
             cur.close()
         if conn:
