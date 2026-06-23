@@ -164,7 +164,7 @@
             <select id="curso" name="curso" class="form-select" required>
               <option value="">Seleccionar curso</option>
               {% for c in cursos %}
-              <option value="{{ c.id_curso }}">{{ c.nombre_curso }}</option>
+              <option value="{{ c.id_curso }}">{{ c.curso_nombre }}</option>
               {% endfor %}
             </select>
           </div>
@@ -209,7 +209,7 @@
             <label for="edit_curso" class="form-label">Curso *</label>
             <select id="edit_curso" name="curso" class="form-select" required>
               {% for c in cursos %}
-              <option value="{{ c.id_curso }}">{{ c.nombre_curso }}</option>
+              <option value="{{ c.id_curso }}">{{ c.curso_nombre }}</option>
               {% endfor %}
             </select>
           </div>
