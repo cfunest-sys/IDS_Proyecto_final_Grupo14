@@ -42,7 +42,7 @@ def desactivar_alumno():
         data = {"legajo":legajo, "estado":estado}
         token = session.get("token", "")
         auth_headers = {'Authorization': 'Bearer ' + token}
-        resp = requests.put(f"{app.config['BACKEND_URL']}/api/alumnos/actualizar/desactivar", 
+        resp = requests.put(f"{current_app.config['BACKEND_URL']}/api/alumnos/actualizar/desactivar", 
             timeout=5, json=data, headers=auth_headers)
     except requests.exceptions.RequestException:
         flash("Error de conexión con el servidor", "danger")
