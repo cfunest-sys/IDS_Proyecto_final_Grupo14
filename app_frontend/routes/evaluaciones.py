@@ -38,7 +38,9 @@ def listar_evaluaciones():
                     "tipo": eva.get("tipo"), 
                     "fecha": eva.get("fecha"), 
                     "id_curso": eva.get("id_curso"),
-                    "curso_nombre": eva.get("curso_nombre", "N/A")
+                    "curso_nombre": eva.get("curso_nombre", "N/A"),
+                    "cuatrimestre": eva.get("cuatrimestre"), # <-- AGREGADO
+                    "anio": eva.get("anio")                  # <-- AGREGADO
                 })
         else:
             flash("No se pudieron cargar las evaluaciones", "warning")

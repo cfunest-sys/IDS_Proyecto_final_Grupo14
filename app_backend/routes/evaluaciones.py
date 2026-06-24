@@ -52,19 +52,27 @@ def obtener_eva_usuario(current_user):
                 "tipo": eva.get("tipo"),
                 "fecha": fecha_str,
                 "id_curso": eva.get("id_curso"),
-                "curso_nombre": eva.get("curso_nombre", f"Curso {eva.get('id_curso')}")
+                "curso_nombre": eva.get("curso_nombre", f"Curso {eva.get('id_curso')}"),
+                "cuatrimestre": eva.get("cuatrimestre"), # <-- AGREGADO
+                "anio": eva.get("anio")                  # <-- AGREGADO
             })
         else:
             # Formato Tupla/Lista Tradicional (Alumno)
             lista = list(eva)
             fecha_str = lista[3].strftime("%Y-%m-%d") if isinstance(lista[3], (date, datetime)) else str(lista[3])
+            
+            # Calculamos cuatri y año a partir de la fecha por si la tupla no los trae
+            dt = datetime.strptime(fecha_str, "%Y-%m-%d") if isinstance(fecha_str, str) and "-" in fecha_str else None
+
             evaluacion_formateada.append({
                 "id_evaluacion": lista[0],
                 "nombre": lista[1],
                 "tipo": lista[2],
                 "fecha": fecha_str,
-                "id_curso": lista[4],
-                "curso_nombre": f"Curso {lista[4]}"
+                "id_curso": lista[4] if len(lista) > 4 else "",
+                "curso_nombre": f"Curso {lista[4]}" if len(lista) > 4 else "N/A",
+                "cuatrimestre": 1 if dt and dt.month <= 6 else 2, # <-- AGREGADO
+                "anio": dt.year if dt else ""                     # <-- AGREGADO
             })
 
     return jsonify({"body": evaluacion_formateada}), 200
