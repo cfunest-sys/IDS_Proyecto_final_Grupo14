@@ -55,9 +55,9 @@
         <select id="filtroCurso" name="curso" class="form-select">
           <option value="">Todos</option>
           {% for c in cursos %}
-          <option value="{{ c.id_curso }}" {% if filtro_curso|string == c.id_curso|string %}selected{% endif %}>
-            {{ c.nombre_curso }}
-          </option>
+            <option value="{{ c.id_curso }}" {% if filtro_curso|string == c.id_curso|string %}selected{% endif %}>
+              {{ c.nombre_curso }}
+            </option>
           {% endfor %}
         </select>
       </div>

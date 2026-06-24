@@ -476,8 +476,8 @@ function initFiltroCurso() {
   select.addEventListener('change', function() {
     var id = this.value;
     var params = new URLSearchParams(window.location.search);
-    if (id) params.set('id_curso', id);
-    else params.delete('id_curso');
+    if (id) params.set('curso', id);
+    else params.delete('curso');
     params.set('pagina', '1');
     window.location.search = params.toString();
   });
