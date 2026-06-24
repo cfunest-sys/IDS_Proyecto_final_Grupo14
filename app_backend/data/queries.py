@@ -197,20 +197,23 @@ def desactivar_alumno_query(legajo, estado):
 
 
 def get_evaluacion(id):
+    conn = None
+    cursor = None
     try:
-        connection = get_connection()
-        cursor = connection.cursor()
-        cursor.execute("SELECT * FROM evaluaciones WHERE id = %s", (id,))
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM evaluaciones WHERE id_evaluacion = %s", (id,))
         evaluacion = cursor.fetchone()
         rowcount = cursor.rowcount
-        cursor.close()
-        connection.close()
         if rowcount == 0:
             return evaluacion, 204
         return evaluacion, 200
     except Exception as e:
         print(e)
         return jsonify({"error": "Error interno del servidor"}), 500
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 
 def get_evaluacion_por_curso(curso_id):
@@ -256,28 +259,53 @@ def get_categorias_evaluacion_por_curso(id_curso):
         if cur: cur.close()
         if conn: conn.close()
 
-def get_evaluacion_profesor(id_profesor):
+def get_evaluacion_profesor(id_profesor, tipo=None, cuatrimestre=None, anio=None):
+    connection = None
+    cursor = None
     try:
         connection = get_connection()
-        cursor = connection.cursor()
-        query = """select evaluaciones.* from evaluaciones  
-                   inner join profesor_curso pc on pc.id_curso = evaluaciones.id_curso 
-                   where pc.id_profesor=%s;"""
-        cursor.execute(query, (id_profesor,))
-        evaluacion = cursor.fetchall()
-        cursor.close()
-        connection.close()
-        return evaluacion
+        cursor = connection.cursor(dictionary=True)
+
+        condiciones = ["pc.id_profesor = %s"]
+        parametros  = [id_profesor]
+
+        if tipo:
+            condiciones.append("e.tipo = %s")
+            parametros.append(tipo)
+        if anio:
+            condiciones.append("YEAR(e.fecha) = %s")
+            parametros.append(int(anio))
+        if cuatrimestre:
+            if int(cuatrimestre) == 1:
+                condiciones.append("MONTH(e.fecha) <= 7")
+            else:
+                condiciones.append("MONTH(e.fecha) > 7")
+
+        where = " AND ".join(condiciones)
+        query = f"""
+            SELECT
+                e.id_evaluacion,
+                e.nombre,
+                e.tipo,
+                e.fecha,
+                e.id_curso,
+                CONCAT(c.anio, ' - ', c.cuatrimestre, '° Cuatrimestre') AS curso_nombre,
+                CASE WHEN MONTH(e.fecha) <= 7 THEN 1 ELSE 2 END AS cuatrimestre,
+                YEAR(e.fecha) AS anio
+            FROM evaluaciones e
+            INNER JOIN profesor_curso pc ON pc.id_curso = e.id_curso
+            INNER JOIN cursos c ON c.id_curso = e.id_curso
+            WHERE {where}
+            ORDER BY e.fecha ASC
+        """
+        cursor.execute(query, parametros)
+        return cursor.fetchall()
     except Exception as e:
         print(e)
-        return jsonify({"error": "Error interno del servidor"}), 500
-
-
-# select evaluaciones.* from evaluaciones
-# inner join profesor_curso pc on pc.id_curso = evaluaciones.id_curso
-# where pc.id_profesor=2;
-
-
+        return []
+    finally:
+        if cursor: cursor.close()
+        if connection: connection.close()
 
 
 def crear_evaluacion(nombre, tipo, fecha, curso_id):
@@ -296,8 +324,9 @@ def crear_evaluacion(nombre, tipo, fecha, curso_id):
         traceback.print_exc()
         return jsonify({"error": "Error interno del servidor"}), 500
 
-### ACÁ ME QUEDÉ: 676767
 def cambiar_evaluacion(id, nombre, tipo, fecha, curso_id):
+    connection = None
+    cursor = None
     try:
         connection = get_connection()
         cursor = connection.cursor()
@@ -330,31 +359,24 @@ def cambiar_evaluacion(id, nombre, tipo, fecha, curso_id):
 
 
 def eliminar_evaluacion(id):
+    connection = None
+    cursor = None
     try:
         connection = get_connection()
         cursor = connection.cursor()
-        query_esta = """SELECT * FROM evaluaciones WHERE id_evaluacion = %s"""
-        cursor.execute(query_esta, (id,))
-        esta = cursor.fetchall()
+        cursor.execute("SELECT id_evaluacion FROM evaluaciones WHERE id_evaluacion = %s", (id,))
+        cursor.fetchone()
         if cursor.rowcount == 0:
-            cursor.close()
-            connection.close()
-            return jsonify({"error": "No existe ese id"}), 404
-        query = """DELETE FROM evaluaciones WHERE id_evaluacion = %s"""
-        cursor.execute(query, (id,))
-        connection.commit()
-        query = """SELECT * FROM evaluaciones WHERE id_evaluacion = %s"""
-        cursor.execute(query, (id,))
-        resultado = cursor.fetchall()
-        filas = cursor.rowcount
-        cursor.close()
-        connection.close()
-        if filas != 0:
             return False
-        return True
+        cursor.execute("DELETE FROM evaluaciones WHERE id_evaluacion = %s", (id,))
+        connection.commit()
+        return cursor.rowcount > 0
     except Exception as e:
         print(e)
-        return jsonify({"error": "Error interno del servidor"}), 500
+        return False
+    finally:
+        if cursor: cursor.close()
+        if connection: connection.close()
 
 
 def get_equipos_filtrados(id_equipo=None, nombre_equipo=None, id_curso=None, pag = None, por_pag = None):
@@ -559,23 +581,11 @@ def crear_profesor(profesor):
 
         cur.execute(query_profesor, (profesor["nombre"], profesor["departamento"], id_usuario))
 
-        id_profesor = cur.lastrowid
-
-        query_profesor_curso = """
-            INSERT INTO profesor_curso (
-                id_profesor,
-                id_curso
-            )
-            VALUES (%s, %s)
-        """
-
-        cur.execute(query_profesor_curso, (id_profesor, 1))
-
-
         conn.commit()
+        print(profesor)
         enviar_mail_bienvenida(profesor["email"], profesor["nombre"], profesor["password"])
 
-        return id_profesor
+        return cur.lastrowid
 
     finally:
 
@@ -733,7 +743,6 @@ def insertar_material(
     fecha_material=None,
     es_libre=False,
     estado="publicado",
-    nombre_original=None,
 ):
     if estado not in ESTADOS_VALIDOS:
         raise ValueError(f"Estado inválido: {estado}")
@@ -746,8 +755,8 @@ def insertar_material(
             INSERT INTO materiales
             (id_curso, id_profesor, titulo, descripcion, tipo_material,
              tema, orden_material, archivo_ruta, es_externo, tipo_archivo,
-             tamano_bytes, fecha_material, es_libre, estado, nombre_original)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+             tamano_bytes, fecha_material, es_libre, estado)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(
             query,
@@ -766,7 +775,6 @@ def insertar_material(
                 fecha_material,
                 es_libre,
                 estado,
-                nombre_original,
             ),
         )
         conn.commit()
@@ -1488,7 +1496,28 @@ def modificar_curso_query(cuatrimestre, anio, id_curso):
             cursor.close()
         if conexion:
             conexion.close()
-            
+
+def get_cursos_profesor(id_profesor):
+    connection = None
+    cursor = None
+    try:
+        connection = get_connection()
+        cursor = connection.cursor(dictionary=True)
+        query = """
+            SELECT c.id_curso, CONCAT(c.anio, ' - ', c.cuatrimestre, '° Cuatrimestre') AS nombre_curso
+            FROM cursos c
+            INNER JOIN profesor_curso pc ON c.id_curso = pc.id_curso
+            WHERE pc.id_profesor = %s
+        """
+        cursor.execute(query, (id_profesor,))
+        return cursor.fetchall()
+    except Exception as e:
+        print(f"Error en get_cursos_profesor: {e}")
+        return []
+    finally:
+        if cursor: cursor.close()
+        if connection: connection.close()
+
 def existe_equipo(nombre_equipo, id_curso):
     conexion = None
     cursor = None

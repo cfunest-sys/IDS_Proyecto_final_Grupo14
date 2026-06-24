@@ -10,7 +10,6 @@ evaluaciones_blueprint = Blueprint("evaluaciones", __name__)
 # Acá se muestra el listado/gestión de evaluaciones
 @evaluaciones_blueprint.route("/", methods=["GET"])
 def listar_evaluaciones():
-
     evaluaciones = []
     rol = ""
     try:
@@ -32,7 +31,15 @@ def listar_evaluaciones():
         elif response.ok:
             json_data = response.json()
             for eva in json_data.get("body", []):
-                evaluaciones.append({"id": eva[0], "nombre": eva[1], "tipo": eva[2], "fecha": eva[3], "curso": eva[4]})
+                # Ahora leemos de forma segura como diccionario mapeado desde el backend
+                evaluaciones.append({
+                    "id": eva.get("id_evaluacion"), 
+                    "nombre": eva.get("nombre"), 
+                    "tipo": eva.get("tipo"), 
+                    "fecha": eva.get("fecha"), 
+                    "id_curso": eva.get("id_curso"),
+                    "curso_nombre": eva.get("curso_nombre", "N/A")
+                })
         else:
             flash("No se pudieron cargar las evaluaciones", "warning")
 
@@ -40,31 +47,49 @@ def listar_evaluaciones():
         flash("Error de conexión con el servidor", "danger")
         return render_template("evaluaciones.html", evas=evaluaciones, rol=rol, cursos=[], stats={})
 
-    # Filtros
+    # 1. Capturar los filtros de la URL (lo que manda el form HTML)
     tipo_filtro = request.args.get("tipo")
-    fecha_desde = request.args.get("fecha_desde")
-    fecha_hasta = request.args.get("fecha_hasta")
+    cuatrimestre_filtro = request.args.get("cuatrimestre")
+    anio_filtro = request.args.get("anio")
+    curso_filtro = request.args.get("curso") # ¡Acá capturamos el curso!
 
+    # 2. Aplicar los filtros a la lista 'evaluaciones'
     if tipo_filtro:
-        evaluaciones = [e for e in evaluaciones if e["tipo"] == tipo_filtro]
-    if fecha_desde:
-        fecha_desde_dt = datetime.strptime(fecha_desde, "%Y-%m-%d")
-        evaluaciones = [e for e in evaluaciones if datetime.strptime(e["fecha"], "%Y-%m-%d") >= fecha_desde_dt]
-    if fecha_hasta:
-        fecha_hasta_dt = datetime.strptime(fecha_hasta, "%Y-%m-%d")
-        evaluaciones = [e for e in evaluaciones if datetime.strptime(e["fecha"], "%Y-%m-%d") <= fecha_hasta_dt]
+        evaluaciones = [e for e in evaluaciones if e.get("tipo") == tipo_filtro]
 
+    if cuatrimestre_filtro:
+        evaluaciones = [e for e in evaluaciones if str(e.get("cuatrimestre")) == str(cuatrimestre_filtro)]
+
+    if anio_filtro:
+        evaluaciones = [e for e in evaluaciones if str(e.get("anio")) == str(anio_filtro)]
+        
+    if curso_filtro:
+        evaluaciones = [e for e in evaluaciones if str(e.get("id_curso")) == str(curso_filtro)]
+
+    # Obtención de cursos para los selects de los modales
     cursos = []
     try:
-        resp = requests.get(
-            f"{current_app.config['BACKEND_URL']}/api/perfil/",
-            headers={"Authorization": f"Bearer {session.get('token', '')}"},
-            timeout=5,
-        )
-        if resp.ok:
-            data = resp.json()
-            detalles = data.get("detalles") or {}
-            cursos = detalles.get("cursos_asignados", [])
+        if rol == "profesor":
+            # Consumimos el nuevo endpoint optimizado para profesores
+            resp = requests.post(
+                f"{current_app.config['BACKEND_URL']}/api/evaluaciones/cursos",
+                headers={"Authorization": f"Bearer {session.get('token', '')}"},
+                json={"rol": rol, "user_id": session.get("user_id", "")},
+                timeout=5,
+            )
+            if resp.ok:
+                cursos = resp.json().get("body", [])
+        else:
+            # Alumnos siguen usando el fallback de su perfil asignado
+            resp = requests.get(
+                f"{current_app.config['BACKEND_URL']}/api/perfil/",
+                headers={"Authorization": f"Bearer {session.get('token', '')}"},
+                timeout=5,
+            )
+            if resp.ok:
+                data = resp.json()
+                detalles = data.get("detalles") or {}
+                cursos = detalles.get("cursos_asignados", [])
     except requests.exceptions.RequestException:
         pass
 
@@ -78,34 +103,47 @@ def listar_evaluaciones():
         elif t == "Parcialito":
             stats["parcialito"] += 1
 
-    return render_template("evaluaciones.html", evas=evaluaciones, rol=rol, cursos=cursos, stats=stats)
-
+    return render_template(
+        "evaluaciones.html", 
+        evas=evaluaciones, 
+        rol=rol, 
+        cursos=cursos, 
+        stats=stats,
+        filtro_tipo=tipo_filtro,
+        filtro_cuatrimestre=cuatrimestre_filtro,
+        filtro_anio=anio_filtro,
+        filtro_curso=curso_filtro
+    )
 
 # 2. RUTA DEL CALENDARIO: http://127.0.0.1:8080/evaluaciones/calendario
 # Redirige a la ruta principal /calendario en app.py
-"""@evaluaciones_blueprint.route("/calendario", methods=["GET"])
+@evaluaciones_blueprint.route("/calendario", methods=["GET"])
 def calendario_evaluaciones():
-    return redirect(url_for("inicio.mostrar_calendario"))"""
+    return redirect(url_for("inicio.mostrar_calendario"))
 
-
-# 3. RUTA CREAR EVALUACION: http://127.0.0.1:8080/evaluaciones/crear
-# Acá se crean evaluaciones
+# 3. RUTA CREAR EVALUACION: http://127.0.0.1:8080/evaluaciones/
 @evaluaciones_blueprint.route("/", methods=["POST"])
 def crear_evaluacion():
-    data = {}
+    if not session.get("user_id"):
+        flash("Sesión no iniciada", "warning")
+        return redirect("/")
     try:
-        if session:
-            data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
-            # data = {"rol": "profesor", "user_id": 2}  #--para probar--
-            # data = {"rol": "alumno", "user_id": 2}  #--para probar--
-        data["nombre"] = request.form.get("nombre")
-        data["tipo"] = request.form.get("tipo")
-        data["fecha"] = request.form.get("fecha")
-        data["curso_id"] = request.form.get("curso")
         token = session.get("token", "")
         auth_headers = {"Authorization": "Bearer " + token}
-        response = requests.post(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/crear", 
-            json=data, headers=auth_headers)
+        data = {
+            "rol":      session.get("rol", ""),
+            "user_id":  session.get("user_id", ""),
+            "nombre":   request.form.get("nombre"),
+            "tipo":     request.form.get("tipo"),
+            "fecha":    request.form.get("fecha"),
+            "curso_id": request.form.get("curso"),
+        }
+        response = requests.post(
+            f"{current_app.config['BACKEND_URL']}/api/evaluaciones/crear",
+            json=data,
+            headers=auth_headers,
+            timeout=5
+        )
         if not response.ok:
             err = response.json().get("error", "Error desconocido")
             flash(f"Error al crear evaluación: {err}", "danger")
@@ -116,25 +154,27 @@ def crear_evaluacion():
     flash("Evaluación creada con éxito", "success")
     return redirect(url_for("evaluaciones.listar_evaluaciones"))
 
-
 # 4. RUTA ACTUALIZAR EVALUACION
 @evaluaciones_blueprint.route("/actualizar", methods=["POST"])
 def actualizar_evaluacion():
-    data = {}
-    if not session:
+    if not session.get("user_id"):
         flash("Sesión no iniciada", "warning")
-        return redirect(url_for("evaluaciones.listar_evaluaciones"))
+        return redirect("/")
     try:
-        data["id"] = request.form.get("id")
-        data["nombre"] = request.form.get("nombre")
-        data["tipo"] = request.form.get("tipo")
-        data["fecha"] = request.form.get("fecha")
-        data["curso_id"] = request.form.get("curso")
         token = session.get("token", "")
         auth_headers = {"Authorization": "Bearer " + token}
+        data = {
+            "id":       request.form.get("id"),
+            "nombre":   request.form.get("nombre"),
+            "tipo":     request.form.get("tipo"),
+            "fecha":    request.form.get("fecha"),
+            "curso_id": request.form.get("curso"),
+        }
         response = requests.put(
-            f"{current_app.config['BACKEND_URL']}/api/evaluaciones/actualizar/", 
-            json=data, timeout=5, headers=auth_headers
+            f"{current_app.config['BACKEND_URL']}/api/evaluaciones/actualizar/",
+            json=data,
+            headers=auth_headers,
+            timeout=5
         )
         if response.ok:
             flash("Evaluación actualizada con éxito", "success")
@@ -146,31 +186,32 @@ def actualizar_evaluacion():
     return redirect(url_for("evaluaciones.listar_evaluaciones"))
 
 
-# 5. RUTA ELIMINAR EVALUACION: http://127.0.0.1:8080/evaluaciones/destruir/<int:id>
-# Acá se crean evaluaciones
-@evaluaciones_blueprint.route("/eliminar", methods=["POST", "DELETE"])
+# 5. RUTA ELIMINAR EVALUACION
+@evaluaciones_blueprint.route("/eliminar", methods=["POST"])
 def eliminar_evaluacion():
-    data = {}
+    if not session.get("user_id"):
+        flash("Sesión no iniciada", "warning")
+        return redirect("/")
     if request.form.get("method") != "delete":
         flash("Error, intento de conexión indebido", "danger")
         return redirect(url_for("evaluaciones.listar_evaluaciones"))
     try:
-        if session:
-            data = {"rol": session.get("rol", ""), "user_id": session.get("user_id", "")}
-            # data = {"rol": "profesor", "user_id": 2}  #--para probar--
-            # data = {"rol": "alumno", "user_id": 2}  #--para probar--
-        data["id"] = request.form.get("id_evaluacion", "")
         token = session.get("token", "")
         auth_headers = {"Authorization": "Bearer " + token}
-        response = requests.delete(f"{current_app.config['BACKEND_URL']}/api/evaluaciones/destruir/{str(data['id'])}", headers=auth_headers)
+        id_evaluacion = request.form.get("id_evaluacion", "")
+        response = requests.delete(
+            f"{current_app.config['BACKEND_URL']}/api/evaluaciones/destruir/{id_evaluacion}",
+            headers=auth_headers,
+            timeout=5
+        )
         if response.ok:
-            if response.json().get("body", "") != "":
-                json = response.json().get("body", "")
-                if json.get("estado") == True:
-                    flash("Eliminado con éxito", "success")
-                else:
-                    flash("No se pudo eliminar", "danger")
+            body = response.json().get("body", {})
+            if body.get("estado") == True:
+                flash("Eliminado con éxito", "success")
+            else:
+                flash("No se pudo eliminar", "danger")
+        else:
+            flash("Error al eliminar la evaluación", "danger")
     except requests.exceptions.RequestException:
         flash("Error de conexión con el servidor", "danger")
-        return redirect(url_for("evaluaciones.listar_evaluaciones"))
     return redirect(url_for("evaluaciones.listar_evaluaciones"))

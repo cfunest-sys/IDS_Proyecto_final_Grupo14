@@ -34,36 +34,71 @@
   </div>
 
   <!-- FILTROS -->
-  <h2>Filtros</h2>
-  <div class="row mb-4">
-    <div class="col-md-5 mb-3 mb-md-0">
+<h2>Filtros</h2>
+  <form method="GET" action="/evaluaciones" class="row g-2 mb-4 align-items-end">
+    
+    <div class="col-md-3">
       <div class="input-group">
         <label class="input-group-text" for="filtroTipo">Tipo</label>
-        <select id="filtroTipo" class="form-select">
+        <select id="filtroTipo" name="tipo" class="form-select">
           <option value="">Todos</option>
-          <option value="Parcial">Parcial</option>
-          <option value="TP">Trabajo Práctico</option>
-          <option value="Parcialito">Parcialito</option>
+          <option value="Parcial"    {% if filtro_tipo == "Parcial"    %}selected{% endif %}>Parcial</option>
+          <option value="TP"         {% if filtro_tipo == "TP"         %}selected{% endif %}>Trabajo Práctico</option>
+          <option value="Parcialito" {% if filtro_tipo == "Parcialito" %}selected{% endif %}>Parcialito</option>
         </select>
       </div>
     </div>
-    <div class="col-md-5 mb-3 mb-md-0">
+
+    <div class="col-md-3">
       <div class="input-group">
         <label class="input-group-text" for="filtroCurso">Curso</label>
-        <select id="filtroCurso" class="form-select">
+        <select id="filtroCurso" name="curso" class="form-select">
           <option value="">Todos</option>
-          {% for curso in cursos %}
-          <option value="{{ curso.id_curso }}">{{ curso.curso_nombre }}</option>
+          {% for c in cursos %}
+          <option value="{{ c.id_curso }}" {% if filtro_curso|string == c.id_curso|string %}selected{% endif %}>
+            {{ c.curso_nombre }}
+          </option>
           {% endfor %}
         </select>
       </div>
     </div>
+
     <div class="col-md-2">
-      <div class="d-flex align-items-center h-100">
-        <span class="badge bg-light text-dark p-2 w-100"><i class="bi bi-files"></i> Total: <span id="totalEvaluaciones">{{ evas|length }}</span></span>
+      <div class="input-group">
+        <label class="input-group-text" for="filtroCuatrimestre">Cuatri</label>
+        <select id="filtroCuatrimestre" name="cuatrimestre" class="form-select">
+          <option value="">Todos</option>
+          <option value="1" {% if filtro_cuatrimestre == "1" %}selected{% endif %}>1°</option>
+          <option value="2" {% if filtro_cuatrimestre == "2" %}selected{% endif %}>2°</option>
+        </select>
       </div>
     </div>
-  </div>
+
+    <div class="col-md-2">
+      <div class="input-group">
+        <label class="input-group-text" for="filtroAnio">Año</label>
+        <input
+          type="number" id="filtroAnio" name="anio"
+          class="form-control" placeholder="Ej: 2026"
+          value="{{ filtro_anio }}" min="2000" max="2100"
+        >
+      </div>
+    </div>
+
+    <div class="col-md-1 d-grid">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+
+    {% if filtro_tipo or filtro_cuatrimestre or filtro_anio or filtro_curso %}
+    <div class="col-md-1 d-grid">
+      <a href="/evaluaciones" class="btn btn-outline-secondary" title="Limpiar filtros">
+        <i class="bi bi-x-lg"></i>
+      </a>
+    </div>
+    {% endif %}
+  </form>
 
   <!-- TABLA -->
   {% if rol == "profesor" %}
@@ -74,20 +109,31 @@
     </button>
   </div>
   {% endif %}
+
   <table class="table" id="tablaEvaluaciones">
     <thead>
       <tr>
-        <th style="width:30%">Nombre</th>
+        <th style="width:25%">Nombre</th>
+        <th style="width:20%">Curso</th>
         <th style="width:15%">Tipo</th>
-        <th style="width:15%">Fecha</th>
-        <th style="width:25%">Curso</th>
+        <th style="width:10%">Fecha</th>
+        <th style="width:15%">Cuatrimestre</th>
+        {% if rol == "profesor" %}
         <th style="width:15%" class="text-center">Acciones</th>
+        {% endif %}
       </tr>
     </thead>
     <tbody id="cuerpoTabla">
       {% for eva in evas %}
-      <tr data-id="{{ eva.id }}" data-nombre="{{ eva.nombre }}" data-tipo="{{ eva.tipo }}" data-fecha="{{ eva.fecha }}" data-curso="{{ eva.curso }}">
+      <tr
+        data-id="{{ eva.id }}"
+        data-nombre="{{ eva.nombre }}"
+        data-tipo="{{ eva.tipo }}"
+        data-fecha="{{ eva.fecha }}"
+        data-curso="{{ eva.id_curso }}"
+      >
         <td class="fw-semibold">{{ eva.nombre }}</td>
+        <td class="small">{{ eva.curso_nombre }}</td>
         <td>
           {% if eva.tipo == "Parcial" %}
           <span class="badge bg-info">{{ eva.tipo }}</span>
@@ -100,38 +146,49 @@
           {% endif %}
         </td>
         <td class="small">{{ eva.fecha }}</td>
-        <td class="small text-muted">
-          {% for c in cursos %}
-            {% if c.id_curso == eva.curso %}{{ c.curso_nombre }}{% endif %}
-          {% endfor %}
-        </td>
+        <td class="small text-muted">{{ eva.cuatrimestre }}° Cuatrimestre {{ eva.anio }}</td>
+        {% if rol == "profesor" %}
         <td class="text-center">
           <div class="d-flex justify-content-center gap-1">
-            <button type="button" class="btn btn-sm btn-outline-primary btn-editar-eva" data-bs-toggle="tooltip" title="Editar evaluación">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary btn-editar-eva"
+              data-bs-toggle="tooltip"
+              title="Editar evaluación"
+            >
               <i class="bi bi-pencil"></i>
             </button>
             <form action="/evaluaciones/eliminar" method="POST" class="d-inline">
-              <input name="method" value="delete" type="hidden">
-              <input value="{{ eva.id }}" type="hidden" name="id_evaluacion">
-              <button type="submit" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Eliminar evaluación">
+              <input type="hidden" name="method" value="delete">
+              <input type="hidden" name="id_evaluacion" value="{{ eva.id }}">
+              <button
+                type="submit"
+                class="btn btn-sm btn-outline-danger"
+                data-bs-toggle="tooltip"
+                title="Eliminar evaluación"
+                onclick="return confirm('¿Eliminar esta evaluación?')"
+              >
                 <i class="bi bi-trash"></i>
               </button>
             </form>
           </div>
         </td>
+        {% endif %}
       </tr>
       {% else %}
       <tr id="filaVacia">
-        <td colspan="5" class="tabla-vacia">
+        <td colspan="{% if rol == 'profesor' %}5{% else %}4{% endif %}" class="tabla-vacia text-center py-4">
           <i class="bi bi-inbox icon-empty"></i>
-          <p class="text-muted mt-2">No hay evaluaciones registradas.</p>
+          <p class="text-muted mt-2">No hay evaluaciones para los filtros seleccionados.</p>
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
+
 </div>
 
+{% if rol == "profesor" %}
 <!-- MODAL NUEVA EVALUACION -->
 <div class="modal fade" id="modalNuevaEvaluacion" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
@@ -156,10 +213,6 @@
             </select>
           </div>
           <div class="mb-3">
-            <label for="fecha" class="form-label">Fecha *</label>
-            <input type="date" id="fecha" name="fecha" class="form-control" required>
-          </div>
-          <div class="mb-3">
             <label for="curso" class="form-label">Curso *</label>
             <select id="curso" name="curso" class="form-select" required>
               <option value="">Seleccionar curso</option>
@@ -167,6 +220,10 @@
               <option value="{{ c.id_curso }}">{{ c.curso_nombre }}</option>
               {% endfor %}
             </select>
+          </div>
+          <div class="mb-3">
+            <label for="fecha" class="form-label">Fecha *</label>
+            <input type="date" id="fecha" name="fecha" class="form-control" required>
           </div>
         </div>
         <div class="modal-footer">
@@ -187,7 +244,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <form action="/evaluaciones/actualizar" method="POST">
-        <input type="hidden" id="edit_id" name="id" value="">
+        <input type="hidden" id="edit_id" name="id">
         <div class="modal-body">
           <div class="mb-3">
             <label for="edit_nombre" class="form-label">Nombre *</label>
@@ -202,16 +259,17 @@
             </select>
           </div>
           <div class="mb-3">
-            <label for="edit_fecha" class="form-label">Fecha *</label>
-            <input type="date" id="edit_fecha" name="fecha" class="form-control" required>
-          </div>
-          <div class="mb-3">
             <label for="edit_curso" class="form-label">Curso *</label>
             <select id="edit_curso" name="curso" class="form-select" required>
+              <option value="">Seleccionar curso</option>
               {% for c in cursos %}
               <option value="{{ c.id_curso }}">{{ c.curso_nombre }}</option>
               {% endfor %}
             </select>
+          </div>
+          <div class="mb-3">
+            <label for="edit_fecha" class="form-label">Fecha *</label>
+            <input type="date" id="edit_fecha" name="fecha" class="form-control" required>
           </div>
         </div>
         <div class="modal-footer">
@@ -222,42 +280,24 @@
     </div>
   </div>
 </div>
+{% endif %}
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const filtroTipo = document.getElementById('filtroTipo');
-  const filtroCurso = document.getElementById('filtroCurso');
-  const filas = document.querySelectorAll('#cuerpoTabla tr:not(#filaVacia)');
-  const totalSpan = document.getElementById('totalEvaluaciones');
+document.addEventListener('DOMContentLoaded', function () {
+  // Inicializar tooltips de Bootstrap
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+    new bootstrap.Tooltip(el);
+  });
 
-  function filtrar() {
-    const tipo = filtroTipo.value;
-    const curso = filtroCurso.value;
-    let visibles = 0;
-    filas.forEach(function(fila) {
-      const celdas = fila.querySelectorAll('td');
-      const tipoCelda = celdas[1] ? celdas[1].textContent.trim() : '';
-      const cursoCelda = fila.dataset.curso || '';
-      let coincide = true;
-      if (tipo && tipoCelda !== tipo) coincide = false;
-      if (curso && !cursoCelda.includes(curso)) coincide = false;
-      fila.style.display = coincide ? '' : 'none';
-      if (coincide) visibles++;
-    });
-    totalSpan.textContent = visibles;
-  }
-
-  filtroTipo.addEventListener('change', filtrar);
-  filtroCurso.addEventListener('change', filtrar);
-
-  document.querySelectorAll('.btn-editar-eva').forEach(function(btn) {
-    btn.addEventListener('click', function() {
+  // Poblar modal de edición con los datos de la fila
+  document.querySelectorAll('.btn-editar-eva').forEach(function (btn) {
+    btn.addEventListener('click', function () {
       const tr = btn.closest('tr');
-      document.getElementById('edit_id').value = tr.dataset.id;
+      document.getElementById('edit_id').value    = tr.dataset.id;
       document.getElementById('edit_nombre').value = tr.dataset.nombre;
-      document.getElementById('edit_tipo').value = tr.dataset.tipo;
-      document.getElementById('edit_fecha').value = tr.dataset.fecha;
-      document.getElementById('edit_curso').value = tr.dataset.curso;
+      document.getElementById('edit_tipo').value   = tr.dataset.tipo;
+      document.getElementById('edit_fecha').value  = tr.dataset.fecha;
+      document.getElementById('edit_curso').value  = tr.dataset.curso;
       new bootstrap.Modal(document.getElementById('modalEditarEvaluacion')).show();
     });
   });
