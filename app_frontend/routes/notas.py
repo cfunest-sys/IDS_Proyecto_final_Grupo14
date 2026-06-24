@@ -16,8 +16,10 @@ def ver_notas():
     mes_actual    = datetime.now().month
     semestre_default = "1" if mes_actual <= 7 else "2"
 
-    anio_activo     = request.args.get("anio",     str(año_actual))      # ← default: año actual
-    semestre_activo = request.args.get("cuatrimestre", semestre_default)      # ← default: cuatrimestre actual
+    anio_activo      = request.args.get("anio",      str(año_actual))
+    semestre_activo = request.args.get("cuatrimestre", semestre_default)
+    # 1. NUEVO: Capturamos el tipo de evaluación seleccionado en el filtro HTML
+    tipo_eval_activo = request.args.get("tipo_evaluacion", "")
 
     años_disponibles = list(range(año_actual - 5, año_actual + 3))
     try:
@@ -48,6 +50,14 @@ def ver_notas():
         )
         if response.ok:
             resumen_promedios = response.json()
+            
+            # 2. NUEVO: Si hay un filtro de evaluación activo, filtramos la lista en el Front
+            if tipo_eval_activo:
+                # Armamos la clave dinámica tal como la genera el backend: 'prom_parcialito', 'prom_tp', etc.
+                clave_promedio = f"prom_{tipo_eval_activo.lower()}"
+                
+                # Nos quedamos solo con las filas de alumnos que tengan una nota cargada (distinta de "-")
+                resumen_promedios = [r for r in resumen_promedios if r.get(clave_promedio) != "-"]
         else:
             flash("No se pudieron procesar las actas académicas", "warning")
 
@@ -68,8 +78,8 @@ def ver_notas():
                 data_eventos = response_eva.json()
                 for evento in data_eventos.get("body", []):
                     eventos.append({
-                        "nombre":        evento[1],
-                        "id_evaluacion": evento[0]
+                        "nombre":        evento["nombre"],
+                        "id_evaluacion": evento["id_evaluacion"]
                     })
 
         # 4. Lista completa de alumnos para el modal (solo profesores)
@@ -96,6 +106,7 @@ def ver_notas():
         anio_activo=anio_activo,
         años_disponibles=años_disponibles,
         semestre_activo=semestre_activo,
+        tipo_eval_activo=tipo_eval_activo,  # 3. NUEVO: Lo pasamos para mantener la opción seleccionada en el select del HTML
         rol=rol
     )
 

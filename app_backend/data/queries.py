@@ -1060,7 +1060,7 @@ def get_promedio_notas(rol, usuario_id, legajo_alumno=None, id_evaluacion=None, 
 
         if resultado and resultado["promedio"] is not None:
             return round(float(resultado["promedio"]), 2)
-        return 0.0
+        return None
 
     except Exception as e:
         print(f"Error en queries.get_promedio_notas: {e}")

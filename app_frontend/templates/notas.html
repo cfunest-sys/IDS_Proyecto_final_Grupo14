@@ -6,7 +6,6 @@
 
   <h1 class="page-title">Gestión de Notas</h1>
 
-  <!-- FILTRO PERIODO (Server-side GET) -->
   <h2>Filtros de Período</h2>
   <form action="/notas" method="GET" class="row mb-4">
     <div class="col-md-4 mb-3 mb-md-0">
@@ -38,17 +37,16 @@
     </div>
   </form>
 
-  <!-- FILTROS TABLA (Client-side JS) -->
-  <!-- <h2>Filtros de Búsqueda</h2>
+  <h2>Filtros de Búsqueda</h2>
   <div class="row mb-4">
     <div class="col-md-3 mb-3 mb-md-0">
       <div class="input-group">
-        <label class="input-group-text" for="filtroEvaluacion">Evaluación</label>
+        <label class="input-group-text" for="filtroEvaluacion">Evaluación</label>  
         <select id="filtroEvaluacion" class="form-select">
-          <option value="">Todas</option>
+          <option value="">Todas las instancias</option>
+          <option value="parcial">Parciales</option>
           <option value="tp">Trabajos Prácticos</option>
           <option value="parcialito">Parcialitos</option>
-          <option value="parcial">Parciales</option>
         </select>
       </div>
     </div>
@@ -72,9 +70,8 @@
     <div class="col-md-2 mb-3 mb-md-0 d-grid">
       <button type="button" class="btn btn-filtrar" id="btnLimpiarFiltros"><i class="bi bi-arrow-clockwise me-1"></i>Limpiar</button>
     </div>
-  </div> -->
+  </div>
 
-  <!-- TABLA -->
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
       <h3 class="titulo-tabla mb-0">Actas de Calificaciones</h3>
@@ -138,7 +135,6 @@
   </div>
 </div>
 
-<!-- MODAL DE CARGA -->
 <div class="modal fade" id="modalNota" tabindex="-1" aria-labelledby="modalNotaLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -202,6 +198,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const busqueda = busquedaAlumno   ? busquedaAlumno.value.toLowerCase() : "";
 
     filas.forEach(fila => {
+      if (fila.querySelector(".tabla-vacia")) return;
+
       const alumnoCol = fila.querySelector(".alumno-columna");
       if (!alumnoCol) return;
 
@@ -209,13 +207,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const padron     = fila.children[0].innerText.toLowerCase();
       const estadoFila = fila.querySelector(".estado-columna").innerText.toLowerCase();
 
-      const coincideEstado   = estado   === "" || estadoFila.includes(estado);
+      const coincideEstado   = estado === "" || estadoFila.includes(estado);
       const coincideBusqueda = busqueda === "" || alumno.includes(busqueda) || padron.includes(busqueda);
 
       let coincideEval = true;
       if (tipoEval !== "") {
-        const claveDataset = CATEGORIA_A_DATASET[tipoEval];
-        coincideEval = claveDataset !== undefined && fila.dataset[claveDataset] === "true";
+        let textoNota = "";
+        
+        if (tipoEval === "tp") textoNota = fila.cells[3]?.textContent.trim();
+        if (tipoEval === "parcial") textoNota = fila.cells[4]?.textContent.trim();
+        if (tipoEval === "parcialito") textoNota = fila.cells[5]?.textContent.trim();
+
+        // Si la nota es un guión "-" o está vacía, significa que no la rindió
+        coincideEval = textoNota !== "" && textoNota !== "-";
       }
 
       fila.style.display = (coincideEstado && coincideBusqueda && coincideEval) ? "" : "none";

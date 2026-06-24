@@ -219,16 +219,28 @@ INSERT INTO alumnos (
     cuatrimestre,
     estado
 )
-VALUES (
+VALUES
+(
     115598,
     'Juan',
     'Pérez',
     '40123456',
     1,
-    2025,
+    2026,
+    1,
+    'activo'
+),
+(
+    115599,
+    'Carlos',
+    'Gómez',
+    '41987654',
+    2,
+    2024,
     1,
     'activo'
 );
+
 INSERT INTO cursos (anio, cuatrimestre)
 VALUES
  (2026, 1),
@@ -238,13 +250,13 @@ INSERT INTO evaluaciones (nombre, tipo, fecha, id_curso)
 VALUES 
     ('Primer Parcial Teórico-Práctico', 'parcial', '2026-05-20', 1),
     ('Trabajo Práctico Integrador Final', 'TP', '2026-06-17', 1),
-    ('Control de Lectura - Parcialito 1', 'parcialito', '2026-05-13', 2);
+    ('Control de Lectura - Parcialito 1', 'parcialito', '2024-05-13', 2);
 
 INSERT INTO notas (legajo_alumno, id_evaluacion, calificacion, fecha)
 VALUES
     (115598, 1, 8.5, CURDATE()),
     (115598, 2, 9.0, CURDATE()),
-    (115598, 3, 7.5, CURDATE());
+    (115599, 3, 7.5, CURDATE());
 
 INSERT INTO equipos (nombre_equipo, id_curso)
 VALUES 

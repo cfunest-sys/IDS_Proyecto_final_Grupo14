@@ -104,9 +104,9 @@ def resumen_promedios(current_user):
     if current_user.get('rol') not in ['profesor', 'admin']:
         return jsonify({"error": "Acceso denegado"}), 403
 
-    anio     = request.args.get('anio',     type=int)
+    anio         = request.args.get('anio',      type=int)
     cuatrimestre = request.args.get('cuatrimestre', type=int)
-    id_curso = request.args.get('id_curso', type=int)
+    id_curso     = request.args.get('id_curso', type=int)
 
     conn = None
     cur  = None
@@ -114,11 +114,12 @@ def resumen_promedios(current_user):
         conn = get_connection()
         cur  = conn.cursor(dictionary=True)
 
+        # CAMBIO: Ahora seleccionamos c.anio y c.cuatrimestre para el nombre del curso
         query = """
             SELECT 
                 a.legajo AS legajo,
                 CONCAT(a.nombre, ' ', a.apellido) AS alumno,
-                CONCAT(a.anio, ' ', a.cuatrimestre) AS nombre_curso,
+                CONCAT(c.anio, ' ', c.cuatrimestre) AS nombre_curso,
                 LOWER(e.tipo) AS tipo_evaluacion,
                 n.calificacion AS nota,
                 c.id_curso 
@@ -130,12 +131,13 @@ def resumen_promedios(current_user):
         condiciones = []
         parametros  = []
 
+        # CAMBIO: Filtramos por las columnas del CURSO ('c'), aislando el período lectivo real
         if anio:
-            condiciones.append("a.anio = %s")
+            condiciones.append("c.anio = %s")
             parametros.append(anio)
 
         if cuatrimestre:
-            condiciones.append("a.cuatrimestre = %s")
+            condiciones.append("c.cuatrimestre = %s")
             parametros.append(cuatrimestre)
 
         if id_curso:
@@ -148,9 +150,9 @@ def resumen_promedios(current_user):
         cur.execute(query, parametros)
         notas_crudas = cur.fetchall()
 
-        # Diccionario para agrupar por (legajo, id_curso)
+        # El resto de tu lógica de agrupación se mantiene exactamente IGUAL e impecable...
         alumnos_dict = {}
-        cursos_visto = set()  # Para saber qué cursos hay
+        cursos_visto = set()
 
         for fila in notas_crudas:
             legajo        = fila["legajo"]
@@ -164,7 +166,7 @@ def resumen_promedios(current_user):
                     "nombre":       fila["alumno"],
                     "curso":        fila["nombre_curso"],
                     "id_curso":     id_curso_fila,
-                    "categorias":   {}  # ← dinámico: {categoria: [notas]}
+                    "categorias":   {}
                 }
 
             tipo_eval = fila["tipo_evaluacion"].lower() if fila["tipo_evaluacion"] else "otro"
@@ -178,7 +180,6 @@ def resumen_promedios(current_user):
 
             alumnos_dict[clave]["categorias"][tipo_eval].append(float(nota))
 
-        # Ahora, para cada curso, consultar qué categorías existen realmente
         categorias_por_curso = {}
         for id_curso_check in cursos_visto:
             categorias_por_curso[id_curso_check] = get_categorias_evaluacion_por_curso(id_curso_check)
@@ -189,7 +190,6 @@ def resumen_promedios(current_user):
             id_curso_fila  = datos["id_curso"]
             categorias_req = categorias_por_curso.get(id_curso_fila, [])
 
-            # Calcular promedios dinámicamente
             promedios = {}
             for cat in categorias_req:
                 notas_cat = datos["categorias"].get(cat, [])
@@ -198,7 +198,6 @@ def resumen_promedios(current_user):
                 else:
                     promedios[cat] = None
 
-            # Validar: tiene notas en TODAS las categorías requeridas?
             tiene_todas = all(promedios.get(cat) is not None for cat in categorias_req)
 
             if tiene_todas:
@@ -208,7 +207,6 @@ def resumen_promedios(current_user):
                 prom_final = None
                 condicion  = "Incompleto"
 
-            # Armar respuesta con campos dinámicos
             respuesta = {
                 "legajo":    legajo,
                 "nombre":    datos["nombre"],
@@ -217,7 +215,6 @@ def resumen_promedios(current_user):
                 "condicion": condicion
             }
 
-            # Agregar cada categoría como campo: prom_tp, prom_parcial, etc.
             for cat in categorias_req:
                 prom = promedios.get(cat)
                 respuesta[f"prom_{cat}"] = round(prom, 2) if prom is not None else "-"
