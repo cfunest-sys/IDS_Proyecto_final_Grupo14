@@ -249,9 +249,11 @@ def reporte_estadisticas(current_user):
 
             cur.execute("""
                 SELECT COUNT(*)
-                FROM alumnos
-                WHERE anio = %s
-                AND cuatrimestre = %s
+                FROM alumnos a
+                INNER JOIN cursos c
+                    ON a.curso = c.id_curso
+                WHERE c.anio = %s
+                AND c.cuatrimestre = %s
             """, (anio, cuatrimestre))
             
             total_alumnos = cur.fetchone()[0]
@@ -262,10 +264,12 @@ def reporte_estadisticas(current_user):
 
             cur.execute("""
                 SELECT COUNT(*)
-                FROM alumnos
-                WHERE anio = %s
-                AND cuatrimestre = %s
-                AND estado = 'inactivo'
+                FROM alumnos a
+                INNER JOIN cursos c
+                    ON a.curso = c.id_curso
+                WHERE c.anio = %s
+                AND c.cuatrimestre = %s
+                AND a.estado = 'inactivo'
             """, (anio, cuatrimestre))
             
             inactivos = cur.fetchone()[0]
@@ -283,25 +287,27 @@ def reporte_estadisticas(current_user):
             )
 
             cur.execute("""
-                SELECT
-                    COUNT(DISTINCT n.legajo_alumno)
+                SELECT COUNT(DISTINCT n.legajo_alumno)
                 FROM notas n
                 INNER JOIN alumnos a
                     ON n.legajo_alumno = a.legajo
-                WHERE a.anio = %s
-                AND a.cuatrimestre = %s
+                INNER JOIN cursos c
+                    ON a.curso = c.id_curso
+                WHERE c.anio = %s
+                AND c.cuatrimestre = %s
             """, (anio, cuatrimestre))
             
             alumnos_con_nota = cur.fetchone()[0]
 
             cur.execute("""
-                SELECT
-                    COUNT(DISTINCT n.legajo_alumno)
+                SELECT COUNT(DISTINCT n.legajo_alumno)
                 FROM notas n
                 INNER JOIN alumnos a
                     ON n.legajo_alumno = a.legajo
-                WHERE a.anio = %s
-                AND a.cuatrimestre = %s
+                INNER JOIN cursos c
+                    ON a.curso = c.id_curso
+                WHERE c.anio = %s
+                AND c.cuatrimestre = %s
                 AND n.calificacion >= 4
             """, (anio, cuatrimestre))
             
