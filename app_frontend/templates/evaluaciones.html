@@ -77,11 +77,9 @@
     <div class="col-md-2">
       <div class="input-group">
         <label class="input-group-text" for="filtroAnio">Año</label>
-        <input
-          type="number" id="filtroAnio" name="anio"
-          class="form-control" placeholder="Ej: 2026"
-          value="{{ filtro_anio }}" min="2000" max="2100"
-        >
+        <select id="filtroAnio" name="anio" class="form-select" data-activo="{{ filtro_anio }}">
+          <option value="">Todos</option>
+          </select>
       </div>
     </div>
 
@@ -301,6 +299,26 @@ document.addEventListener('DOMContentLoaded', function () {
       new bootstrap.Modal(document.getElementById('modalEditarEvaluacion')).show();
     });
   });
+
+  // POBLAR EL SELECT DE AÑOS DINÁMICAMENTE (Año actual - 4 hasta +1)
+  const selectAnio = document.getElementById('filtroAnio');
+  if (selectAnio) {
+    const anioActual = new Date().getFullYear(); // Captura el año real del sistema
+    const anioActivoBackend = selectAnio.dataset.activo; // Lee lo que guardó Jinja
+
+    // Podés cambiar el rango acá (ej: desde 2 años atrás hasta 1 año adelante)
+    for (let anio = anioActual - 4; anio <= anioActual + 1; anio++) {
+      const option = document.createElement('option');
+      option.value = anio;
+      option.textContent = anio;
+
+      // Si coincide con el filtro activo del backend, lo deja seleccionado
+      if (String(anio) === anioActivoBackend) {
+        option.selected = true;
+      }
+      selectAnio.appendChild(option);
+    }
+  }
 });
 </script>
 
