@@ -59,12 +59,16 @@ def mostrar_calendario():
                 json_data = response.json()
                 if not json_data.get("error"):
                     for evento in json_data.get("body", []):
-                        d = datetime.strptime(evento[3], "%Y-%m-%d")
+                        # d = datetime.strptime(evento[3], "%Y-%m-%d")
                         eventos.append({
-                            "nombre": evento[1],
-                            "tipo": evento[2],
-                            "fecha": d.strftime("%Y-%m-%d"),
-                            "curso": evento[4]
+                            # "nombre": evento[1],
+                            # "tipo": evento[2],
+                            # "fecha": d.strftime("%Y-%m-%d"),
+                            # "curso": evento[4]
+                            "nombre": evento.get("nombre",""),
+                            "tipo": evento.get("tipo",""),
+                            "fecha": evento.get("fecha",""),
+                            "curso": str(evento.get("anio","")) + ' ' + str(evento.get("cuatrimestre",""))
                         })
 
     except requests.exceptions.RequestException:
