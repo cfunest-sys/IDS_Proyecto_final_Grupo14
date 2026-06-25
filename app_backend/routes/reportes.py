@@ -101,27 +101,29 @@ def reporte_alumnos(current_user):
                     a.estado,
                     a.email,
                     ROUND(AVG(n.calificacion), 2) AS promedio,
-                    a.anio,
-                    a.cuatrimestre
+                    c.anio,
+                    c.cuatrimestre
                 FROM alumnos a
+                INNER JOIN cursos c
+                    ON a.curso = c.id_curso
                 LEFT JOIN notas n
                     ON a.legajo = n.legajo_alumno
                 WHERE a.curso = %s
+
                 GROUP BY
                     a.legajo,
                     a.nombre,
                     a.apellido,
                     a.estado,
                     a.email,
-                    a.anio,
-                    a.cuatrimestre
+                    c.anio,
+                    c.cuatrimestre
                 ORDER BY
-                    a.anio,
-                    a.cuatrimestre,
+                    c.anio,
+                    c.cuatrimestre,
                     a.apellido,
                     a.nombre
             """, (id_curso,))
-        
         
         else:
         
